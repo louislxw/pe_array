@@ -21,62 +21,40 @@
 `include "parameters.vh"
 
 module data_mem(
-    clk, en, valid, din, inst, src1, src2
+    clk, wren, rden, inst, wdata, rdata0, rdata1
     );
-    
-	parameter DATA_WIDTH = 32;
-	parameter INS_WIDTH	= 40;
-	parameter INST_WIDTH	= 32;
-	parameter TAG_WIDTH	= 8;
-	
-	parameter RAM_WIDTH = 32;
-	parameter RAM_ADDR_BITS = 5;
 
 	input clk; 
-	input en;
-	input valid;
-	input [`DATA_WIDTH-1:0] din;
-	input [INST_WIDTH-1:0] inst;
-	output reg[`DM_ADDR_WIDTH-1:0] src1;
-	output reg[`DM_ADDR_WIDTH-1:0] src2;
-
-	reg [`DM_ADDR_WIDTH-1:0] count = 0;
-	wire [`DM_ADDR_WIDTH-1:0] src1_addr;
+	input wren; 
+	input rden;
+	input [`INST_WIDTH-1:0] inst;
+	input [`DATA_WIDTH-1:0] wdata;
+	output reg [`DATA_WIDTH*2-1:0] rdata0;
+	output reg [`DATA_WIDTH*2-1:0] rdata1;
 	
+	wire [`DM_ADDR_WIDTH-1:0] raddr0, raddr1, waddr;
+	
+	// 8-bit read/write address
+	assign raddr0 = inst[7:0]; 
+	assign raddr1 = inst[15:8]; 
+	assign waddr = inst[23:16]; 
+
+//	wire [1:0] sel;
+//	assign sel = inst[`INST_WIDTH-2:`INST_WIDTH-3];
 	
 	(* ram_style="block" *)
 	reg [`DATA_WIDTH-1:0] regfile [(2**`DM_ADDR_WIDTH)-1:0];
-	reg [`DM_ADDR_WIDTH-1:0] addra, src2_addr;
-	reg [`DATA_WIDTH-1:0] din_r;
-	reg valid_r;
+//	reg [`DM_ADDR_WIDTH-1:0] raddr0, raddr1, waddr;
 
 	always @(posedge clk) begin
-      if (en) begin
-         if (valid_r)	//valid
-            begin
-				regfile[addra] <= din_r; //din
-				end
-         src1 <= regfile[addra];
-      end
-      if (en)
-		begin
-			src2 <= regfile[src2_addr];
-		end
-   end
+	   if (wren) begin
+	       regfile[waddr] <= wdata; 
+	   end
+	   if (rden) begin
+	       rdata0 <= regfile[raddr0];
+	       rdata1 <= regfile[raddr1];
+	   end
+	end
 
-
-	always @(posedge clk) 
-	begin
-		src2_addr <= inst[5:1];
-		addra <= (valid) ? count : src1_addr;
-		din_r <= din;
-		valid_r <= valid;
-		if (valid)
-			count <= count + 1;
-		else 
-			count <= 0;
-   end
-	
-	assign src1_addr = inst[10:6];    
     
 endmodule
