@@ -21,11 +21,12 @@
 `include "parameters.vh"
 
 module complex_alu( 
-    clk, rst, din_1, din_2, dout 
+    clk, rst, inst, din_1, din_2, dout 
     );
 
 input  clk; 
 input  rst;
+input  [`INST_WIDTH-1:0] inst;
 input  [`DATA_WIDTH*2-1:0] din_1; // 32-bit
 input  [`DATA_WIDTH*2-1:0] din_2; // 32-bit
 
