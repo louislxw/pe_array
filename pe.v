@@ -21,34 +21,36 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_ld, din_pe, inst_in, dout 
+    clk, rst, din_v, din_ld, din_pe, inst_in, dout_pe 
     );
     
 input  clk; 
 input  rst;
+input  din_v;
 input  [`DATA_WIDTH*2-1:0] din_ld;
 input  [`DATA_WIDTH*2-1:0] din_pe;
 input  [`INST_WIDTH-1:0] inst_in;
 
-output [`DATA_WIDTH*4-1:0] dout; 
+output [`DATA_WIDTH*2-1:0] dout_pe; 
 
 wire [`INST_WIDTH-1:0] inst_out;
 
 wire [1:0] sel;
-wire [`DATA_WIDTH*4-1:0] din_wb;
+wire [`DATA_WIDTH*2-1:0] din_wb;
 
-assign sel = inst_in[`INST_WIDTH-1:`INST_WIDTH-2];
-assign din_wb = (sel == 2'b10) ? dout : 0;
+assign sel = inst_out[`INST_WIDTH-1:`INST_WIDTH-2];
+assign din_wb = (sel == 2'b10) ? dout_pe : 0;
 
 // Instruction Memory
 inst_mem IMEM(
     .clk(clk), 
     .rst(rst), 
-    .valid(valid), 
+    .valid(din_v), 
     .inst_in(inst_in), 
     .inst_out(inst_out) // pc triggered instructions
     ); 
 
+// Control Logics
 control CTRL(
     .din_ld(din_ld), 
     .din_pe(din_pe), 
@@ -61,7 +63,7 @@ control CTRL(
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(wren), 
+    .wren(din_v), 
     .rden(rden), 
     .inst(inst_out), 
     .wdata(wdata), 
@@ -76,7 +78,7 @@ complex_alu ALU(
     .inst(inst_out),
     .din_1(rdata0), 
     .din_2(rdata1), 
-    .dout(dout) 
+    .dout(dout_pe) 
     );    
     
 endmodule

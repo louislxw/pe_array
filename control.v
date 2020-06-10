@@ -24,17 +24,17 @@ module control(
     din_ld, din_pe, din_wb, sel, dout 
     );
     
-input [`DATA_WIDTH*2-1:0] din_ld;
-input [`DATA_WIDTH*2-1:0] din_pe;
-input [`DATA_WIDTH*4-1:0] din_wb;
+input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit
+input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit
+input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit
 input [1:0] sel;
-    
-output reg [`DATA_WIDTH*2-1:0] dout;
-    
+
+output reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
+
 always @ (*)  
 case (sel)
     2'b00:   dout <= din_ld; // load data
-    2'b01:   dout <= din_pe; // shift register
+    2'b01:   dout <= din_pe; // shift data
     2'b10:   dout <= din_wb; // write back
     default: dout <= 0;
 endcase
