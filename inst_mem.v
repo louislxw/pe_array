@@ -39,8 +39,9 @@ assign ctrl = control | control_d1;
 
 (* ram_style="block" *)
 reg [`INST_WIDTH-1:0] imem [(2**`IM_ADDR_WIDTH)-1:0];
-reg [`INST_WIDTH-1:0] inst_out, inst_in_r;
-reg [`IM_ADDR_WIDTH-1:0] addr;
+reg [`INST_WIDTH-1:0] inst_in_r;
+reg [`INST_WIDTH-1:0] inst_out = 0;
+reg [`IM_ADDR_WIDTH-1:0] addr = 0;
 reg [`IM_ADDR_WIDTH-1:0] inst_addr = 0;
 reg [`IM_ADDR_WIDTH-1:0] pc = 0;
 
