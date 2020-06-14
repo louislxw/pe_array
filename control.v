@@ -55,7 +55,7 @@ endcase
 wire[2:0] opcode;
 assign opcode = inst[26:24];
 
-reg [11:0] alumode = 0;
+reg [15:0] alumode = 0;
 reg [19:0] inmode = 0;
 reg [27:0] opmode = 0;
 reg [3:0]  cea2 =  0;
@@ -88,8 +88,8 @@ case (opcode[2:0])
 	            alumode <= 16'b0000_0000_0000_0000; inmode <= 20'b10001_10001_10001_10001; opmode <= 28'b0000101_0000101_0000101_0000101; 
 	            cea2 <= 4'b0000; ceb2 <= 4'b0000; usemult <= 4'b1111; 
 	          end
-          default: begin 
-                alumode <= 12'b0000_0000_0000_0000; inmode <= 20'b00000_00000_00000_00000; opmode <= 28'b0000000_0000000_0000000_0000000; 
+/*`LOAD*/ default: begin 
+                alumode <= 16'b0000_0000_0000_0000; inmode <= 20'b00000_00000_00000_00000; opmode <= 28'b0000000_0000000_0000000_0000000; 
 	            cea2 <= 4'b0000; ceb2 <= 4'b0000; usemult <= 4'b0000; 
 	          end
 endcase

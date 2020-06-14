@@ -43,14 +43,18 @@ wire [`PORTAWIDTH-1:0] a_1, a_2, a_3, a_4; // 30-bit
 wire [`PORTCWIDTH-1:0] c_1, c_2, c_3, c_4; // 48-bit
 wire [`PORTPWIDTH-1:0] p_o_1, p_o_2, p_o_3, p_o_4; // 48-bit
 
-assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH];
-assign b_2 = din_1[`DATA_WIDTH-1:0];
-assign b_3 = din_1[`DATA_WIDTH-1:0];
-assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH];
-assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH];
-assign a_2 = din_2[`DATA_WIDTH-1:0];
-assign a_3 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH];
-assign a_4 = din_2[`DATA_WIDTH-1:0];
+assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
+assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
+assign c_1 = 0;
+assign b_2 = din_1[`DATA_WIDTH-1:0]; // b
+assign a_2 = din_2[`DATA_WIDTH-1:0]; // d
+assign c_2 = 0;
+assign b_3 = din_1[`DATA_WIDTH-1:0]; // b
+assign a_3 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
+assign c_3 = 0;
+assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
+assign a_4 = din_2[`DATA_WIDTH-1:0]; // d
+assign c_4 = 0;
 
 wire [3:0] alumode_1, alumode_2, alumode_3, alumode_4; // 4-bit
 wire [4:0] inmode_1, inmode_2, inmode_3, inmode_4; // 5-bit
@@ -68,8 +72,8 @@ assign usemult_1 = usemult[3]; assign usemult_2 = usemult[2]; assign usemult_3 =
 
 //assign dout = {p_o_1[`DATA_WIDTH-1:0], p_o_2[`DATA_WIDTH-1:0], p_o_3[`DATA_WIDTH-1:0], p_o_4[`DATA_WIDTH-1:0]};
 wire [`DATA_WIDTH-1:0] i_out, q_out; 
-assign i_out = p_o_1 + p_o_2; // round to 16-bit
-assign q_out = p_o_3 - p_o_4; // round to 16-bit
+assign i_out = p_o_1 - p_o_2; // (ac - bd) round to 16-bit 
+assign q_out = p_o_3 + p_o_4; // (bc + ad) round to 16-bit 
 assign dout = {i_out, q_out}; // 32-bit
 
 alu core_1 (
@@ -93,7 +97,7 @@ alu core_2 (
 	.a_i(a_2), // a_i
 	.b_i(b_2), // b_i
 	.c_i(c_2), // c_i
-	.alumode_i(opmode_2), //inst_d2[31:28] 
+	.alumode_i(alumode_2), //inst_d2[31:28] 
 	.inmode_i(inmode_2), //inst_d2[27:23] 
 	.opmode_i(opmode_2), //inst_d2[22:16] 
 	.cea2_i(cea2_2), //inst_d2[15] 

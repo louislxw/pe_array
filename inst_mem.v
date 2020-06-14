@@ -26,7 +26,7 @@ module inst_mem(
 
 input clk;
 input rst;
-input valid; // data valid signal
+input valid; // instruction valid signal
 input [`INST_WIDTH-1:0] inst_in;
 output[`INST_WIDTH-1:0] inst_out;
 
@@ -34,7 +34,7 @@ wire wr_en, ctrl;
 reg  wr_en_r;
 reg  control, control_d1;
 	
-assign wr_en = (inst_in!=0) & (~ctrl);
+assign wr_en = valid & (~ctrl);
 assign ctrl = control | control_d1;
 //wire [`IM_ADDR_WIDTH-1:0] addr;
 //assign addr = ctrl ? pc : inst_addr; // read or write

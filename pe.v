@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_ld, din_pe, inst_in, dout_pe 
+    clk, rst, din_v, din_ld, din_pe, inst_v, inst_in, dout_pe 
     );
     
 input  clk; 
@@ -29,6 +29,7 @@ input  rst;
 input  din_v;
 input  [`DATA_WIDTH*2-1:0] din_ld;
 input  [`DATA_WIDTH*2-1:0] din_pe;
+input  inst_v;
 input  [`INST_WIDTH-1:0] inst_in;
 
 output [`DATA_WIDTH*2-1:0] dout_pe; 
@@ -44,15 +45,20 @@ wire [3:0] usemult; // 1-bit * 4
 
 wire [1:0] sel;
 wire [`DATA_WIDTH*2-1:0] din_wb;
+wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 
 assign sel = inst_out[`INST_WIDTH-1:`INST_WIDTH-2];
 assign din_wb = (sel == 2'b10) ? dout_pe : 0;
+
+wire rden;
+
+assign rden = inst_out[`INST_WIDTH-5]; // bit: 59
 
 // Instruction Memory
 inst_mem IMEM(
     .clk(clk), 
     .rst(rst), 
-    .valid(din_v), 
+    .valid(inst_v), 
     .inst_in(inst_in), 
     .inst_out(inst_out) // pc triggered instructions
     ); 
