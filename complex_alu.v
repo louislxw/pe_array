@@ -21,12 +21,18 @@
 `include "parameters.vh"
 
 module complex_alu( 
-    clk, rst, inst, din_1, din_2, dout 
+    clk, rst, alumode, inmode, opmode, cea2, ceb2, usemult, din_1, din_2, dout 
     );
 
 input  clk; 
 input  rst;
-input  [`INST_WIDTH-1:0] inst;
+//input  [`INST_WIDTH-1:0] inst;
+input  [15:0] alumode; // 4-bit * 4
+input  [19:0] inmode; // 5-bit * 4 
+input  [27:0] opmode; // 7-bit * 4
+input  [3:0] cea2; // 1-bit * 4
+input  [3:0] ceb2; // 1-bit * 4
+input  [3:0] usemult; // 1-bit * 4
 input  [`DATA_WIDTH*2-1:0] din_1; // 32-bit
 input  [`DATA_WIDTH*2-1:0] din_2; // 32-bit
 
@@ -52,6 +58,13 @@ wire [6:0] opmode_1, opmode_2, opmode_3, opmode_4; // 7-bit
 wire cea2_1, cea2_2, cea2_3, cea2_4;
 wire ceb2_1, ceb2_2, ceb2_3, ceb2_4;
 wire usemult_1, usemult_2, usemult_3, usemult_4;
+
+assign alumode_1 = alumode[15:12]; assign alumode_2 = alumode[11:8]; assign alumode_3 = alumode[7:4]; assign alumode_4 = alumode[3:0];
+assign inmode_1 = inmode[19:15]; assign inmode_2 = inmode[14:10]; assign inmode_3 = inmode[9:5]; assign inmode_4 = inmode[4:0];
+assign opmode_1 = opmode[27:21]; assign opmode_2 = opmode[20:14]; assign opmode_3 = opmode[13:7]; assign opmode_4 = opmode[6:0];
+assign cea2_1 = cea2[3]; assign cea2_2 = cea2[2]; assign cea2_3 = cea2[1]; assign cea2_4 = cea2[0];
+assign ceb2_1 = ceb2[3]; assign ceb2_2 = ceb2[2]; assign ceb2_3 = ceb2[1]; assign ceb2_4 = ceb2[0]; 
+assign usemult_1 = usemult[3]; assign usemult_2 = usemult[2]; assign usemult_3 = usemult[1]; assign usemult_4 = usemult[0];
 
 //assign dout = {p_o_1[`DATA_WIDTH-1:0], p_o_2[`DATA_WIDTH-1:0], p_o_3[`DATA_WIDTH-1:0], p_o_4[`DATA_WIDTH-1:0]};
 wire [`DATA_WIDTH-1:0] i_out, q_out; 

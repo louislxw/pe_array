@@ -35,6 +35,13 @@ output [`DATA_WIDTH*2-1:0] dout_pe;
 
 wire [`INST_WIDTH-1:0] inst_out;
 
+wire [15:0] alumode; // 4-bit * 4
+wire [19:0] inmode; // 5-bit * 4 
+wire [27:0] opmode; // 7-bit * 4
+wire [3:0] cea2; // 1-bit * 4
+wire [3:0] ceb2; // 1-bit * 4
+wire [3:0] usemult; // 1-bit * 4
+
 wire [1:0] sel;
 wire [`DATA_WIDTH*2-1:0] din_wb;
 
@@ -50,13 +57,20 @@ inst_mem IMEM(
     .inst_out(inst_out) // pc triggered instructions
     ); 
 
-// Control Logics
+// Control Logics & Decoder
 control CTRL(
     .din_ld(din_ld), 
     .din_pe(din_pe), 
     .din_wb(din_wb), 
-    .sel(sel), 
-    .dout(wdata) 
+//    .sel(sel), 
+    .inst(inst_out),
+    .dout(wdata), 
+    .alumode(alumode), 
+    .inmode(inmode), 
+    .opmode(opmode), 
+    .cea2(cea2), 
+    .ceb2(ceb2), 
+    .usemult(usemult)
     );
 
 // Data Memory
@@ -75,7 +89,12 @@ data_mem DMEM(
 complex_alu ALU( 
     .clk(clk), 
     .rst(rst), 
-    .inst(inst_out),
+    .alumode(alumode), 
+    .inmode(inmode), 
+    .opmode(opmode), 
+    .cea2(cea2), 
+    .ceb2(ceb2), 
+    .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
     .dout(dout_pe) 

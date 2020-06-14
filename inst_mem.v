@@ -36,20 +36,22 @@ reg  control, control_d1;
 	
 assign wr_en = (inst_in!=0) & (~ctrl);
 assign ctrl = control | control_d1;
+//wire [`IM_ADDR_WIDTH-1:0] addr;
+//assign addr = ctrl ? pc : inst_addr; // read or write
 
 (* ram_style="block" *)
 reg [`INST_WIDTH-1:0] imem [(2**`IM_ADDR_WIDTH)-1:0];
 reg [`INST_WIDTH-1:0] inst_in_r;
 reg [`INST_WIDTH-1:0] inst_out = 0;
-reg [`IM_ADDR_WIDTH-1:0] addr = 0;
+reg [`IM_ADDR_WIDTH-1:0] addr;
 reg [`IM_ADDR_WIDTH-1:0] inst_addr = 0;
 reg [`IM_ADDR_WIDTH-1:0] pc = 0;
 
 always @(posedge clk) begin 
     if (rst) begin
         pc <= 0;
-        addr <= 0;
-        inst_out <= 0;
+//        addr <= 0;
+//        inst_out <= 0;
     end
     if (wr_en_r) begin 
         imem[addr] <= inst_in_r;
@@ -70,7 +72,6 @@ always @(posedge clk) begin
     if (wr_en)
         inst_addr <= inst_addr + 1;
 end
-
 
 /*** Control Logics for Instruction Memory ***/
 reg valid_d1;
