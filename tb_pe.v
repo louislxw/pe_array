@@ -97,6 +97,7 @@ module tb_pe;
 		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 		
 		#1000;
+		
     end    
 
 endmodule

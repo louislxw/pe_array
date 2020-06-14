@@ -60,21 +60,22 @@ module tb_inst_mem;
         #100;
         
         // Add stimulus here
-        valid = 0; rst = 0; #20;
-		valid = 0; #20;
-		valid = 0; #20;
-		valid = 0; #20;
-		valid = 1; inst_in = 64'h00000000ffff0000; #20;
-		valid = 1; inst_in = 64'h00000000ffffaaaa; #20;
-		valid = 1; inst_in = 64'h00000000ffffbbbb; #20;
-		valid = 1; inst_in = 64'h00000000ffffcccc; #20;
-		valid = 1; inst_in = 64'h00000000ffffdddd; #20;
-		valid = 0; inst_in = 0; #20;
-		valid = 0; #20;
-		valid = 0; #20;
-		valid = 0; #20;	
+        #20; valid = 0; rst = 0; 
+		#20; valid = 0; 
+		#20; valid = 0; 
+		#20; valid = 0;
+		#20; valid = 1; inst_in = 64'h00000000ffff0000; 
+		#20; valid = 1; inst_in = 64'h00000000ffffaaaa; 
+		#20; valid = 1; inst_in = 64'h00000000ffffbbbb; 
+		#20; valid = 1; inst_in = 64'h00000000ffffcccc;
+		#20; valid = 1; inst_in = 64'h00000000ffffdddd; 
+		#20; valid = 0; inst_in = 0; 
+		#20; valid = 0; 
+		#20; valid = 0; 
+		#20; valid = 0; 
 		
 		#1000;
+		
     end
 
 endmodule
