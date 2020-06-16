@@ -22,28 +22,28 @@
 
 module alu (
 
-	input [`PORTAWIDTH-1:0]	a_i,
-	input [`PORTBWIDTH-1:0]	b_i,
-	input [`PORTCWIDTH-1:0]	c_i,
-	input [3:0]		alumode_i,
-	input 			cea2_i,
-	input			ceb2_i,
-	input			clk,
-	input			rst,
-	input [4:0]		inmode_i,
-	input [6:0]		opmode_i,
-	input			usemult_i,	// select mux
+	input clk,
+	input rst,
+	input cea2_i,
+	input ceb2_i,
+	input usemult_i,	// select mux
+	input [`PORTA_WIDTH-1:0]	a_i,
+	input [`PORTB_WIDTH-1:0]	b_i,
+	input [`PORTC_WIDTH-1:0]	c_i,
+	input [`ALUMODE_WIDTH-1:0]	alumode_i,
+	input [`INMODE_WIDTH-1:0]	inmode_i,
+	input [`OPMODE_WIDTH-1:0]	opmode_i,
 
-	output [`PORTPWIDTH-1:0] p_o	// to ex3 and regfile
+	output [`PORTP_WIDTH-1:0]   p_o	// to ex3 and regfile
 );
 
 // Internal signals
-reg [6:0]	qopmode_o_reg1;
-reg [3:0]	qalumode_o_reg1;
-reg [4:0]	qinmode_o_reg1;
-wire [4:0]	qinmode_o_mux;
-reg			qcea2_o_reg1, qceb2_o_reg1;
-reg [47:0] 	qc0_o_reg1;
+reg  [`OPMODE_WIDTH-1:0]  qopmode_o_reg1;
+reg  [`ALUMODE_WIDTH-1:0] qalumode_o_reg1;
+reg  [`INMODE_WIDTH-1:0]  qinmode_o_reg1;
+wire [`OPMODE_WIDTH-1:0]  qinmode_o_mux;
+reg  [`PORTC_WIDTH-1:0]   qc0_o_reg1;
+reg	 qcea2_o_reg1, qceb2_o_reg1;
 
 DSP48E2 #( 
 	// Feature Control Attributes: Data Path Selection

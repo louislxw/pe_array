@@ -36,19 +36,19 @@ output [`DATA_WIDTH*2-1:0] dout_pe;
 
 wire [`INST_WIDTH-1:0] inst_out;
 
-wire [15:0] alumode; // 4-bit * 4
-wire [19:0] inmode; // 5-bit * 4 
-wire [27:0] opmode; // 7-bit * 4
-wire [3:0] cea2; // 1-bit * 4
-wire [3:0] ceb2; // 1-bit * 4
+wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
+wire [`INMODE_WIDTH*4-1:0] inmode;   // 5-bit * 4 
+wire [`OPMODE_WIDTH*4-1:0] opmode;   // 7-bit * 4
+wire [3:0] cea2;    // 1-bit * 4
+wire [3:0] ceb2;    // 1-bit * 4
 wire [3:0] usemult; // 1-bit * 4
 
-wire [1:0] sel;
-wire [`DATA_WIDTH*2-1:0] din_wb;
 wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 
-assign sel = inst_out[`INST_WIDTH-1:`INST_WIDTH-2];
-assign din_wb = (sel == 2'b10) ? dout_pe : 0;
+//wire [1:0] sel;
+//wire [`DATA_WIDTH*2-1:0] din_wb;
+//assign sel = inst_out[`INST_WIDTH-1:`INST_WIDTH-2];
+//assign din_wb = (sel == 2'b10) ? dout_pe : 0;
 
 wire rden;
 
@@ -67,7 +67,7 @@ inst_mem IMEM(
 control CTRL(
     .din_ld(din_ld), 
     .din_pe(din_pe), 
-    .din_wb(din_wb), 
+    .din_wb(dout_pe), // din_wb
 //    .sel(sel), 
     .inst(inst_out),
     .dout(wdata), 

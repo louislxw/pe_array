@@ -32,10 +32,11 @@ output[`INST_WIDTH-1:0] inst_out;
 
 wire wr_en, ctrl;
 reg  wr_en_r;
-reg  control, control_d1;
+reg  control, control_d1, control_d2;
 	
 assign wr_en = valid & (~ctrl);
 assign ctrl = control | control_d1;
+//assign ctrl = control_d1 | control_d2;
 //wire [`IM_ADDR_WIDTH-1:0] addr;
 //assign addr = ctrl ? pc : inst_addr; // read or write
 
@@ -128,6 +129,7 @@ always@(posedge clk) begin
 		valid_d14 <= 0;
 		valid_d15 <= 0;
 		control_d1 <= 0;
+		control_d2 <= 0;
 	end
 	else begin
 		valid_d1 <= valid;
@@ -146,6 +148,7 @@ always@(posedge clk) begin
 		valid_d14 <= valid_d13;
 		valid_d15 <= valid_d14;
 		control_d1 <= control;
+		control_d2 <= control_d1;
 	end
 end
 
