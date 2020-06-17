@@ -65,10 +65,10 @@ inst_mem IMEM(
 
 // Control Logics & Decoder
 control CTRL(
+    .clk(clk),
     .din_ld(din_ld), 
     .din_pe(din_pe), 
     .din_wb(dout_pe), // din_wb
-//    .sel(sel), 
     .inst(inst_out),
     .dout(wdata), 
     .alumode(alumode), 

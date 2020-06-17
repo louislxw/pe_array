@@ -54,6 +54,12 @@ module tb_pe;
         #(PERIOD/2);
     end
     
+    integer cycle;
+    
+    initial cycle = 0;
+    always @(posedge clk)
+        cycle = cycle + 1;
+    
     initial begin
         // Initialize Inputs
         clk = 0;

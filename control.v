@@ -21,9 +21,10 @@
 `include "parameters.vh"
 
 module control(
-    din_ld, din_pe, din_wb, inst, dout, alumode, inmode, opmode, cea2, ceb2, usemult
+    clk, din_ld, din_pe, din_wb, inst, dout, alumode, inmode, opmode, cea2, ceb2, usemult
     );
     
+input clk;
 input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
@@ -42,7 +43,8 @@ assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2];
 
 reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
-always @ (*) 
+//always @ (*) 
+always @ (posedge clk) 
 case (sel)
     2'b00:   dout <= din_ld; // load data
     2'b01:   dout <= din_pe; // shift data
@@ -54,14 +56,15 @@ endcase
 wire[2:0] opcode;
 assign opcode = inst[26:24];
 
-reg [15:0] alumode = 0;
-reg [19:0] inmode = 0;
-reg [27:0] opmode = 0;
+reg [`ALUMODE_WIDTH*4-1:0] alumode = 0; // 4-bit * 4
+reg [`INMODE_WIDTH*4-1:0]  inmode = 0;  // 5-bit * 4
+reg [`OPMODE_WIDTH*4-1:0]  opmode = 0;  // 7-bit * 4
 reg [3:0]  cea2 =  0;
 reg [3:0]  ceb2 = 0;
 reg [3:0]  usemult = 0;
 
-always@ (*)
+//always@ (*)
+always @ (posedge clk) 
 case (opcode[2:0])
 /*`ADD*/ 3'b001: begin 
 	            alumode <= 16'b0000_0000_0000_0000; 
