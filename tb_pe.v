@@ -75,20 +75,20 @@ module tb_pe;
         #100;
         
         // Add stimulus here
-        rst = 0; #20;
+        #20; rst = 0; 
 		#20;
 		#20;
-		#20;
-//		din_v = 1; din_ld = 32'd1; inst = 0; #20;
-        #20; inst_v = 1; inst_in = 64'h0_000000000_00_00_00; // din_ld
-        #20; inst_v = 1; inst_in = 64'h0_000000000_01_00_00; // din_ld
-        #20; inst_v = 1; inst_in = 64'h0_000000000_02_00_00; // din_ld
-		#20; inst_v = 1; inst_in = 64'h4_000000000_03_00_00; // din_pe
-		#20; inst_v = 1; inst_in = 64'h4_000000000_04_00_00; // din_pe
-		#20; inst_v = 1; inst_in = 64'h4_000000000_05_00_00; // din_pe
+
+        #20; inst_v = 1; inst_in = 64'h0_0_0000000_0_00_00_00; // din_ld
+        #20; inst_v = 1; inst_in = 64'h0_0_0000000_0_01_00_00; // din_ld
+        #20; inst_v = 1; inst_in = 64'h0_0_0000000_0_02_00_00; // din_ld
+		#20; inst_v = 1; inst_in = 64'h4_0_0000000_0_03_00_00; // din_pe
+		#20; inst_v = 1; inst_in = 64'h4_0_0000000_0_04_00_00; // din_pe
+		#20; inst_v = 1; inst_in = 64'h4_0_0000000_0_05_00_00; // din_pe
 		#20; inst_v = 1; inst_in = 64'h0_8_0000000_3_00_01_00; // CMPLX_MULT
 		#20; inst_v = 1; inst_in = 64'h0_8_0000000_3_00_03_02; // CMPLX_MULT
 		#20; inst_v = 1; inst_in = 64'h0_8_0000000_3_00_05_04; // CMPLX_MULT
+		
 		#20; inst_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_v = 0; inst_in = 0; din_v = 1; din_ld = 32'h0004_0002;  din_pe = 32'd2; // 4 + j*2 
@@ -97,6 +97,7 @@ module tb_pe;
 		#20; inst_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd7;  din_pe = 32'h0007_0005; // 7 + j*5 
 		#20; inst_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd9;  din_pe = 32'h000c_000a; // 12 + j*10
 		#20; inst_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd11; din_pe = 32'h000b_0009; // 11 + j*9
+		
 		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 

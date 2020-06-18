@@ -55,38 +55,6 @@ assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
 assign a_4 = din_2[`DATA_WIDTH-1:0]; // d
 assign c_4 = 0;
 
-//wire [`ALUMODE_WIDTH-1:0] alumode_1, alumode_2, alumode_3, alumode_4; // 4-bit
-//wire [`INMODE_WIDTH-1:0]  inmode_1, inmode_2, inmode_3, inmode_4;     // 5-bit
-//wire [`OPMODE_WIDTH-1:0]  opmode_1, opmode_2, opmode_3, opmode_4;     // 7-bit
-//wire cea2_1, cea2_2, cea2_3, cea2_4;
-//wire ceb2_1, ceb2_2, ceb2_3, ceb2_4;
-//wire usemult_1, usemult_2, usemult_3, usemult_4;
-
-//assign alumode_1 = alumode[`ALUMODE_WIDTH*4-1:`ALUMODE_WIDTH*3]; 
-//assign alumode_2 = alumode[`ALUMODE_WIDTH*3-1:`ALUMODE_WIDTH*2]; 
-//assign alumode_3 = alumode[`ALUMODE_WIDTH*2-1:`ALUMODE_WIDTH]; 
-//assign alumode_4 = alumode[`ALUMODE_WIDTH-1:0];
-
-//assign inmode_1 = inmode[`INMODE_WIDTH*4-1:`INMODE_WIDTH*3]; 
-//assign inmode_2 = inmode[`INMODE_WIDTH*3-1:`INMODE_WIDTH*2]; 
-//assign inmode_3 = inmode[`INMODE_WIDTH*2-1:`INMODE_WIDTH]; 
-//assign inmode_4 = inmode[`INMODE_WIDTH-1:0];
-
-//assign opmode_1 = opmode[`OPMODE_WIDTH*4-1:`OPMODE_WIDTH*3]; 
-//assign opmode_2 = opmode[`OPMODE_WIDTH*3-1:`OPMODE_WIDTH*2]; 
-//assign opmode_3 = opmode[`OPMODE_WIDTH*2-1:`OPMODE_WIDTH]; 
-//assign opmode_4 = opmode[`OPMODE_WIDTH-1:0];
-
-//assign cea2_1 = cea2[3]; 
-//assign cea2_2 = cea2[2]; 
-//assign cea2_3 = cea2[1]; 
-//assign cea2_4 = cea2[0];
-
-//assign ceb2_1 = ceb2[3]; 
-//assign ceb2_2 = ceb2[2]; 
-//assign ceb2_3 = ceb2[1]; 
-//assign ceb2_4 = ceb2[0]; 
-
 reg [`ALUMODE_WIDTH-1:0] alumode_1, alumode_2, alumode_3, alumode_4; // 4-bit
 reg [`INMODE_WIDTH-1:0]  inmode_1, inmode_2, inmode_3, inmode_4;     // 5-bit
 reg [`OPMODE_WIDTH-1:0]  opmode_1, opmode_2, opmode_3, opmode_4;     // 7-bit

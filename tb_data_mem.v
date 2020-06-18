@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+`include "parameters.vh"
 
 module tb_data_mem;
 
@@ -72,17 +72,18 @@ module tb_data_mem;
 		#20; wren = 0;  
 		#20; wren = 0; 
 		#20; wren = 0; 
-//		wren = 1; wdata = 32'd1;  inst = 0; #20;
-		#20; wren = 1; wdata = 32'd1;  inst = 64'h0000000000_00_00_00; 
-		#20; wren = 1; wdata = 32'd3;  inst = 64'h0000000000_01_00_00; 
-		#20; wren = 1; wdata = 32'd5;  inst = 64'h0000000000_02_00_00; 
-		#20; wren = 1; wdata = 32'd7;  inst = 64'h0000000000_03_00_00; 
-		#20; wren = 1; wdata = 32'd9;  inst = 64'h0000000000_04_00_00; 
-		#20; wren = 1; wdata = 32'd11; inst = 64'h0000000000_05_00_00;
-		#20; wren = 0; rden = 1; wdata = 32'd0; inst = 64'h0000000000_00_01_00; 
-		#20; wren = 0; rden = 1; wdata = 32'd0; inst = 64'h0000000000_00_03_02;
-		#20; wren = 0; rden = 1; wdata = 32'd0; inst = 64'h0000000000_00_05_04; 
-		#20; wren = 0; rden = 0; wdata = 32'd0; inst = 0; 
+        // wren or rden is aligned with inst; 1 cycle ahead of wdata 
+        #20; wren = 1;                 inst = 64'h0000000000_00_00_00; 
+		#20; wren = 1; wdata = 32'd1;  inst = 64'h0000000000_01_00_00; 
+		#20; wren = 1; wdata = 32'd3;  inst = 64'h0000000000_02_00_00; 
+		#20; wren = 1; wdata = 32'd5;  inst = 64'h0000000000_03_00_00; 
+		#20; wren = 1; wdata = 32'd7;  inst = 64'h0000000000_04_00_00; 
+		#20; wren = 1; wdata = 32'd9;  inst = 64'h0000000000_05_00_00; 
+		#20; wren = 0; rden = 1; wdata = 32'd11; inst = 64'h0000000000_00_01_00; 
+		#20; wren = 0; rden = 1; wdata = 32'd0;  inst = 64'h0000000000_00_03_02;
+		#20; wren = 0; rden = 1; wdata = 32'd0;  inst = 64'h0000000000_00_05_04; 
+		#20; wren = 0; rden = 0; wdata = 32'd0;  inst = 0; 
+//		#20; wren = 0; rden = 0; wdata = 32'd0;  inst = 0; 
 		
 		#1000;
 		

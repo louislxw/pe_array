@@ -58,9 +58,9 @@ assign rden = inst_out[`INST_WIDTH-5]; // bit: 59
 inst_mem IMEM(
     .clk(clk), 
     .rst(rst), 
-    .valid(inst_v), 
+    .inst_v(inst_v), 
     .inst_in(inst_in), 
-    .inst_out(inst_out) // pc triggered instructions
+    .inst_out(inst_out) // instructions triggered by program counter
     ); 
 
 // Control Logics & Decoder
@@ -68,7 +68,7 @@ control CTRL(
     .clk(clk),
     .din_ld(din_ld), 
     .din_pe(din_pe), 
-    .din_wb(dout_pe), // din_wb
+    .din_wb(dout_pe), 
     .inst(inst_out),
     .dout(wdata), 
     .alumode(alumode), 

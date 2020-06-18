@@ -25,7 +25,7 @@ module tb_inst_mem;
     // Inputs
     reg clk;
     reg rst;
-    reg valid;
+    reg inst_v;
     reg [`INST_WIDTH-1:0] inst_in;
     
     // Outputs
@@ -35,7 +35,7 @@ module tb_inst_mem;
     inst_mem uut(
     .clk(clk), 
     .rst(rst), 
-    .valid(valid), 
+    .inst_v(inst_v), 
     .inst_in(inst_in), 
     .inst_out(inst_out) 
     ); 
@@ -52,7 +52,7 @@ module tb_inst_mem;
         // Initialize Inputs
         clk = 0;
         rst = 0;
-        valid = 0;
+        inst_v = 0;
         inst_in = 0;
         
         // Wait 100 ns for global reset to finish
@@ -60,19 +60,19 @@ module tb_inst_mem;
         #100;
         
         // Add stimulus here
-        #20; valid = 0; rst = 0; 
-		#20; valid = 0; 
-		#20; valid = 0; 
-		#20; valid = 0;
-		#20; valid = 1; inst_in = 64'h00000000ffff0000; 
-		#20; valid = 1; inst_in = 64'h00000000ffffaaaa; 
-		#20; valid = 1; inst_in = 64'h00000000ffffbbbb; 
-		#20; valid = 1; inst_in = 64'h00000000ffffcccc;
-		#20; valid = 1; inst_in = 64'h00000000ffffdddd; 
-		#20; valid = 0; inst_in = 0; 
-		#20; valid = 0; 
-		#20; valid = 0; 
-		#20; valid = 0; 
+        #20; inst_v = 0; rst = 0; 
+		#20; inst_v = 0; 
+		#20; inst_v = 0; 
+		#20; inst_v = 0;
+		#20; inst_v = 1; inst_in = 64'h00000000ffff0000; 
+		#20; inst_v = 1; inst_in = 64'h00000000ffffaaaa; 
+		#20; inst_v = 1; inst_in = 64'h00000000ffffbbbb; 
+		#20; inst_v = 1; inst_in = 64'h00000000ffffcccc;
+		#20; inst_v = 1; inst_in = 64'h00000000ffffdddd; 
+		#20; inst_v = 0; inst_in = 0; 
+		#20; inst_v = 0; 
+		#20; inst_v = 0; 
+		#20; inst_v = 0; 
 		
 		#1000;
 		

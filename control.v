@@ -39,7 +39,7 @@ output [3:0] ceb2;    // 1-bit * 4
 output [3:0] usemult; // 1-bit * 4
 
 wire [1:0] sel;
-assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2];
+assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
 
 reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
@@ -110,8 +110,8 @@ case (opcode[2:0])
 	          end
 /*`LOAD*/ default: begin 
 	            alumode <= 16'b0000_0000_0000_0000; 
-                inmode <= 20'b00000_00000_00000_00000; 
-                opmode <= 28'b0000000_0000000_0000000_0000000; 
+	            inmode <= 20'b00000_00000_00000_00000; 
+	            opmode <= 28'b0000000_0000000_0000000_0000000; 
 	            cea2 <= 4'b0000; ceb2 <= 4'b0000; usemult <= 4'b0000; 
 	          end
 endcase
