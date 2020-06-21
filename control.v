@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module control(
-    clk, din_ld, din_pe, din_wb, inst, dout, alumode, inmode, opmode, cea2, ceb2, usemult
+    clk, din_ld, din_pe, din_wb, inst, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
     );
     
 input clk;
@@ -30,6 +30,7 @@ input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
 input [`INST_WIDTH-1:0] inst; // 64-bit instruction
 
+output dout_v;
 output [`DATA_WIDTH*2-1:0] dout; // 32-bit
 output [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
 output [`INMODE_WIDTH*4-1:0] inmode;   // 5-bit * 4 
@@ -38,12 +39,11 @@ output [3:0] cea2;    // 1-bit * 4
 output [3:0] ceb2;    // 1-bit * 4
 output [3:0] usemult; // 1-bit * 4
 
+reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
+
 wire [1:0] sel;
 assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
 
-reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
-
-//always @ (*) 
 always @ (posedge clk) 
 case (sel)
     2'b00:   dout <= din_ld; // load data
@@ -51,7 +51,7 @@ case (sel)
     2'b10:   dout <= din_wb; // write back
     default: dout <= 0;
 endcase
- 
+
 /***************** INSTRUCTION DECODE***************/	 
 wire[2:0] opcode;
 assign opcode = inst[26:24];
@@ -63,7 +63,6 @@ reg [3:0]  cea2 =  0;
 reg [3:0]  ceb2 = 0;
 reg [3:0]  usemult = 0;
 
-//always@ (*)
 always @ (posedge clk) 
 case (opcode[2:0])
 /*`ADD*/ 3'b001: begin 
@@ -116,5 +115,23 @@ case (opcode[2:0])
 	          end
 endcase
 
+/*** Control Logics for Data Ouput Valid Signal ***/
+reg valid;
+
+always @ (posedge clk) 
+if (opcode > 0)
+    valid <= 1;
+else 
+    valid <= 0;
+   
+parameter DELAY = 4; 
+
+reg [DELAY-1:0] shift_reg = 0;
+
+always @ (posedge clk) begin 
+    shift_reg <= {shift_reg[DELAY-2:0], valid};
+end
+
+assign dout_v = shift_reg[DELAY-1]; // delayed_signal    
     
 endmodule
