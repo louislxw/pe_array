@@ -78,7 +78,7 @@ end
 parameter DELAY = 9; // how to set automatically set DELAY with inst_addr
 
 reg [DELAY-1:0] shift_reg = 0;
-wire delayed_signal;
+//wire delayed_signal; // inst_v
 
 always @ (posedge clk) begin 
     shift_reg <= {shift_reg[DELAY-2:0], inst_v};
