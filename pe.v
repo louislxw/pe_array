@@ -21,19 +21,19 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_ld, din_pe, inst_in_v, inst_in, dout_v, dout_pe, inst_out_v, inst_out
+    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, inst_out_v, inst_out
     );
     
-input  clk; 
+input  clk;
 input  rst;
 input  din_v;
-input  [`DATA_WIDTH*2-1:0] din_ld;
+//input  [`DATA_WIDTH*2-1:0] din_ld;
 input  [`DATA_WIDTH*2-1:0] din_pe;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 
 output dout_v;
-output [`DATA_WIDTH*2-1:0] dout_pe; 
+output [`DATA_WIDTH*2-1:0] dout_pe;
 output inst_out_v;
 output [`INST_WIDTH-1:0] inst_out;
 
@@ -51,13 +51,7 @@ wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 
-//wire [1:0] sel;
-//wire [`DATA_WIDTH*2-1:0] din_wb;
-//assign sel = inst_pc[`INST_WIDTH-1:`INST_WIDTH-2];
-//assign din_wb = (sel == 2'b10) ? dout_pe : 0;
-
 wire rden;
-
 assign rden = inst_pc[`INST_WIDTH-5]; // bit: 59
 
 always @ (posedge clk) begin
@@ -77,7 +71,7 @@ inst_mem IMEM(
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-    .din_ld(din_ld), 
+//    .din_ld(din_ld), 
     .din_pe(din_pe), 
     .din_wb(dout_pe), 
     .inst(inst_pc), // instructions triggered by program counter

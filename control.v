@@ -21,11 +21,11 @@
 `include "parameters.vh"
 
 module control(
-    clk, din_ld, din_pe, din_wb, inst, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
+    clk, din_pe, din_wb, inst, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
     );
     
 input clk;
-input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
+//input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
 input [`INST_WIDTH-1:0] inst; // 64-bit instruction
@@ -41,15 +41,17 @@ output [3:0] usemult; // 1-bit * 4
 
 reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
-wire [1:0] sel;
-assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
+//wire [1:0] sel;
+//assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
+wire sel;
+assign sel = inst[`INST_WIDTH-1]; // The most significant 1-bit select input of the PE
 
 always @ (posedge clk) 
 case (sel)
-    2'b00:   dout <= din_ld; // load data
-    2'b01:   dout <= din_pe; // shift data
-    2'b10:   dout <= din_wb; // write back
-    default: dout <= 0;
+//    2'b00:   dout <= din_ld; // load data
+    1'b0:   dout <= din_pe; // shift data
+    1'b1:   dout <= din_wb; // write back
+//    default: dout <= 0;
 endcase
 
 /***************** INSTRUCTION DECODE***************/	 
