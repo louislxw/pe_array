@@ -134,6 +134,6 @@ always @ (posedge clk) begin
     shift_reg <= {shift_reg[DELAY-2:0], valid};
 end
 
-assign dout_v = shift_reg[DELAY-1]; // delayed_signal    
+assign dout_v = shift_reg[DELAY-1]; // delayed_signal
     
 endmodule

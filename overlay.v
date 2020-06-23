@@ -21,13 +21,13 @@
 `include "parameters.vh"
 
 module overlay(
-    clk, rst, din_v, din_ld, din_pe, ins_in_v, ins_in, dout_v, dout
+    clk, rst, din_v, din_pe, ins_in_v, ins_in, dout_v, dout
     );
     
 input  clk; 
 input  rst;
 input  din_v;
-input  [`DATA_WIDTH*2-1:0] din_ld;
+//input  [`DATA_WIDTH*2-1:0] din_ld;
 input  [`DATA_WIDTH*2-1:0] din_pe;
 input  ins_in_v;
 input  [`INST_WIDTH-1:0] ins_in;
@@ -52,7 +52,7 @@ generate
             .clk(clk), 
             .rst(rst), 
             .din_v(din_v), 
-            .din_ld(din_ld), 
+//            .din_ld(din_ld), 
             .din_pe(din_pe), 
             .inst_in_v(inst_v), 
             .inst_in(inst_in), 
@@ -67,7 +67,7 @@ generate
             .clk(clk), 
             .rst(rst), 
             .din_v(valid_data[i]), 
-            .din_ld(pe_ld[i]), 
+//            .din_ld(pe_ld[i]), 
             .din_pe(pe_in[i + 1]), 
             .inst_in_v(valid_inst[i + 1]), 
             .inst_in(inst_ld[i]), 
@@ -82,7 +82,7 @@ generate
             .clk(clk), 
             .rst(rst), 
             .din_v(valid_data[i]), 
-            .din_ld(pe_ld[i]), 
+//            .din_ld(pe_ld[i]), 
             .din_pe(pe_in[i + 1]), 
             .inst_in_v(valid_inst[i + 1]), 
             .inst_in(inst_ld[i]), 

@@ -37,7 +37,7 @@ output [`DATA_WIDTH*2-1:0] dout_pe;
 output inst_out_v;
 output [`INST_WIDTH-1:0] inst_out;
 
-reg inst_out_v;
+reg inst_out_v = 0;
 reg [`INST_WIDTH-1:0] inst_out;
 
 wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
@@ -51,13 +51,26 @@ wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 
-wire rden;
-assign rden = inst_pc[`INST_WIDTH-5]; // bit: 59
-
 always @ (posedge clk) begin
     inst_out_v <= inst_in_v;
     inst_out <= inst_in;
 end
+
+// shift register array for din_pe
+parameter PE_NUM = 8; // 256 
+
+wire shift_v; // triggered by the negedge of ctrl signal
+reg [`DATA_WIDTH*2-1:0] shift_reg [0:PE_NUM-1]; // double packed array
+integer i;
+always @ (posedge clk) begin 
+    if (shift_v) begin
+        for(i = PE_NUM-1; i > 0; i = i-1) 
+            shift_reg[i] <= shift_reg[i-1];
+        shift_reg[0] <= din_pe;
+    end
+end
+
+//assign dout_v = [`DATA_WIDTH*2-1:0]shift_reg[FFT_NUM-1]; 
 
 // Instruction Memory
 inst_mem IMEM(
@@ -65,6 +78,7 @@ inst_mem IMEM(
     .rst(rst), 
     .inst_v(inst_in_v), 
     .inst_in(inst_in), 
+    .shift_v(shift_v),
     .inst_out(inst_pc) // instructions triggered by program counter
     ); 
 
@@ -84,6 +98,9 @@ control CTRL(
     .ceb2(ceb2), 
     .usemult(usemult)
     );
+
+wire rden; // read enable signal for DMEM
+assign rden = inst_pc[`INST_WIDTH-5]; // bit: 59
 
 // Data Memory
 data_mem DMEM(

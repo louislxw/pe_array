@@ -21,27 +21,37 @@
 `include "parameters.vh"
 
 module inst_mem(
-    clk, rst, inst_v, inst_in, inst_out
+    clk, rst, inst_v, inst_in, shift_v, inst_out
     );
 
 input clk;
 input rst;
 input inst_v; // instruction valid signal
 input [`INST_WIDTH-1:0] inst_in;
-output[`INST_WIDTH-1:0] inst_out;
+
+output shift_v;
+output [`INST_WIDTH-1:0] inst_out;
 
 wire wr_en, ctrl;
 reg  wr_en_r;
 wire control; 
-reg  control_d1;
+reg  control_d1 = 0;
 	
 assign wr_en = inst_v & (~ctrl);
 assign ctrl = control | control_d1;
 //wire [`IM_ADDR_WIDTH-1:0] addr;
 //assign addr = ctrl ? pc : inst_addr; // read or write
 
+reg shift_v = 0;
+always @(posedge clk or negedge ctrl) begin
+    if (ctrl) 
+        shift_v <= 0;
+    else
+        shift_v <= 1;
+end
+
 (* ram_style="block" *)
-reg [`INST_WIDTH-1:0] imem [(2**`IM_ADDR_WIDTH)-1:0];
+reg [`INST_WIDTH-1:0] imem [0:(2**`IM_ADDR_WIDTH)-1];
 reg [`INST_WIDTH-1:0] inst_in_r;
 reg [`INST_WIDTH-1:0] inst_out = 0;
 reg [`IM_ADDR_WIDTH-1:0] addr;
@@ -87,12 +97,12 @@ end
 assign control = shift_reg[DELAY-1]; // delayed_signal
 
 always@(posedge clk) begin
-	if(rst) begin
-		control_d1 <= 0;
-	end
-	else begin
+//	if(rst) begin
+//		control_d1 <= 0;
+//	end
+//	else begin
 		control_d1 <= control;
-	end
+//	end
 end
 
 endmodule

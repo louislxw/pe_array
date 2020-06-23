@@ -50,7 +50,7 @@ always @(posedge clk) begin
 end 
 
 (* ram_style="block" *)
-reg [`DATA_WIDTH*2-1:0] regfile [(2**`DM_ADDR_WIDTH)-1:0];
+reg [`DATA_WIDTH*2-1:0] regfile [0:(2**`DM_ADDR_WIDTH)-1];
 reg [`DM_ADDR_WIDTH-1:0] raddr0, raddr1, waddr;
 reg [`DATA_WIDTH*2-1:0] rdata0 = 0;
 reg [`DATA_WIDTH*2-1:0] rdata1 = 0;
