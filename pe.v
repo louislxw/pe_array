@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, inst_out_v, inst_out
+    clk, rst, din_v, din_pe, inst_in_v, inst_in, fwd_v, dout_fwd, dout_v, dout_pe, inst_out_v, inst_out
     );
     
 input  clk;
@@ -32,10 +32,14 @@ input  [`DATA_WIDTH*2-1:0] din_pe;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 
+output fwd_v;
+output [`DATA_WIDTH*2-1:0] dout_fwd;
 output dout_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
 output inst_out_v;
 output [`INST_WIDTH-1:0] inst_out;
+
+reg [`DATA_WIDTH*2-1:0] dout_fwd;
 
 reg inst_out_v = 0;
 reg [`INST_WIDTH-1:0] inst_out;
@@ -51,20 +55,31 @@ wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 
+reg [`DATA_WIDTH*2-1:0] shift_array [0:`REG_NUM-1]; 
+reg [`REG_NUM-1:0] addr = 0;
+always @ (posedge clk) begin
+    if (addr != 31) begin
+        shift_array[addr] <= din_pe; 
+        addr <= addr + 1;
+    end
+    else begin
+        dout_fwd <= din_pe;
+        addr <= 0;
+    end
+end
+
 always @ (posedge clk) begin
     inst_out_v <= inst_in_v;
     inst_out <= inst_in;
 end
 
 // shift register array for din_pe
-parameter PE_NUM = 8; // 256 
-
 wire shift_v; // triggered by the negedge of ctrl signal
-reg [`DATA_WIDTH*2-1:0] shift_reg [0:PE_NUM-1]; // double packed array
+reg [`DATA_WIDTH*2-1:0] shift_reg [0:`REG_NUM-1]; // double packed array
 integer i;
 always @ (posedge clk) begin 
     if (shift_v) begin
-        for(i = PE_NUM-1; i > 0; i = i-1) 
+        for(i = `REG_NUM-1; i > 0; i = i-1) 
             shift_reg[i] <= shift_reg[i-1];
         shift_reg[0] <= din_pe;
     end

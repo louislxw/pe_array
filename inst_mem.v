@@ -36,19 +36,18 @@ wire wr_en, ctrl;
 reg  wr_en_r;
 wire control; 
 reg  control_d1 = 0;
+reg  ctrl_d1 = 0;
 	
 assign wr_en = inst_v & (~ctrl);
 assign ctrl = control | control_d1;
 //wire [`IM_ADDR_WIDTH-1:0] addr;
 //assign addr = ctrl ? pc : inst_addr; // read or write
 
-reg shift_v = 0;
-always @(posedge clk or negedge ctrl) begin
-    if (ctrl) 
-        shift_v <= 0;
-    else
-        shift_v <= 1;
+always @(posedge clk) begin
+    ctrl_d1 <= ctrl; 
 end
+
+assign shift_v = ~ctrl & ctrl_d1;
 
 (* ram_style="block" *)
 reg [`INST_WIDTH-1:0] imem [0:(2**`IM_ADDR_WIDTH)-1];

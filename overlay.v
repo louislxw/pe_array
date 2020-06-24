@@ -37,16 +37,16 @@ output [`DATA_WIDTH*2-1:0] dout;
 //output inst_out_v;
 //output [`INST_WIDTH-1:0] inst_out;
 
-wire valid_data [`NUM_PE-1:0], valid_inst [`NUM_PE-1:0];
-wire [`DATA_WIDTH*2-1:0] pe_in [`NUM_PE-1:0];
-wire [`DATA_WIDTH*2-1:0] pe_ld [`NUM_PE-1:0];
-wire [`DATA_WIDTH*2-1:0] pe_out [`NUM_PE-1:0];
-wire [`INST_WIDTH-1:0] inst_ld [`NUM_PE-1:0];
+wire valid_data [`PE_NUM-1:0], valid_inst [`PE_NUM-1:0];
+wire [`DATA_WIDTH*2-1:0] pe_in [`PE_NUM-1:0];
+wire [`DATA_WIDTH*2-1:0] pe_ld [`PE_NUM-1:0];
+wire [`DATA_WIDTH*2-1:0] pe_out [`PE_NUM-1:0];
+wire [`INST_WIDTH-1:0] inst_ld [`PE_NUM-1:0];
 
 genvar i;
 
 generate
-    for (i = 0; i < `NUM_PE; i = i + 1) begin : array
+    for (i = 0; i < `PE_NUM; i = i + 1) begin : array
         if (i == 0) begin
             pe(
             .clk(clk), 
@@ -62,7 +62,7 @@ generate
             .inst_out(inst_out)
             );
         end
-        else if (i == `NUM_PE-1) begin
+        else if (i == `PE_NUM-1) begin
             pe(
             .clk(clk), 
             .rst(rst), 

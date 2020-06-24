@@ -15,4 +15,5 @@
 `define DM_ADDR_WIDTH   8
 `define IM_ADDR_WIDTH   8
 
-`define NUM_PE 8
+`define PE_NUM          8
+`define REG_NUM        32
