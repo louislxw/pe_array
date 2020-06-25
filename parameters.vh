@@ -15,5 +15,7 @@
 `define DM_ADDR_WIDTH   8
 `define IM_ADDR_WIDTH   8
 
+// Top PE
 `define PE_NUM          8
 `define REG_NUM        32
+`define REG_ADDR_WIDTH  5
