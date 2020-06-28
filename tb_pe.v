@@ -34,8 +34,8 @@ module tb_pe;
     // Outputs
     wire dout_v;
     wire [`DATA_WIDTH*2-1:0] dout_pe; 
-    wire inst_out_v;
-    wire [`INST_WIDTH-1:0] inst_out;
+//    wire inst_out_v;
+//    wire [`INST_WIDTH-1:0] inst_out;
     
     // Instantiate the Unit Under Test (UUT)
     pe uut(
@@ -47,9 +47,9 @@ module tb_pe;
     .inst_in_v(inst_in_v), 
     .inst_in(inst_in),
     .dout_v(dout_v), 
-    .dout_pe(dout_pe),
-    .inst_out_v(inst_out_v),
-    .inst_out(inst_out) 
+    .dout_pe(dout_pe)
+//    .inst_out_v(inst_out_v),
+//    .inst_out(inst_out) 
     ); 
     
     parameter PERIOD = 20;
