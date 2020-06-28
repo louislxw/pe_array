@@ -126,7 +126,7 @@ if (opcode > 0)
 else 
     valid <= 0;
    
-parameter DELAY = 4; 
+parameter DELAY = 5; 
 
 reg [DELAY-1:0] shift_reg = 0;
 
