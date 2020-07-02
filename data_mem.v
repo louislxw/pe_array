@@ -21,13 +21,14 @@
 `include "parameters.vh"
 
 module data_mem(
-    clk, rst, wren, rden, inst, wdata, rdata0, rdata1
+    clk, rst, wren, rden, inst_v, inst, wdata, rdata0, rdata1
     );
 
 input clk; 
 input rst;
 input wren; 
 input rden;
+input inst_v;
 input [`INST_WIDTH-1:0] inst;
 input [`DATA_WIDTH*2-1:0] wdata;
 output [`DATA_WIDTH*2-1:0] rdata0;
@@ -63,7 +64,7 @@ always @(posedge clk) begin
 //        rdata0 <= 0;
 //        rdata1 <= 0;
     end
-    else begin
+    else if(inst_v) begin
         raddr0 <= inst[7:0]; 
         raddr1 <= inst[15:8]; 
         waddr <= inst[23:16];

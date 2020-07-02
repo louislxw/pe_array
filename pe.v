@@ -53,6 +53,9 @@ wire [3:0] usemult; // 1-bit * 4
 wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
 wire [`DATA_WIDTH*2-1:0] alu_out;
 
+reg shift_v; // triggered by the negedge of ctrl signal
+reg load_v;
+
 always @ (posedge clk) begin
     if (load_v | shift_v) 
         dout_pe <= dout_fwd;
@@ -65,38 +68,43 @@ end
 //    inst_out <= inst_in;
 //end
 
-// shift register array for din_pe
-reg load_v;
-reg shift_v; // triggered by the negedge of ctrl signal
-reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
-reg [`DATA_WIDTH*2-1:0] shift_reg [0:`REG_NUM-1]; 
-integer i;
+parameter DELAY = 32; // 32 cycles for shift_reg 
+reg [DELAY-1:0] shift_reg = 0;
 always @ (posedge clk) begin 
-    if (din_v) begin  // should last for 32 cycles
-        for(i = `REG_NUM-1; i > 0; i = i-1) begin
-            shift_reg[i] <= shift_reg[i-1];
-        end
-        shift_reg[0] <= din_pe;
-        dc <= dc + 1;
-        if (dc == `REG_NUM-1) begin
-//            load_v <= 0;
-            dout_pe <= din_pe; // dout_fwd
-        end
-    end
-    if (shift_v) begin // should last for 32 cycles
-        for(i = `REG_NUM-1; i > 0; i = i-1) 
-            shift_reg[i] <= shift_reg[i-1];
-        shift_reg[0] <= din_pe;
-        dout_pe <= shift_reg[`REG_NUM-1]; // dout_fwd
-        dc <= dc + 1;
-        if (dc == `REG_NUM-1) begin
-            shift_v <= 0;
-        end          
-    end
+    shift_reg <= {shift_reg[DELAY-2:0], din_v};
 end
+wire reg_v;
+assign reg_v = shift_reg[DELAY-1]; // delayed_signal
 
-//assign dout_v = [`DATA_WIDTH*2-1:0]shift_reg[FFT_NUM-1]; 
+/*** shift register array for din_pe ***/
+//reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
+//reg [`DATA_WIDTH*2-1:0] shift_reg [0:`REG_NUM-1]; 
+//integer i;
+//always @ (posedge clk) begin 
+//    if (din_v) begin  // should last for 32 cycles
+//        for(i = `REG_NUM-1; i > 0; i = i-1) begin
+//            shift_reg[i] <= shift_reg[i-1];
+//        end
+//        shift_reg[0] <= din_pe;
+//        dc <= dc + 1;
+//        if (dc == `REG_NUM-1) begin
+////            load_v <= 0;
+//            dout_pe <= din_pe; // dout_fwd
+//        end
+//    end
+//    if (shift_v) begin // should last for 32 cycles
+//        for(i = `REG_NUM-1; i > 0; i = i-1) 
+//            shift_reg[i] <= shift_reg[i-1];
+//        shift_reg[0] <= din_pe;
+//        dout_pe <= shift_reg[`REG_NUM-1]; // dout_fwd
+//        dc <= dc + 1;
+//        if (dc == `REG_NUM-1) begin
+//            shift_v <= 0;
+//        end          
+//    end
+//end
 
+wire inst_out_v;
 // Instruction Memory
 inst_mem IMEM(
     .clk(clk), 
@@ -104,6 +112,7 @@ inst_mem IMEM(
     .inst_v(inst_in_v), 
     .inst_in(inst_in), 
 //    .shift_v(shift_v),
+    .inst_out_v(inst_out_v),
     .inst_out(inst_pc) // instructions triggered by program counter
     ); 
 
@@ -133,6 +142,7 @@ data_mem DMEM(
     .rst(rst), 
     .wren(din_v), 
     .rden(rden), 
+    .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .wdata(wdata), 
     .rdata0(rdata0),
