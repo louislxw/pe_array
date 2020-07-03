@@ -95,12 +95,12 @@ module tb_pe;
 //		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_03_02; // CMPLX_MULT
 //		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_05_04; // CMPLX_MULT
 
-        #20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_00_00_00; // din_pe
-        #20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_01_00_00; // din_pe
-        #20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_02_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_03_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_04_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 64'h0_0_0000000_0_05_00_00; // din_pe
+        #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_00_00_00; // din_pe
+        #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_01_00_00; // din_pe
+        #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_02_00_00; // din_pe
+		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_03_00_00; // din_pe
+		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_04_00_00; // din_pe
+		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_05_00_00; // din_pe
 		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_01_00; // CMPLX_MULT
 		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_03_02; // CMPLX_MULT
 		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_05_04; // CMPLX_MULT

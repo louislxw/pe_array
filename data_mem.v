@@ -52,7 +52,9 @@ end
 
 (* ram_style="block" *)
 reg [`DATA_WIDTH*2-1:0] regfile [0:(2**`DM_ADDR_WIDTH)-1];
-reg [`DM_ADDR_WIDTH-1:0] raddr0, raddr1, waddr;
+reg [`DM_ADDR_WIDTH-1:0] raddr0 = 0;
+reg [`DM_ADDR_WIDTH-1:0] raddr1 = 0;
+reg [`DM_ADDR_WIDTH-1:0] waddr = 0;
 reg [`DATA_WIDTH*2-1:0] rdata0 = 0;
 reg [`DATA_WIDTH*2-1:0] rdata1 = 0;
 
@@ -64,11 +66,13 @@ always @(posedge clk) begin
 //        rdata0 <= 0;
 //        rdata1 <= 0;
     end
-    else if(inst_v) begin
+    if (inst_v) begin
         raddr0 <= inst[7:0]; 
         raddr1 <= inst[15:8]; 
         waddr <= inst[23:16];
-
+    end
+    if (wren_r) begin
+        waddr <= waddr + 1;
     end
     if (wren_r) begin // wren
         regfile[waddr] <= wdata; 

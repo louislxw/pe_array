@@ -21,12 +21,12 @@
 `include "parameters.vh"
 
 module inst_mem(
-    clk, rst, inst_v, inst_in, inst_out_v, inst_out
+    clk, rst, inst_in_v, inst_in, inst_out_v, inst_out
     );
 
 input clk;
 input rst;
-input inst_v; // instruction valid signal
+input inst_in_v; // instruction valid signal
 input [`INST_WIDTH-1:0] inst_in;
 
 //output shift_v;
@@ -40,7 +40,7 @@ reg  control_d1 = 0;
 reg  control_d2 = 0;
 reg  ctrl_d1 = 0;
 	
-assign wr_en = inst_v & (~ctrl);
+assign wr_en = inst_in_v & (~ctrl);
 assign ctrl = control | control_d1;
 assign inst_out_v = control_d2;
 //wire [`IM_ADDR_WIDTH-1:0] addr;
@@ -93,7 +93,7 @@ reg [DELAY-1:0] shift_reg = 0;
 //wire delayed_signal; // inst_v
 
 always @ (posedge clk) begin 
-    shift_reg <= {shift_reg[DELAY-2:0], inst_v};
+    shift_reg <= {shift_reg[DELAY-2:0], inst_in_v};
 end
 
 assign control = shift_reg[DELAY-1]; // delayed_signal

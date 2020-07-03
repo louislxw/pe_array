@@ -21,13 +21,14 @@
 `include "parameters.vh"
 
 module control(
-    clk, din_pe, din_wb, inst, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
+    clk, din_pe, din_wb, inst_v, inst, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
     );
     
 input clk;
 //input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit data
 input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
+input inst_v;
 input [`INST_WIDTH-1:0] inst; // 64-bit instruction
 
 output dout_v;
@@ -44,7 +45,7 @@ reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
 wire sel;
-assign sel = inst[`INST_WIDTH-1]; // The most significant 1-bit select input of the PE
+assign sel = inst_v ? inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
 
 always @ (posedge clk) 
 case (sel)

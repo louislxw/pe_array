@@ -109,7 +109,7 @@ wire inst_out_v;
 inst_mem IMEM(
     .clk(clk), 
     .rst(rst), 
-    .inst_v(inst_in_v), 
+    .inst_in_v(inst_in_v), 
     .inst_in(inst_in), 
 //    .shift_v(shift_v),
     .inst_out_v(inst_out_v),
@@ -122,6 +122,7 @@ control CTRL(
 //    .din_ld(din_ld), 
     .din_pe(din_pe), 
     .din_wb(alu_out), 
+    .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_v),
     .dout(wdata), // data_in for DMEM
