@@ -28,7 +28,6 @@ module pe(
 input  clk;
 input  rst;
 input  din_v;
-//input  [`DATA_WIDTH*2-1:0] din_ld;
 input  [`DATA_WIDTH*2-1:0] din_pe;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
@@ -41,6 +40,7 @@ output [`DATA_WIDTH*2-1:0] dout_pe;
 reg [`DATA_WIDTH*2-1:0] dout_pe;
 reg [`DATA_WIDTH*2-1:0] dout_fwd;
 
+wire inst_out_v;
 wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
 
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -50,48 +50,49 @@ wire [3:0] cea2;    // 1-bit * 4
 wire [3:0] ceb2;    // 1-bit * 4
 wire [3:0] usemult; // 1-bit * 4
 
-wire [`DATA_WIDTH*2-1:0] wdata, rdata0, rdata1; 
-wire [`DATA_WIDTH*2-1:0] alu_out;
+wire [`DATA_WIDTH*2-1:0] dout_ctrl;
+wire [`DATA_WIDTH*2-1:0] rdata0, rdata1; 
+wire [`DATA_WIDTH*2-1:0] dout_alu;
 
-reg shift_v; // triggered by the negedge of ctrl signal
-reg load_v;
+//reg shift_v; // triggered by the negedge of ctrl signal
+//reg load_v;
 
-always @ (posedge clk) begin
-    if (load_v | shift_v) 
-        dout_pe <= dout_fwd;
-    else 
-        dout_pe <= alu_out;
-end
+//always @ (posedge clk) begin
+//    if (load_v | shift_v) 
+//        dout_pe <= dout_fwd;
+//    else 
+//        dout_pe <= dout_alu;
+//end
 
 //always @ (posedge clk) begin
 //    inst_out_v <= inst_in_v;
 //    inst_out <= inst_in;
 //end
 
-parameter DELAY = 32; // 32 cycles for shift_reg 
-reg [DELAY-1:0] shift_reg = 0;
+//parameter DELAY = 6; // 32 cycles for shift_reg 
+reg [`REG_NUM-1:0] shift_reg_v = 0;
 always @ (posedge clk) begin 
-    shift_reg <= {shift_reg[DELAY-2:0], din_v};
+    shift_reg_v <= {shift_reg_v[`REG_NUM-2:0], din_v};
 end
 wire reg_v;
-assign reg_v = shift_reg[DELAY-1]; // delayed_signal
+assign reg_v = shift_reg_v[`REG_NUM-1]; // valid signal for shift registers
 
 /*** shift register array for din_pe ***/
-//reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
-//reg [`DATA_WIDTH*2-1:0] shift_reg [0:`REG_NUM-1]; 
-//integer i;
-//always @ (posedge clk) begin 
-//    if (din_v) begin  // should last for 32 cycles
-//        for(i = `REG_NUM-1; i > 0; i = i-1) begin
-//            shift_reg[i] <= shift_reg[i-1];
-//        end
-//        shift_reg[0] <= din_pe;
-//        dc <= dc + 1;
-//        if (dc == `REG_NUM-1) begin
-////            load_v <= 0;
-//            dout_pe <= din_pe; // dout_fwd
-//        end
-//    end
+reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
+reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
+integer i;
+always @ (posedge clk) begin 
+    if (din_v) begin  // should last for 32 cycles
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin
+            shift_reg_data[i] <= shift_reg_data[i-1];
+        end
+        shift_reg_data[0] <= din_pe;
+        dc <= dc + 1;
+        if (dc == `REG_NUM-1) begin
+//            load_v <= 0;
+            dout_pe <= din_pe; // dout_fwd
+        end
+    end
 //    if (shift_v) begin // should last for 32 cycles
 //        for(i = `REG_NUM-1; i > 0; i = i-1) 
 //            shift_reg[i] <= shift_reg[i-1];
@@ -102,9 +103,9 @@ assign reg_v = shift_reg[DELAY-1]; // delayed_signal
 //            shift_v <= 0;
 //        end          
 //    end
-//end
+end
 
-wire inst_out_v;
+
 // Instruction Memory
 inst_mem IMEM(
     .clk(clk), 
@@ -121,11 +122,11 @@ control CTRL(
     .clk(clk),
 //    .din_ld(din_ld), 
     .din_pe(din_pe), 
-    .din_wb(alu_out), 
+    .din_wb(dout_alu), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_v),
-    .dout(wdata), // data_in for DMEM
+    .dout(dout_ctrl), // input data of DMEM
     .alumode(alumode), 
     .inmode(inmode), 
     .opmode(opmode), 
@@ -145,7 +146,7 @@ data_mem DMEM(
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
-    .wdata(wdata), 
+    .wdata(dout_ctrl), 
     .rdata0(rdata0),
     .rdata1(rdata1)
     );
@@ -162,7 +163,7 @@ complex_alu ALU(
     .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
-    .dout(alu_out) 
+    .dout(dout_alu) 
     );    
     
 endmodule

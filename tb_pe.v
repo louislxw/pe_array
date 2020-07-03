@@ -95,6 +95,7 @@ module tb_pe;
 //		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_03_02; // CMPLX_MULT
 //		#20; inst_in_v = 1; inst_in = 64'h0_8_0000000_3_00_05_04; // CMPLX_MULT
 
+        // Load the instructions
         #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_00_00_00; // din_pe
         #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_01_00_00; // din_pe
         #20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_02_00_00; // din_pe
@@ -114,6 +115,7 @@ module tb_pe;
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd9;  din_pe = 32'h000c_000a; // 12 + j*10
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd11; din_pe = 32'h000b_0009; // 11 + j*9
 
+        // Load the data
 		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 

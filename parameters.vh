@@ -17,5 +17,5 @@
 
 // Top PE
 `define PE_NUM          8
-`define REG_NUM        32
+`define REG_NUM         6 // 32
 `define REG_ADDR_WIDTH  5
