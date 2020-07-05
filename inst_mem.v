@@ -41,8 +41,8 @@ reg  control_d2 = 0;
 reg  ctrl_d1 = 0;
 	
 assign wr_en = inst_in_v & (~ctrl);
-assign ctrl = control | control_d1;
-assign inst_out_v = control_d2;
+assign ctrl = control | control_d1; // signal to triger the program counter
+assign inst_out_v = control_d2; // control_d2
 //wire [`IM_ADDR_WIDTH-1:0] addr;
 //assign addr = ctrl ? pc : inst_addr; // read or write
 
@@ -87,7 +87,7 @@ always @(posedge clk) begin
 end
 
 /*** Control Logics for Instruction Memory ***/
-parameter DELAY = 9; // how to set automatically set DELAY with inst_addr
+parameter DELAY = 16; // 9 // how to set automatically set DELAY with inst_addr
 
 reg [DELAY-1:0] shift_reg = 0;
 //wire delayed_signal; // inst_v

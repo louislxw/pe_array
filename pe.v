@@ -111,7 +111,7 @@ always @ (posedge clk) begin
     if(din_v)
         din_ctrl <= din_pe;
     else if(reg_v) begin
-        din_ctrl <= shift_reg_data[addr];
+        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
         addr <= addr + 1;
     end
     else 
@@ -147,14 +147,15 @@ control CTRL(
     .usemult(usemult)
     );
 
-wire rden; // read enable signal for DMEM
-assign rden = inst_pc[`INST_WIDTH-5]; // bit: 59
+wire wren, rden; // write enable & read enable signal for DMEM
+assign wren = din_v | reg_v;
+assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(din_v), 
+    .wren(wren), // din_v
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter

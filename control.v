@@ -125,7 +125,7 @@ if (opcode > 0)
     valid <= 1;
 else 
     valid <= 0;
-   
+
 parameter DELAY = 4; 
 reg [DELAY-1:0] shift_reg = 0;
 always @ (posedge clk) begin 
