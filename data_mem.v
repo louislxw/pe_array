@@ -43,10 +43,11 @@ output [`DATA_WIDTH*2-1:0] rdata1;
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-2:`INST_WIDTH-3];
 
-reg wren_r, rden_r; // ADD
+reg wren_r1, wren_r, rden_r; // ADD
 
 always @(posedge clk) begin
     wren_r <= wren;
+    wren_r1 <= wren_r;
     rden_r <= rden;
 end 
 
@@ -71,7 +72,7 @@ always @(posedge clk) begin
         raddr1 <= inst[15:8]; 
         waddr <= inst[23:16];
     end
-    if (wren_r) begin
+    if (wren_r) begin // wren_r
         waddr <= waddr + 1;
     end
     if (wren_r) begin // wren

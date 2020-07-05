@@ -105,6 +105,18 @@ always @ (posedge clk) begin
 //    end
 end
 
+reg [`DATA_WIDTH*2-1:0] din_ctrl;
+reg [`REG_ADDR_WIDTH-1:0] addr = 0;
+always @ (posedge clk) begin
+    if(din_v)
+        din_ctrl <= din_pe;
+    else if(reg_v) begin
+        din_ctrl <= shift_reg_data[addr];
+        addr <= addr + 1;
+    end
+    else 
+        din_ctrl <= 0;
+end
 
 // Instruction Memory
 inst_mem IMEM(
@@ -121,7 +133,7 @@ inst_mem IMEM(
 control CTRL(
     .clk(clk),
 //    .din_ld(din_ld), 
-    .din_pe(din_pe), 
+    .din_pe(din_ctrl), // din_pe
     .din_wb(dout_alu), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
