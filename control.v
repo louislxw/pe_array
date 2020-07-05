@@ -40,20 +40,18 @@ output [3:0] cea2;    // 1-bit * 4
 output [3:0] ceb2;    // 1-bit * 4
 output [3:0] usemult; // 1-bit * 4
 
-reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
+wire [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
-wire sel;
-assign sel = inst_v ? inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
+wire WB;
+assign WB = inst_v ? inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
 
-always @ (*) // (posedge clk) 
-case (sel)
-//    2'b00:   dout <= din_ld; // load data
-    1'b0:   dout <= din_pe; // shift data
-    1'b1:   dout <= din_wb; // write back
-//    default: dout <= 0;
-endcase
+//always @ (*) // (posedge clk) 
+//case (WB)
+//    1'b0:   dout <= din_pe; // shift data
+//    1'b1:   dout <= din_wb; // write back
+//endcase
 
 /***************** INSTRUCTION DECODE***************/	 
 wire[2:0] opcode;
@@ -119,19 +117,21 @@ case (opcode[2:0])
 endcase
 
 /*** Control Logics for Data Ouput Valid Signal ***/
-reg valid;
-always @ (posedge clk) 
-if (opcode > 0)
-    valid <= 1;
-else 
-    valid <= 0;
+//reg valid;
+//always @ (posedge clk) 
+//if (opcode > 0)
+//    valid <= 1;
+//else 
+//    valid <= 0;
 
-parameter DELAY = 4; 
+parameter DELAY = 5; 
 reg [DELAY-1:0] shift_reg = 0;
 always @ (posedge clk) begin 
-    shift_reg <= {shift_reg[DELAY-2:0], valid};
+    shift_reg <= {shift_reg[DELAY-2:0], WB};
 end
 
 assign dout_v = shift_reg[DELAY-1]; // delayed_signal
+
+assign dout = dout_v ? din_wb : din_pe;
     
 endmodule

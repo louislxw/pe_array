@@ -155,7 +155,8 @@ assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(wren), // din_v
+    .wren(wren), // din_pe
+    .wben(dout_v), // dout_alu
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
