@@ -40,7 +40,7 @@ output [3:0] cea2;    // 1-bit * 4
 output [3:0] ceb2;    // 1-bit * 4
 output [3:0] usemult; // 1-bit * 4
 
-wire [`DATA_WIDTH*2-1:0] dout; // 32-bit
+reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-1:`INST_WIDTH-2]; // The most significant 2-bit select input of the PE
@@ -132,6 +132,13 @@ end
 
 assign dout_v = shift_reg[DELAY-1]; // delayed_signal
 
-assign dout = dout_v ? din_wb : din_pe;
+//assign dout = dout_v ? din_wb : din_pe;
+
+always @ (posedge clk) 
+if (dout_v)
+    dout <= din_wb; // shift data
+else    
+    dout <= din_pe; // write back
+    
     
 endmodule

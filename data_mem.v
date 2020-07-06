@@ -44,23 +44,29 @@ output [`DATA_WIDTH*2-1:0] rdata1;
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-2:`INST_WIDTH-3];
 
+wire wb_en;
+
 reg wren_r, rden_r, wben_r; // ADD
+reg wren_r1, wb_en_r;
 
 always @(posedge clk) begin
     wren_r <= wren;
+    wren_r1 <= wren_r;
     rden_r <= rden;
     
     wben_r <= wben;
+    wb_en_r <= wb_en;
     
     wb_addr_d1 <= wb_addr; // 
     wb_addr_d2 <= wb_addr_d1; // 
     wb_addr_d3 <= wb_addr_d2; // 
     wb_addr_d4 <= wb_addr_d3; // 
+    wb_addr_d5 <= wb_addr_d4; // 
     
 end 
 
-wire wb_en;
 assign wb_en = wben | wben_r;
+
 //
 //parameter INST_DELAY = 5; 
 //wire inst_v_d;
@@ -76,7 +82,7 @@ reg [`DM_ADDR_WIDTH-1:0] raddr0 = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddr1 = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
-reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
+reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4, wb_addr_d5;
 reg [`DATA_WIDTH*2-1:0] rdata0 = 0;
 reg [`DATA_WIDTH*2-1:0] rdata1 = 0;
 reg [`DATA_WIDTH*2-1:0] wdata_d1;
@@ -99,12 +105,12 @@ always @(posedge clk) begin
 //        waddr <= wb_addr_d4; 
 //    end
     
-    if (wren_r) begin // write enable for load & shift load
+    if (wren_r1) begin // write enable for load & shift load
         waddr <= waddr + 1;
         regfile[waddr] <= wdata; 
     end
-    else if (wb_en) begin // write enable for load & shift load
-        waddr <= wb_addr_d4; 
+    else if (wb_en_r) begin // write enable for load & shift load
+        waddr <= wb_addr_d5; 
         wdata_d1 <= wdata;
         regfile[waddr] <= wdata_d1;
     end

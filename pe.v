@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe
+    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, dout_fwd
 //    , inst_out_v, inst_out
     );
     
@@ -34,10 +34,11 @@ input  [`INST_WIDTH-1:0] inst_in;
 
 output dout_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
+output [`DATA_WIDTH*2-1:0] dout_fwd;
 //output reg inst_out_v;
 //output reg [`INST_WIDTH-1:0] inst_out;
 
-reg [`DATA_WIDTH*2-1:0] dout_pe;
+//reg [`DATA_WIDTH*2-1:0] dout_pe;
 reg [`DATA_WIDTH*2-1:0] dout_fwd;
 
 wire inst_out_v;
@@ -90,7 +91,7 @@ always @ (posedge clk) begin
         dc <= dc + 1;
         if (dc == `REG_NUM-1) begin
 //            load_v <= 0;
-            dout_pe <= din_pe; // dout_fwd
+            dout_fwd <= din_pe; // dout_fwd
         end
     end
 //    if (shift_v) begin // should last for 32 cycles
@@ -133,8 +134,8 @@ inst_mem IMEM(
 control CTRL(
     .clk(clk),
 //    .din_ld(din_ld), 
-    .din_pe(din_ctrl), // din_pe
-    .din_wb(dout_alu), 
+    .din_pe(din_ctrl), 
+    .din_wb(dout_pe), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_v),
@@ -156,7 +157,7 @@ data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
     .wren(wren), // din_pe
-    .wben(dout_v), // dout_alu
+    .wben(dout_v), // dout_pe
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
@@ -177,7 +178,7 @@ complex_alu ALU(
     .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
-    .dout(dout_alu) 
+    .dout(dout_pe) 
     );    
     
 endmodule
