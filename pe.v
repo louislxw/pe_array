@@ -147,15 +147,28 @@ control CTRL(
     .usemult(usemult)
     );
 
-wire wren, rden; // write enable & read enable signal for DMEM
-assign wren = din_v | reg_v;
-assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
+//wire wren, rden; // write enable & read enable signal for DMEM
+//assign wren = din_v | reg_v;
+//assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
+
+reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
+always @ (posedge clk) begin
+    if (din_v | reg_v)
+        wren <= 1;
+    else
+        wren <= 0;
+    
+    if (inst_out_v)
+        rden <= inst_pc[`INST_WIDTH-5];
+    else
+        rden <= 0;
+end
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(wren), // din_pe
+    .wren(wren), 
     .wben(dout_v), // dout_pe
     .rden(rden), 
     .inst_v(inst_out_v),
