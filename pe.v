@@ -133,8 +133,7 @@ inst_mem IMEM(
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-//    .din_ld(din_ld), 
-    .din_pe(din_ctrl), 
+    .din_ld(din_ctrl), 
     .din_wb(dout_pe), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
