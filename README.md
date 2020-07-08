@@ -1,2 +1,3 @@
 # pe_array
-An array of PEs working like RISC-V processors
+A linear array of PEs working in SIMD fashion. 
+One PE targets for 600MHz on ZYNQ UltraScale+; specificially for SCD and CNNs.
