@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, dout_fwd
+    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, dout_fwd_v, dout_fwd
 //    , inst_out_v, inst_out
     );
     
@@ -34,11 +34,13 @@ input  [`INST_WIDTH-1:0] inst_in;
 
 output dout_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
+output dout_fwd_v;
 output [`DATA_WIDTH*2-1:0] dout_fwd;
 //output reg inst_out_v;
 //output reg [`INST_WIDTH-1:0] inst_out;
 
 //reg [`DATA_WIDTH*2-1:0] dout_pe;
+reg dout_fwd_v;
 reg [`DATA_WIDTH*2-1:0] dout_fwd;
 
 wire inst_out_v;
@@ -83,17 +85,20 @@ reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
 reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
 integer i;
 always @ (posedge clk) begin 
-    if (din_v) begin  // should last for 32 cycles
+    if (din_v && dc <= `REG_NUM-1) begin  // should last for 32 cycles
         for(i = `REG_NUM-1; i > 0; i = i-1) begin
             shift_reg_data[i] <= shift_reg_data[i-1];
         end
         shift_reg_data[0] <= din_pe;
         dc <= dc + 1;
-        if (dc == `REG_NUM-1) begin
-//            load_v <= 0;
-            dout_fwd <= din_pe; // dout_fwd
-        end
     end
+    if (din_v && dc > `REG_NUM-1) begin
+        dout_fwd_v <= 1;
+        dout_fwd <= din_pe; 
+//        dc <= 0;
+    end
+    else 
+        dout_fwd_v <= 0;
 //    if (shift_v) begin // should last for 32 cycles
 //        for(i = `REG_NUM-1; i > 0; i = i-1) 
 //            shift_reg[i] <= shift_reg[i-1];
@@ -159,7 +164,7 @@ always @ (posedge clk) begin
         wren <= 0;
     
     if (inst_out_v)
-        rden <= inst_pc[`INST_WIDTH-5];
+        rden <= inst_pc[`INST_WIDTH-5]; // bit: 59
     else
         rden <= 0;
 end
@@ -168,8 +173,8 @@ end
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(wren), 
-    .wben(dout_v), // dout_pe
+    .wren(wren), // valid for din_pe
+    .wben(dout_v), // valid for dout_pe
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
