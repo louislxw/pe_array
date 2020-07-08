@@ -44,25 +44,6 @@ output [`DATA_WIDTH*2-1:0] rdata1;
 //wire [1:0] sel;
 //assign sel = inst[`INST_WIDTH-2:`INST_WIDTH-3];
 
-wire wb_en;
-assign wb_en = wben | wben_r;
-
-reg wren_r, rden_r, wben_r, wb_en_r; // ADD
-
-always @(posedge clk) begin
-    wren_r <= wren;
-    rden_r <= rden;
-    
-    wben_r <= wben;
-    wb_en_r <= wb_en;
-    
-    wb_addr_d1 <= wb_addr; // 
-    wb_addr_d2 <= wb_addr_d1; // 
-    wb_addr_d3 <= wb_addr_d2; // 
-    wb_addr_d4 <= wb_addr_d3; // 
-    
-end 
-
 
 (* ram_style="block" *)
 reg [`DATA_WIDTH*2-1:0] regfile [0:(2**`DM_ADDR_WIDTH)-1];
@@ -70,11 +51,22 @@ reg [`DM_ADDR_WIDTH-1:0] raddr0 = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddr1 = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
-reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
+reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4, wb_addr_d5;
 reg [`DATA_WIDTH*2-1:0] rdata0 = 0;
 reg [`DATA_WIDTH*2-1:0] rdata1 = 0;
+reg wren_r, rden_r, wben_r; // ADD
 
 always @(posedge clk) begin
+    wren_r <= wren;
+//    rden_r <= rden;
+    wben_r <= wben;
+    
+    wb_addr_d1 <= wb_addr; // 
+    wb_addr_d2 <= wb_addr_d1; // 
+    wb_addr_d3 <= wb_addr_d2; // 
+    wb_addr_d4 <= wb_addr_d3; // 
+    wb_addr_d5 <= wb_addr_d4; // 
+    
     if (rst) begin
         waddr <= 0;
         raddr0 <= 0;
@@ -93,8 +85,13 @@ always @(posedge clk) begin
         waddr <= waddr + 1;
         regfile[waddr] <= wdata; 
     end
-    else if (wb_en) begin // write enable for write back 
+    
+    if (wben) begin // write enable for write back 
         waddr <= wb_addr_d4; 
+//        regfile[wb_addr_d5] <= wdata; // waddr
+    end
+    
+    if (wben_r) begin
         regfile[waddr] <= wdata; 
     end
     
