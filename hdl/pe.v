@@ -73,36 +73,38 @@ wire [`DATA_WIDTH*2-1:0] dout_alu;
 //end
 
 //parameter DELAY = 6; // 32 cycles for shift_reg 
-reg [`REG_NUM-1:0] shift_reg_v = 0;
-always @ (posedge clk) begin 
-    shift_reg_v <= {shift_reg_v[`REG_NUM-2:0], din_v};
-end
-wire reg_v;
-assign reg_v = shift_reg_v[`REG_NUM-1]; // valid signal for shift registers
+//reg [`REG_NUM-1:0] shift_reg_v = 0;
+//always @ (posedge clk) begin 
+//    shift_reg_v <= {shift_reg_v[`REG_NUM-2:0], din_v};
+//end
+//wire reg_v;
+//assign reg_v = shift_reg_v[`REG_NUM-1]; // valid signal for shift registers
 
 /*** shift register array for din_pe ***/
 reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
 reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
+reg [`DATA_WIDTH*2-1:0] din_ctrl;
+reg [`REG_ADDR_WIDTH-1:0] addr = 0;
 integer i;
 always @ (posedge clk) begin 
     if (din_v && dc <= `REG_NUM-1) begin  // should last for 32 cycles
         for(i = `REG_NUM-1; i > 0; i = i-1) begin
             shift_reg_data[i] <= shift_reg_data[i-1];
         end
-        din_ctrl <= din_pe; // 
+        din_ctrl <= din_pe; // MUX
         shift_reg_data[0] <= din_pe;
         dc <= dc + 1;
     end
     else if (din_v && dc > `REG_NUM-1) begin
         dout_fwd_v <= 1;
         dout_fwd <= din_pe; 
-        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
-        addr <= addr + 1;
+        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr]; // MUX
+        addr <= addr + 1; // MUX
 //        dc <= 0;
     end
     else begin
         dout_fwd_v <= 0;
-        din_ctrl <= 0;
+        din_ctrl <= 0; // MUX
     end
 //    if (shift_v) begin // should last for 32 cycles
 //        for(i = `REG_NUM-1; i > 0; i = i-1) 
@@ -116,18 +118,6 @@ always @ (posedge clk) begin
 //    end
 end
 
-reg [`DATA_WIDTH*2-1:0] din_ctrl;
-reg [`REG_ADDR_WIDTH-1:0] addr = 0;
-//always @ (posedge clk) begin
-//    if(din_v)
-//        din_ctrl <= din_pe;
-//    else if(reg_v) begin
-//        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
-//        addr <= addr + 1;
-//    end
-//    else 
-//        din_ctrl <= 0;
-//end
 
 // Instruction Memory
 inst_mem IMEM(
