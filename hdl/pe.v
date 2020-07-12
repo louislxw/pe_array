@@ -89,16 +89,21 @@ always @ (posedge clk) begin
         for(i = `REG_NUM-1; i > 0; i = i-1) begin
             shift_reg_data[i] <= shift_reg_data[i-1];
         end
+        din_ctrl <= din_pe; // 
         shift_reg_data[0] <= din_pe;
         dc <= dc + 1;
     end
-    if (din_v && dc > `REG_NUM-1) begin
+    else if (din_v && dc > `REG_NUM-1) begin
         dout_fwd_v <= 1;
         dout_fwd <= din_pe; 
+        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
+        addr <= addr + 1;
 //        dc <= 0;
     end
-    else 
+    else begin
         dout_fwd_v <= 0;
+        din_ctrl <= 0;
+    end
 //    if (shift_v) begin // should last for 32 cycles
 //        for(i = `REG_NUM-1; i > 0; i = i-1) 
 //            shift_reg[i] <= shift_reg[i-1];
@@ -113,16 +118,16 @@ end
 
 reg [`DATA_WIDTH*2-1:0] din_ctrl;
 reg [`REG_ADDR_WIDTH-1:0] addr = 0;
-always @ (posedge clk) begin
-    if(din_v)
-        din_ctrl <= din_pe;
-    else if(reg_v) begin
-        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
-        addr <= addr + 1;
-    end
-    else 
-        din_ctrl <= 0;
-end
+//always @ (posedge clk) begin
+//    if(din_v)
+//        din_ctrl <= din_pe;
+//    else if(reg_v) begin
+//        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr];
+//        addr <= addr + 1;
+//    end
+//    else 
+//        din_ctrl <= 0;
+//end
 
 // Instruction Memory
 inst_mem IMEM(
@@ -157,9 +162,12 @@ control CTRL(
 //assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
 
 reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
+reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 always @ (posedge clk) begin
-    if (din_v | reg_v)
+    if (din_v && dmem_count <= `REG_NUM*2-1) begin
         wren <= 1;
+        dmem_count <= dmem_count + 1;
+    end
     else
         wren <= 0;
     
