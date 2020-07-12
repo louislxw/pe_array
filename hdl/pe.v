@@ -72,13 +72,14 @@ wire [`DATA_WIDTH*2-1:0] dout_alu;
 //    inst_out <= inst_in;
 //end
 
-//parameter DELAY = 6; // 32 cycles for shift_reg 
-//reg [`REG_NUM-1:0] shift_reg_v = 0;
-//always @ (posedge clk) begin 
-//    shift_reg_v <= {shift_reg_v[`REG_NUM-2:0], din_v};
-//end
-//wire reg_v;
-//assign reg_v = shift_reg_v[`REG_NUM-1]; // valid signal for shift registers
+parameter DELAY = 14;
+reg shift_v = 0; 
+reg [DELAY-1:0] shift_reg_v = 0;
+always @ (posedge clk) begin 
+    shift_reg_v <= {shift_reg_v[DELAY-2:0], shift_v};
+end
+wire shift_v_d;
+assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
 
 /*** shift register array for din_pe ***/
 reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
@@ -94,28 +95,41 @@ always @ (posedge clk) begin
         din_ctrl <= din_pe; // MUX
         shift_reg_data[0] <= din_pe;
         dc <= dc + 1;
+        shift_v <= 1;
     end
     else if (din_v && dc > `REG_NUM-1) begin
         dout_fwd_v <= 1;
         dout_fwd <= din_pe; 
         din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr]; // MUX
         addr <= addr + 1; // MUX
+        shift_v <= 0;
 //        dc <= 0;
+    end
+    else if (shift_v_d) begin // should last for 32 cycles
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin
+            shift_reg_data[i] <= shift_reg_data[i-1];
+        end
+        shift_reg_data[0] <= din_pe;
+        dout_fwd_v <= 1;
+        dout_fwd <= shift_reg_data[`REG_NUM-1];
     end
     else begin
         dout_fwd_v <= 0;
         din_ctrl <= 0; // MUX
+        shift_v <= 0;
     end
-//    if (shift_v) begin // should last for 32 cycles
-//        for(i = `REG_NUM-1; i > 0; i = i-1) 
-//            shift_reg[i] <= shift_reg[i-1];
-//        shift_reg[0] <= din_pe;
-//        dout_pe <= shift_reg[`REG_NUM-1]; // dout_fwd
-//        dc <= dc + 1;
-//        if (dc == `REG_NUM-1) begin
-//            shift_v <= 0;
-//        end          
+    
+//    if (shift_v_d) begin // should last for 32 cycles
+//        for(i = `REG_NUM-1; i > 0; i = i-1) begin
+//            shift_reg_data[i] <= shift_reg_data[i-1];
+//        end
+//        shift_reg_data[0] <= din_pe;
+//        dout_fwd_v <= 1;
+//        dout_fwd <= shift_reg_data[`REG_NUM-1];
 //    end
+//    else 
+//        dout_fwd_v <= 0;
+        
 end
 
 
