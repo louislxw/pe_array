@@ -1,4 +1,11 @@
 # pe_array
+Layout of this repository:
+* constrs/ constraint files
+* doc/ documentations and figures
+* hdl/ verilog source files
+* header/ verilog header files
+* sim/ testbench files for simulation
+
 A linear array of PEs working in SIMD fashion. 
 One PE targets for 600MHz on ZYNQ UltraScale+; specificially for SCD and CNNs.
 
