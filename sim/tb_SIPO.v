@@ -29,7 +29,7 @@ module tb_SIPO;
     reg load; 
     
     // Outputs
-    wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; 
+    wire [`REG_NUM*`DATA_WIDTH*2-1:0] p_out; 
 
     // Instantiate the Unit Under Test (UUT)
     SIPO uut(

@@ -29,18 +29,18 @@ input rst;
 input [`DATA_WIDTH*2-1:0] s_in;
 input load; // load serial input
 
-output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; 
+output [`REG_NUM*`DATA_WIDTH*2-1:0] p_out; 
 
-reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`PE_NUM-1]; 
+reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
 
 integer i;
 always @ (posedge clk) begin
     if (rst)
-        for(i = `PE_NUM-1; i > 0; i = i-1) begin 
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
             shift_reg_data[i] <= 0;
         end
     else if (load) begin
-        for(i = `PE_NUM-1; i > 0; i = i-1) begin 
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
             shift_reg_data[i] <= shift_reg_data[i-1];
         end
         shift_reg_data[0] <= s_in; 
@@ -48,7 +48,7 @@ always @ (posedge clk) begin
 end 
 
 genvar j;
-for(j = 0; j < `PE_NUM; j = j+1) begin 
+for(j = 0; j < `REG_NUM; j = j+1) begin 
     assign p_out[(j+1)*`DATA_WIDTH*2-1:j*`DATA_WIDTH*2] = shift_reg_data[j]; 
 end
     

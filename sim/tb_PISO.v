@@ -25,7 +25,7 @@ module tb_PISO;
     // Inputs
     reg clk;
     reg rst;
-    reg [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
+    reg [`REG_NUM*`DATA_WIDTH*2-1:0] p_in;
     reg fetch; 
     
     // Outputs
@@ -68,8 +68,8 @@ module tb_PISO;
 		#20; fetch = 1; p_in = 256'h11111111_22222222_33333333_44444444_55555555_66666666_77777777_88888888; 
 		#20; fetch = 1;
 		#20; fetch = 1;
-		#20; fetch = 1;
-		#20; fetch = 1;
+		#20; fetch = 1; //
+		#20; fetch = 1; //
 		#20; fetch = 0; p_in = 256'h00000011_00000022_00000033_00000044_00000055_00000066_00000077_00000088; 
 		#20; fetch = 1; 
 		#20; fetch = 1; 
