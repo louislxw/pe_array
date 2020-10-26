@@ -34,6 +34,7 @@ module tb_pe;
     // Outputs
     wire dout_v;
     wire [`DATA_WIDTH*2-1:0] dout_pe; 
+    wire dout_fwd_v;
     wire [`DATA_WIDTH*2-1:0] dout_fwd;
 //    wire inst_out_v;
 //    wire [`INST_WIDTH-1:0] inst_out;
@@ -49,6 +50,7 @@ module tb_pe;
     .inst_in(inst_in),
     .dout_v(dout_v), 
     .dout_pe(dout_pe),
+    .dout_fwd_v(dout_fwd_v),
     .dout_fwd(dout_fwd)
 //    .inst_out_v(inst_out_v),
 //    .inst_out(inst_out) 
@@ -104,9 +106,9 @@ module tb_pe;
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_03_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_04_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_05_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_40_01_00; // CMPLX_MULT (inst rden & data WB)
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_41_03_02; // CMPLX_MULT (inst rden & data WB)
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_42_05_04; // CMPLX_MULT (isnt rden & data WB)
+		#20; inst_in_v = 1; inst_in = 32'h60_01_00_80; // CMPLX_MULT 
+		#20; inst_in_v = 1; inst_in = 32'h60_03_02_81; // CMPLX_MULT 
+		#20; inst_in_v = 1; inst_in = 32'h60_05_04_82; // CMPLX_MULT 
 		
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;

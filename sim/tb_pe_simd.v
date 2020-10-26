@@ -94,9 +94,9 @@ module tb_pe_simd;
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_03_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_04_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_05_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_80_01_00; // CMPLX_MULT (inst rden & data WB)
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_81_03_02; // CMPLX_MULT (inst rden & data WB)
-		#20; inst_in_v = 1; inst_in = 64'h8_8_0000000_3_82_05_04; // CMPLX_MULT (isnt rden & data WB)
+		#20; inst_in_v = 1; inst_in = 32'h60_01_00_80; // CMPLX_MULT 
+		#20; inst_in_v = 1; inst_in = 32'h60_03_02_81; // CMPLX_MULT 
+		#20; inst_in_v = 1; inst_in = 32'h60_05_04_82; // CMPLX_MULT 
 		
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;

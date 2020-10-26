@@ -26,7 +26,9 @@ module tb_data_mem;
     reg clk; 
     reg rst;
     reg wren; 
+    reg wben;
     reg rden;
+    reg inst_v;
     reg [`INST_WIDTH-1:0] inst;
     reg [`DATA_WIDTH*2-1:0] wdata;
 
@@ -39,7 +41,9 @@ module tb_data_mem;
     .clk(clk), 
     .rst(rst), 
     .wren(wren), 
+    .wben(wben),
     .rden(rden), 
+    .inst_v(inst_v),
     .inst(inst), 
     .wdata(wdata), 
     .rdata0(rdata0),
@@ -59,7 +63,9 @@ module tb_data_mem;
         clk = 0;
         rst = 0;
         wren = 0;
+        wben = 0;
         rden = 0;
+        inst_v = 0;
         inst = 0;
         wdata = 0;
         
@@ -73,17 +79,21 @@ module tb_data_mem;
 		#20; wren = 0; 
 		#20; wren = 0; 
         // wren or rden is aligned with inst; 1 cycle ahead of wdata 
-        #20; wren = 1;                 inst = 64'h0000000000_00_00_00; 
-		#20; wren = 1; wdata = 32'd1;  inst = 64'h0000000000_01_00_00; 
-		#20; wren = 1; wdata = 32'd3;  inst = 64'h0000000000_02_00_00; 
-		#20; wren = 1; wdata = 32'd5;  inst = 64'h0000000000_03_00_00; 
-		#20; wren = 1; wdata = 32'd7;  inst = 64'h0000000000_04_00_00; 
-		#20; wren = 1; wdata = 32'd9;  inst = 64'h0000000000_05_00_00; 
-		#20; wren = 0; rden = 1; wdata = 32'd11; inst = 64'h0000000000_00_01_00; 
-		#20; wren = 0; rden = 1; wdata = 32'd0;  inst = 64'h0000000000_00_03_02;
-		#20; wren = 0; rden = 1; wdata = 32'd0;  inst = 64'h0000000000_00_05_04; 
-		#20; wren = 0; rden = 0; wdata = 32'd0;  inst = 0; 
-//		#20; wren = 0; rden = 0; wdata = 32'd0;  inst = 0; 
+        #20; wren = 1;                 
+		#20; wren = 1; wdata = 32'd1;  
+		#20; wren = 1; wdata = 32'd3;  
+		#20; wren = 1; wdata = 32'd5;  
+		#20; wren = 1; wdata = 32'd7;  
+		#20; wren = 1; wdata = 32'd9;  
+		#20; wren = 0; wdata = 32'd11; 
+		
+		// Load the instructions
+	    #20; inst_v = 1; rden = 0; inst = 32'h00_01_00_00; // CMPLX_MULT 
+		#20; inst_v = 1; rden = 1; inst = 32'h00_03_02_00; // CMPLX_MULT 
+		#20; inst_v = 1; rden = 1; inst = 32'h00_05_04_00; // CMPLX_MULT 
+		#20; inst_v = 0; rden = 1; 
+		#20; rden = 0; 
+
 		
 		#1000;
 		
