@@ -43,7 +43,7 @@ reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 /*** Control Logics for Data Ouput Valid Signal ***/
 wire wb;
-assign wb = inst_v ? inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
+assign wb = inst_v ? 1 : 0; // inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
 
 parameter DELAY = 5; 
 reg [DELAY-1:0] shift_reg = 0; 
@@ -65,7 +65,7 @@ else
 
 /***************** INSTRUCTION DECODE***************/	 
 wire[2:0] opcode;
-assign opcode = inst[26:24];
+assign opcode = inst[31:29]; // inst[26:24]; 
 
 reg [`ALUMODE_WIDTH*4-1:0] alumode = 0; // 4-bit * 4
 reg [`INMODE_WIDTH*4-1:0]  inmode = 0;  // 5-bit * 4

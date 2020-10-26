@@ -37,13 +37,9 @@ output [`DATA_WIDTH*2-1:0] rdata1;
 
 //wire [`DM_ADDR_WIDTH-1:0] raddr0, raddr1, waddr;
 // 8-bit read/write address
-//assign raddr0 = rst ? 0 : inst[7:0]; 
-//assign raddr1 = rst ? 0 : inst[15:8]; 
-//assign waddr = rst ? 0 : inst[23:16]; 
-
-//wire [1:0] sel;
-//assign sel = inst[`INST_WIDTH-2:`INST_WIDTH-3];
-
+//assign raddr1 = rst ? 0 : inst[23:16]; 
+//assign raddr0 = rst ? 0 : inst[15:8]; 
+//assign waddr = rst ? 0 : inst[7:0]; 
 
 (* ram_style="block" *)
 reg [`DATA_WIDTH*2-1:0] regfile [0:(2**`DM_ADDR_WIDTH)-1];
@@ -54,11 +50,10 @@ reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4, wb_addr_d5;
 reg [`DATA_WIDTH*2-1:0] rdata0 = 0;
 reg [`DATA_WIDTH*2-1:0] rdata1 = 0;
-reg wren_r, rden_r, wben_r; // ADD
+reg wren_r, wben_r; // ADD
 
 always @(posedge clk) begin
     wren_r <= wren;
-//    rden_r <= rden;
     wben_r <= wben;
     
     wb_addr_d1 <= wb_addr; // 
@@ -76,9 +71,9 @@ always @(posedge clk) begin
     end
     
     if (inst_v) begin
-        raddr0 <= inst[7:0]; 
-        raddr1 <= inst[15:8]; 
-        wb_addr <= inst[23:16]; // write back address
+        raddr1 <= inst[23:16]; 
+        raddr0 <= inst[15:8]; 
+        wb_addr <= inst[7:0]; // write back address
     end
     
     if (wren_r) begin // write enable for load & shift load 

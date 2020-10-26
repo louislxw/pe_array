@@ -100,7 +100,7 @@ always @ (posedge clk) begin
     else if (din_v && dc > `REG_NUM-1) begin
         dout_fwd_v <= 1;
         dout_fwd <= din_pe; 
-        din_ctrl <= shift_reg_data[`REG_ADDR_WIDTH-addr]; // MUX
+        din_ctrl <= shift_reg_data[2**`REG_ADDR_WIDTH-addr]; // MUX
         addr <= addr + 1; // MUX
         shift_v <= 0;
 //        dc <= 0;
@@ -176,7 +176,7 @@ always @ (posedge clk) begin
         wren <= 0;
     
     if (inst_out_v)
-        rden <= inst_pc[`INST_WIDTH-5]; // bit: 59
+        rden <= 1; // inst_pc[`INST_WIDTH-5]; 
     else
         rden <= 0;
 end

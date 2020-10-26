@@ -122,7 +122,7 @@ control CTRL(
 
 //wire wren, rden; // write enable & read enable signal for DMEM
 //assign wren = din_v | reg_v;
-//assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
+//assign rden = inst_out_v ? 1 : 0; // inst_pc[`INST_WIDTH-5] : 0; 
 
 reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
@@ -135,7 +135,7 @@ always @ (posedge clk) begin
         wren <= 0;
     
     if (inst_out_v)
-        rden <= inst_pc[`INST_WIDTH-5]; // bit: 59
+        rden <= 1; // inst_pc[`INST_WIDTH-5]; 
     else
         rden <= 0;
 end

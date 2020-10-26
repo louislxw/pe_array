@@ -1,6 +1,6 @@
 // Data & Instructions
 `define DATA_WIDTH     16
-`define INST_WIDTH     64
+`define INST_WIDTH     32 // 64
 
 // DSP48E2
 `define PORTA_WIDTH    30
@@ -18,4 +18,4 @@
 // Top PE
 `define PE_NUM          4
 `define REG_NUM         8 // 32
-`define REG_ADDR_WIDTH  5
+`define REG_ADDR_WIDTH  3 // 2^5 = 32
