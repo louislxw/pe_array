@@ -80,20 +80,25 @@ module tb_data_mem;
 		#20; wren = 0; 
         // wren or rden is aligned with inst; 1 cycle ahead of wdata 
         #20; wren = 1;                 
-		#20; wren = 1; wdata = 32'd1;  
-		#20; wren = 1; wdata = 32'd3;  
-		#20; wren = 1; wdata = 32'd5;  
-		#20; wren = 1; wdata = 32'd7;  
-		#20; wren = 1; wdata = 32'd9;  
-		#20; wren = 0; wdata = 32'd11; 
+		#20; wren = 1; wdata = 32'h0004_0002; // 4 + j*2 
+		#20; wren = 1; wdata = 32'h0003_0001; // 3 + j*1 
+		#20; wren = 1; wdata = 32'h0008_0006; // 8 + j*6 
+		#20; wren = 1; wdata = 32'h0007_0005; // 7 + j*5 
+		#20; wren = 1; wdata = 32'h000c_000a; // 12 + j*10 
+		#20; wren = 0; wdata = 32'h000b_0009; // 11 + j*9 
 		
-		// Load the instructions
-	    #20; inst_v = 1; rden = 0; inst = 32'h00_01_00_00; // CMPLX_MULT 
-		#20; inst_v = 1; rden = 1; inst = 32'h00_03_02_00; // CMPLX_MULT 
-		#20; inst_v = 1; rden = 1; inst = 32'h00_05_04_00; // CMPLX_MULT 
-		#20; inst_v = 0; rden = 1; 
+		// Load the instructions (only affects the raddr1, raddr0, and waddr)
+	    #20; inst_v = 1; rden = 0; inst = 32'h60_01_00_80; // CMPLX_MULT 
+		#20; inst_v = 1; rden = 1; inst = 32'h60_03_02_81; // CMPLX_MULT 
+		#20; inst_v = 1; rden = 1; inst = 32'h60_05_04_82; // CMPLX_MULT 
+		#20; inst_v = 0; rden = 1; inst = 0;
 		#20; rden = 0; 
-
+		
+        #20; wben = 1; 
+        #20; wben = 1; wdata = 32'h000a_000a; 
+        #20; wben = 1; wdata = 32'h001a_0052; 
+        #20; wben = 0; wdata = 32'h002a_00da; 
+        #20; wdata = 0; 
 		
 		#1000;
 		

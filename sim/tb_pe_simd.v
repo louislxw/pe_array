@@ -111,11 +111,11 @@ module tb_pe_simd;
 		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0003_0001; // 3 + j*1
+		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0003_0001; // 3 + j*1 
 		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0008_0006; // 8 + j*6 
 		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0007_0005; // 7 + j*5 
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000c_000a; // 12 + j*10
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000b_0009; // 11 + j*9
+		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000c_000a; // 12 + j*10 
+		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000b_0009; // 11 + j*9 
 		
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 

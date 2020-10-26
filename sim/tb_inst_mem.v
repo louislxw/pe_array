@@ -25,18 +25,20 @@ module tb_inst_mem;
     // Inputs
     reg clk;
     reg rst;
-    reg inst_v;
+    reg inst_in_v;
     reg [`INST_WIDTH-1:0] inst_in;
     
     // Outputs
+    wire inst_out_v;
     wire [`INST_WIDTH-1:0] inst_out;
     
     // Instantiate the Unit Under Test (UUT)
     inst_mem uut(
     .clk(clk), 
     .rst(rst), 
-    .inst_v(inst_v), 
+    .inst_in_v(inst_in_v), 
     .inst_in(inst_in), 
+    .inst_out_v(inst_out_v),
     .inst_out(inst_out) 
     ); 
 
@@ -52,7 +54,7 @@ module tb_inst_mem;
         // Initialize Inputs
         clk = 0;
         rst = 0;
-        inst_v = 0;
+        inst_in_v = 0;
         inst_in = 0;
         
         // Wait 100 ns for global reset to finish
@@ -60,19 +62,19 @@ module tb_inst_mem;
         #100;
         
         // Add stimulus here
-        #20; inst_v = 0; rst = 0; 
-		#20; inst_v = 0; 
-		#20; inst_v = 0; 
-		#20; inst_v = 0;
-		#20; inst_v = 1; inst_in = 64'h00000000ffff0000; 
-		#20; inst_v = 1; inst_in = 64'h00000000ffffaaaa; 
-		#20; inst_v = 1; inst_in = 64'h00000000ffffbbbb; 
-		#20; inst_v = 1; inst_in = 64'h00000000ffffcccc;
-		#20; inst_v = 1; inst_in = 64'h00000000ffffdddd; 
-		#20; inst_v = 0; inst_in = 0; 
-		#20; inst_v = 0; 
-		#20; inst_v = 0; 
-		#20; inst_v = 0; 
+        #20; inst_in_v = 0; rst = 0; 
+		#20; inst_in_v = 0; 
+		#20; inst_in_v = 0; 
+		#20; inst_in_v = 0;
+		#20; inst_in_v = 1; inst_in = 32'hffff0000; 
+		#20; inst_in_v = 1; inst_in = 32'hffffaaaa; 
+		#20; inst_in_v = 1; inst_in = 32'hffffbbbb; 
+		#20; inst_in_v = 1; inst_in = 32'hffffcccc;
+		#20; inst_in_v = 1; inst_in = 32'hffffdddd; 
+		#20; inst_in_v = 0; inst_in = 0; 
+		#20; inst_in_v = 0; 
+		#20; inst_in_v = 0; 
+		#20; inst_in_v = 0; 
 		
 		#1000;
 		
