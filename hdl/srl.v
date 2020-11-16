@@ -25,10 +25,12 @@ module srl(
     );
     
 input clk;
+//input rst;
 input ce;
-input  [`DATA_WIDTH*2-1:0] din;
+input  [`DATA_WIDTH*2-1:0] din; 
 output [`DATA_WIDTH*2-1:0] dout; 
 
+// Code Template: Static Shift SRL (bus) --> have some issues when simulating multiple instances
 reg [`REG_NUM-1:0] shift_reg [`DATA_WIDTH*2-1:0];
 
 integer srl_index;
@@ -38,7 +40,7 @@ initial
 
 genvar i;
 generate
-    for (i=0; i < `DATA_WIDTH*2; i=i+1) begin: srl_32
+    for (i = 0; i < `DATA_WIDTH*2; i = i+1) begin: srl_32
         always @(posedge clk)
             if (ce)
                 shift_reg[i] <= {shift_reg[i][`REG_NUM-2:0], din[i]};
@@ -46,5 +48,6 @@ generate
         assign dout[i] = shift_reg[i][`REG_NUM-1];
     end
 endgenerate
+
     
 endmodule

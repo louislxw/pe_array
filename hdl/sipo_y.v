@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Serial-in to Parallel-out (SIPO) for input Y
 // 
-// Dependencies: 
+// Dependencies: 8243 LUTs, 8240 FFs
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -21,17 +21,20 @@
 `include "parameters.vh"
 
 module sipo_y(
-    clk, en, s_in, p_out
+    clk, s_in_v, s_in, p_out_v, p_out
     );
     
 input clk;
-input en;
-input [`DATA_WIDTH*2-1:0] s_in;
-output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; 
+//input rst; no reset port in the LUTRAM
+input s_in_v; // ce
+input [`DATA_WIDTH*2-1:0] s_in; // no register
+
+output p_out_v;
+output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; // no register
 
 reg [`REG_ADDR_WIDTH-1:0] reg_cnt = {`REG_ADDR_WIDTH{1'b0}}; // 2^5 = 32
 reg [`PE_ADDR_WIDTH-1:0] pe_cnt = {`PE_ADDR_WIDTH{1'b0}}; // 2^8 = 256
-reg state; // Eventually should be three-state: load, process, shift
+reg state = 1'b0; // Eventually should be three-state: load, process, shift
 
 always @(posedge clk) 
     if (reg_cnt == {`REG_ADDR_WIDTH{1'b1}} && pe_cnt == {`PE_ADDR_WIDTH{1'b1}} && state == 1) begin
@@ -58,7 +61,7 @@ wire [`DATA_WIDTH*2-1:0] srl_out [`PE_NUM-1:0];
 always @(posedge clk) 
     if (state == 0) // load state
         srl_in <= s_in;
-    else // shift state
+    else // round shift state
         srl_in <= srl_out[`PE_NUM-1];
 
 genvar i;
@@ -66,17 +69,17 @@ generate
     for (i = 0; i < `PE_NUM; i = i+1) begin: SIPO_Y
         // srl_0 (Input)
         if (i == 0)  
-            srl(
+            srl( // srl_0(
             .clk(clk), 
-            .ce(en), 
+            .ce(1'b1), 
             .din(srl_in), 
             .dout(srl_out[i])
             );
-        // srl_1 to srl_N-1
+        // srl_1 to srl_N-1 (right shift: from low to high)
         else 
-            srl(
-            .clk(clk), 
-            .ce(en), 
+            srl( // srl_k(
+            .clk(clk),
+            .ce(1'b1), 
             .din(srl_out[i-1]), 
             .dout(srl_out[i])
             );
@@ -84,5 +87,12 @@ generate
         assign p_out[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = srl_out[i];
     end
 endgenerate    
+
+parameter DELAY = `REG_NUM;
+reg [DELAY-1:0] shift_reg_v = 0;
+always @ (posedge clk) begin 
+    shift_reg_v <= {shift_reg_v[DELAY-2:0], s_in_v};
+end
+assign p_out_v = shift_reg_v[DELAY-1]; // valid signal for parallel outputs
     
 endmodule
