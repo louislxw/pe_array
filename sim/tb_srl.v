@@ -31,7 +31,7 @@ module tb_srl;
     wire [`DATA_WIDTH*2-1:0] dout; 
     
     // Instantiate the Unit Under Test (UUT)
-    srl_macro uut(
+    srl uut(
     .clk(clk), 
     .ce(ce), 
     .din(din),

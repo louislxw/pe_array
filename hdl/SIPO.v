@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: Serial-in to Parallel-out (SIPO) Shift Register
+// Description: Serial-in to Parallel-out (SIPO) Shift Register implemented by FFs
 // 
 // Dependencies: 
 // 
@@ -21,13 +21,13 @@
 `include "parameters.vh"
 
 module SIPO(
-    clk, rst, load, s_in, p_out
+    clk, s_in, p_out
     );
 
 input clk;
-input rst;
+//input rst;
 input [`DATA_WIDTH*2-1:0] s_in;
-input load; // load serial input
+//input load; // load serial input
 
 output [`REG_NUM*`DATA_WIDTH*2-1:0] p_out; 
 
@@ -35,16 +35,16 @@ reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1];
 
 integer i;
 always @ (posedge clk) begin
-    if (rst)
-        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
-            shift_reg_data[i] <= 0;
-        end
-    else if (load) begin
+//    if (rst)
+//        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
+//            shift_reg_data[i] <= 0;
+//        end
+//    else if (load) begin
         for(i = `REG_NUM-1; i > 0; i = i-1) begin 
             shift_reg_data[i] <= shift_reg_data[i-1];
         end
         shift_reg_data[0] <= s_in; 
-    end
+//    end
 end 
 
 genvar j;

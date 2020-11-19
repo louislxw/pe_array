@@ -39,23 +39,23 @@ for(j = 0; j < `PE_NUM; j = j+1) begin
     assign array_output[j] = p_in[(j+1)*`DATA_WIDTH*2-1:j*`DATA_WIDTH*2];
 end
 
-reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`PE_NUM-1]; 
+reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
 
 integer i;
 always @ (posedge clk) begin
     if (rst)
-        for(i = `PE_NUM-1; i > 0; i = i-1) begin 
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
             shift_reg_data[i] <= 0;
             s_out <= 0;
         end
     else if (load) begin
-        for(i = `PE_NUM-1; i > 0; i = i-1) begin 
+        for(i = `REG_NUM-1; i > 0; i = i-1) begin 
             shift_reg_data[i] <= array_output[i];
         end
     end
     else if (ce) begin // left shift
         s_out <= shift_reg_data[0]; 
-        for(i = 0; i < `PE_NUM-1; i = i+1) begin 
+        for(i = 0; i < `REG_NUM-1; i = i+1) begin 
             shift_reg_data[i] <= shift_reg_data[i+1];
         end
     end

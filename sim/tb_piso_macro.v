@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 18.11.2020 22:36:15
+// Create Date: 19.11.2020 10:01:33
 // Design Name: 
 // Module Name: tb_piso_macro
 // Project Name: 
@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+`include "parameters.vh"
 
 module tb_piso_macro; 
 

@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: 32-bit shift register logic (SRL) implemented by 1 LUT in a SLICEM
 // 
-// Dependencies: 
+// Dependencies: 32 LUTs, 64 FFs
 // 
 // Revision:
 // Revision 0.01 - File Created

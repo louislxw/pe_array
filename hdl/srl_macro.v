@@ -29,8 +29,8 @@ input ce;
 input  [`DATA_WIDTH*2-1:0] din;
 output [`DATA_WIDTH*2-1:0] dout;
 
-reg [`DATA_WIDTH*2-1:0] dout;
-wire [`DATA_WIDTH*2-1:0] srl_out;
+//reg [`DATA_WIDTH*2-1:0] dout;
+//wire [`DATA_WIDTH*2-1:0] srl_out;
 
 // SRLC32E: 32-Bit Shift Register Look-Up Table (LUT)
 parameter A = 5'b11111;
@@ -42,7 +42,7 @@ generate
           .IS_CLK_INVERTED(1'b0)  // Optional inversion for CLK
        )
        SRLC32E_inst (
-          .Q(srl_out[i]),     // 1-bit output: SRL Data
+          .Q(dout[i]), // 1-bit output: SRL Data
           .Q31(Q31), // 1-bit output: SRL Cascade Data
           .A(A),     // 5-bit input: Selects SRL depth
           .CE(ce),   // 1-bit input: Clock enable
@@ -52,8 +52,8 @@ generate
     end
 endgenerate
 
-always @(posedge clk)
-    dout <= srl_out;
+//always @(posedge clk)
+//    dout <= srl_out;
 
  // End of SRLC32E_inst instantiation    
     

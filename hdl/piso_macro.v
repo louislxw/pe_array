@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 18.11.2020 21:46:37
+// Create Date: 18.11.2020 16:55:10
 // Design Name: 
 // Module Name: piso_macro
 // Project Name: 
@@ -29,8 +29,9 @@ input rst;
 input load;
 input ce;
 input [`DATA_WIDTH*2-1:0] p_in;
+
 output s_out;
-    
+
    parameter piso_shift = `DATA_WIDTH*2;
 
    reg [piso_shift-2:0] shift_reg = {piso_shift-1{1'b0}};
@@ -48,6 +49,6 @@ output s_out;
       else if (ce) begin
          shift_reg <= {1'b0, shift_reg[piso_shift-2:1]};
          s_out     <= shift_reg[0];
-      end		
-    
+      end
+
 endmodule

@@ -69,7 +69,7 @@ generate
     for (i = 0; i < `PE_NUM; i = i+1) begin: SIPO_Y
         // srl_0 (Input)
         if (i == 0)  
-            srl( // srl_0(
+            srl_macro srl_inst(
             .clk(clk), 
             .ce(1'b1), 
             .din(srl_in), 
@@ -77,7 +77,7 @@ generate
             );
         // srl_1 to srl_N-1 (right shift: from low to high)
         else 
-            srl( // srl_k(
+            srl_macro srl_inst(
             .clk(clk),
             .ce(1'b1), 
             .din(srl_out[i-1]), 
@@ -88,7 +88,7 @@ generate
     end
 endgenerate    
 
-parameter DELAY = `REG_NUM;
+parameter DELAY = `REG_NUM + 1;
 reg [DELAY-1:0] shift_reg_v = 0;
 always @ (posedge clk) begin 
     shift_reg_v <= {shift_reg_v[DELAY-2:0], s_in_v};
