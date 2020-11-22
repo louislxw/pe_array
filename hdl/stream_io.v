@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: SIPO to PISO --> SISO
 // 
-// Dependencies: 16,378 LUTs, 16,431 FFs (meet 500MHz)
+// Dependencies: 20,553 LUTs, 161 FFs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -46,23 +46,23 @@ sipo_y in_buffer(
     .p_out(p_out)
     );
     
-PISO out_buffer( 
+piso_new out_buffer(
     .clk(clk), 
-    .rst(rst), 
-    .ce(p_ce),
     .load(load),
+    .p_in_v(p_out_v), 
     .p_in(p_out), 
-    .s_out_v(s_out_v),
-    .s_out(s_out) 
+    .s_out_v(s_out_v), 
+    .s_out(s_out)
     );
-
-// Something was wrong with this module when integrating with top module
-//piso_new out_buffer(
+    
+//PISO out_buffer( 
 //    .clk(clk), 
-//    .p_in_v(p_out_v), 
+//    .rst(rst), 
+//    .ce(p_ce),
+//    .load(load),
 //    .p_in(p_out), 
-//    .s_out_v(s_out_v), 
-//    .s_out(s_out)
+//    .s_out_v(s_out_v),
+//    .s_out(s_out) 
 //    );
     
 endmodule

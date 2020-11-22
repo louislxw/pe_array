@@ -27,8 +27,7 @@ module overlay(
 input  clk; 
 input  rst; 
 input  ce;
-input  load; //
-//input  fetch; //
+input  load; 
 input  din_overlay_v; 
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 input  inst_in_v; 
@@ -69,8 +68,7 @@ generate
         .din_v(din_overlay_v), 
         .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
         .inst_in_v(inst_in_v), 
-        .inst_in(inst_in), 
-            
+        .inst_in(inst_in),      
         .dout_v(pe_out_v[i]),
         .dout_pe(pe_out[i])
         );
@@ -83,8 +81,7 @@ generate
 //            .din_v(din_overlay_v), // pe_fwd_v[i]
 //            .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
 //            .inst_in_v(inst_in_v), 
-//            .inst_in(inst_in), 
-            
+//            .inst_in(inst_in),     
 //            .dout_v(dout_last_v), 
 //            .dout_pe(dout_last)
 //            .dout_fwd_v(overlay_fwd_v),
@@ -113,22 +110,23 @@ generate
     end
 endgenerate
 
-PISO out_buffer(
+piso_new out_buffer(
     .clk(clk), 
-    .rst(rst), 
-    .ce(ce),
     .load(load),
+    .p_in_v(), 
     .p_in(p_in), 
-    .s_out_v(dout_overlay_v),
-    .s_out(dout_overlay) 
-    ); 
+    .s_out_v(dout_overlay_v), 
+    .s_out(dout_overlay)
+    );
 
-//piso_new out_buffer(
+//PISO out_buffer(
 //    .clk(clk), 
-//    .p_in_v(), 
+//    .rst(rst), 
+//    .ce(ce),
+//    .load(load),
 //    .p_in(p_in), 
-//    .s_out_v(dout_overlay_v), 
-//    .s_out(dout_overlay)
-//    );
+//    .s_out_v(dout_overlay_v),
+//    .s_out(dout_overlay) 
+//    ); 
     
 endmodule

@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: 
 // 
-// Dependencies: 8,192 LUTs, 8,192 FFs 
+// Dependencies: 12,289 LUTs, 2 FFs 
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -33,44 +33,34 @@ input [`PE_NUM*`DATA_WIDTH*2-1:0] p_in; // no register
 output s_out_v;
 output [`DATA_WIDTH*2-1:0] s_out; // no register
 
-wire [`DATA_WIDTH*2-1:0] srl_out; 
-
 wire [`DATA_WIDTH*2-1:0] srl_in [0:`PE_NUM-1]; 
-wire ce_srl;
+wire [`DATA_WIDTH*2-1:0] srl_out [0:`PE_NUM-1]; 
  
 genvar j;
 for(j = 0; j < `PE_NUM; j = j+1) begin 
-    assign srl_in[j] = load ? p_in[(j+1)*`DATA_WIDTH*2-1:j*`DATA_WIDTH*2] : 1'b0;
+    if (j == `PE_NUM-1) 
+        assign srl_in[`PE_NUM-1] = load ? p_in[(j+1)*`DATA_WIDTH*2-1:j*`DATA_WIDTH*2] : 1'b0; 
+    else
+        assign srl_in[j] = load ? p_in[(j+1)*`DATA_WIDTH*2-1:j*`DATA_WIDTH*2] : srl_out[j+1];
 end
-assign ce_srl = load ? 1'b0 : 1'b1;
 
-//always @(posedge clk) 
-//    s_out <= srl_out;
+//wire ce_srl;
+//assign ce_srl = load ? 1'b0 : 1'b1;
     
 genvar i;
 generate
     for (i = 0; i < `PE_NUM; i = i+1) begin: piso_srl
-        // srl_0 (Output)
-        if (i == 0)  
-            srl srl_inst(
-            .clk(clk), 
-            .ce(ce_srl), // 1'b1
-            .din(srl_in[0]), 
-            .dout(s_out)
-            );
-        // srl_1 to srl_N-1 (left shift: from high to low)
-        else 
-            srl srl_inst(
-            .clk(clk), 
-            .ce(ce_srl), // 1'b1
-            .din(srl_in[i]), 
-            .dout(srl_in[i-1]) 
-            ); 
+        srl_macro srl_inst(
+        .clk(clk), 
+        .ce(1'b1), // 1'b1
+        .din(srl_in[i]), 
+        .dout(srl_out[i]) // srl_in[i-1]
+        ); 
     end 
-    
-//    assign s_out = srl_out;
-    
+
 endgenerate      
+
+assign s_out = srl_out[0];
 
 parameter DELAY = `REG_NUM;
 reg [DELAY-1:0] shift_reg_v = 0;

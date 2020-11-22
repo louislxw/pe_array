@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Serial-in to Parallel-out (SIPO) for input Y
 // 
-// Dependencies: 8243 LUTs, 8240 FFs
+// Dependencies: 8,244 LUTs, 48 FFs
 // 
 // Revision:
 // Revision 0.01 - File Created
