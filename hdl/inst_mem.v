@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Instruction Memory implemented by half a Block RAM
 // 
-// Dependencies: 
+// Dependencies: 16 LUTs, 10 FFs, 0.5 BRAM (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created

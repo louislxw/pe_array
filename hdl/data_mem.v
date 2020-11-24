@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Data Memory implemented by a Block RAM
 // 
-// Dependencies: 
+// Dependencies: 21 LUTs, 42 FFs, 1.0 BRAM (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -71,9 +71,9 @@ always @(posedge clk) begin
     end
     
     if (inst_v) begin
-        raddr1 <= inst[23:16]; 
-        raddr0 <= inst[15:8]; 
-        wb_addr <= inst[7:0]; // write back address
+        raddr1 <= inst[23:16]; // source 2
+        raddr0 <= inst[15:8]; // source 1
+        wb_addr <= inst[7:0]; // destination
     end
     
     if (wren_r) begin // write enable for load & shift load 
