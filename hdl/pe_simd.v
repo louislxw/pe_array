@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Single PE for 32-bit complex operations
 // 
-// Dependencies: 
+// Dependencies: 108 LUTs, 134 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created

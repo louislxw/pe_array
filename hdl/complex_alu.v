@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: An ALU for operations with 32-bit complex numbers
+// Description: An ALU for operations of 32-bit complex numbers
 // 
-// Dependencies: 
+// Dependencies: 44 LUTs, 148 FFs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created

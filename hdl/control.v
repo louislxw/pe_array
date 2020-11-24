@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Instruction Decoder & Feedback Logics
 // 
-// Dependencies: 
+// Dependencies: 35 LUTs, 83 FFs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
