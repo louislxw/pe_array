@@ -21,25 +21,26 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_v, din_pe, inst_in_v, inst_in, dout_v, dout_pe, dout_fwd_v, dout_fwd
+    clk, rst, din_pe_v, din_pe, inst_in_v, inst_in, dout_pe_v, dout_pe, dout_fwd_v, dout_fwd
 //    , inst_out_v, inst_out
     );
     
 input  clk;
 input  rst;
-input  din_v;
+input  din_pe_v;
 input  [`DATA_WIDTH*2-1:0] din_pe;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 
-output dout_v;
+output dout_pe_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
 output dout_fwd_v;
 output [`DATA_WIDTH*2-1:0] dout_fwd;
 //output reg inst_out_v;
 //output reg [`INST_WIDTH-1:0] inst_out;
 
-//reg [`DATA_WIDTH*2-1:0] dout_pe;
+reg dout_pe_v;
+reg [`DATA_WIDTH*2-1:0] dout_pe;
 reg dout_fwd_v;
 reg [`DATA_WIDTH*2-1:0] dout_fwd;
 
@@ -56,16 +57,17 @@ wire [3:0] usemult; // 1-bit * 4
 wire [`DATA_WIDTH*2-1:0] dout_ctrl;
 wire [`DATA_WIDTH*2-1:0] rdata0, rdata1; 
 wire [`DATA_WIDTH*2-1:0] dout_alu;
+wire dout_alu_v;
 
 //reg shift_v; // triggered by the negedge of ctrl signal
 //reg load_v;
 
-//always @ (posedge clk) begin
-//    if (load_v | shift_v) 
-//        dout_pe <= dout_fwd;
-//    else 
-//        dout_pe <= dout_alu;
-//end
+always @ (posedge clk) begin
+    if (dout_pe_v) 
+        dout_pe <= dout_alu;
+    if (dout_fwd_v)
+        dout_fwd <= dout_alu;
+end
 
 //always @ (posedge clk) begin
 //    inst_out_v <= inst_in_v;
@@ -80,57 +82,6 @@ always @ (posedge clk) begin
 end
 wire shift_v_d;
 assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
-
-/*** shift register array for din_pe ***/
-reg [`REG_ADDR_WIDTH-1:0] dc = 0; // data counter for shift_reg
-reg [`DATA_WIDTH*2-1:0] shift_reg_data [0:`REG_NUM-1]; 
-reg [`DATA_WIDTH*2-1:0] din_ctrl;
-reg [`REG_ADDR_WIDTH-1:0] addr = 0;
-integer i;
-always @ (posedge clk) begin 
-    if (din_v && dc <= `REG_NUM-1) begin  // should last for 32 cycles
-        for(i = `REG_NUM-1; i > 0; i = i-1) begin
-            shift_reg_data[i] <= shift_reg_data[i-1];
-        end
-        din_ctrl <= din_pe; // MUX
-        shift_reg_data[0] <= din_pe;
-        dc <= dc + 1;
-        shift_v <= 1;
-    end
-    else if (din_v && dc > `REG_NUM-1) begin
-        dout_fwd_v <= 1;
-        dout_fwd <= din_pe; 
-        din_ctrl <= shift_reg_data[2**`REG_ADDR_WIDTH-addr]; // MUX
-        addr <= addr + 1; // MUX
-        shift_v <= 0;
-//        dc <= 0;
-    end
-    else if (shift_v_d) begin // should last for 32 cycles
-        for(i = `REG_NUM-1; i > 0; i = i-1) begin
-            shift_reg_data[i] <= shift_reg_data[i-1];
-        end
-        shift_reg_data[0] <= din_pe;
-        dout_fwd_v <= 1;
-        dout_fwd <= shift_reg_data[`REG_NUM-1];
-    end
-    else begin
-        dout_fwd_v <= 0;
-        din_ctrl <= 0; // MUX
-        shift_v <= 0;
-    end
-    
-//    if (shift_v_d) begin // should last for 32 cycles
-//        for(i = `REG_NUM-1; i > 0; i = i-1) begin
-//            shift_reg_data[i] <= shift_reg_data[i-1];
-//        end
-//        shift_reg_data[0] <= din_pe;
-//        dout_fwd_v <= 1;
-//        dout_fwd <= shift_reg_data[`REG_NUM-1];
-//    end
-//    else 
-//        dout_fwd_v <= 0;
-        
-end
 
 
 // Instruction Memory
@@ -147,11 +98,11 @@ inst_mem IMEM(
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-    .din_ld(din_ctrl), 
-    .din_wb(dout_pe), 
+    .din_ld(din_pe), // din_ctrl
+    .din_wb(dout_alu), // dout_pe
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
-    .dout_v(dout_v),
+    .dout_v(dout_alu_v),
     .dout(dout_ctrl), // input data of DMEM
     .alumode(alumode), 
     .inmode(inmode), 
@@ -163,12 +114,12 @@ control CTRL(
 
 //wire wren, rden; // write enable & read enable signal for DMEM
 //assign wren = din_v | reg_v;
-//assign rden = inst_out_v ? inst_pc[`INST_WIDTH-5] : 0; // bit: 59
+//assign rden = inst_out_v ? 1 : 0; // inst_pc[`INST_WIDTH-5] : 0; 
 
 reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 always @ (posedge clk) begin
-    if (din_v && dmem_count <= `REG_NUM*2-1) begin
+    if (din_pe_v && dmem_count <= `REG_NUM*2-1) begin
         wren <= 1;
         dmem_count <= dmem_count + 1;
     end
@@ -186,7 +137,7 @@ data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
     .wren(wren), // valid for din_pe
-    .wben(dout_v), // valid for dout_pe
+    .wben(dout_alu_v), // valid for dout_alu
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
@@ -207,7 +158,7 @@ complex_alu ALU(
     .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
-    .dout(dout_pe) 
+    .dout(dout_alu) // dout_pe
     );    
     
 endmodule
