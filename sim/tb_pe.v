@@ -25,30 +25,30 @@ module tb_pe;
     // Inputs
     reg clk;
     reg rst;
-    reg din_v;
-//    reg [`DATA_WIDTH*2-1:0] din_ld;
+    reg din_pe_v;
     reg [`DATA_WIDTH*2-1:0] din_pe;
     reg inst_in_v;
     reg [`INST_WIDTH-1:0] inst_in;
+    reg alpha_v; 
     
     // Outputs
-    wire dout_v;
+    wire dout_pe_v;
     wire [`DATA_WIDTH*2-1:0] dout_pe; 
     wire dout_fwd_v;
     wire [`DATA_WIDTH*2-1:0] dout_fwd;
 //    wire inst_out_v;
 //    wire [`INST_WIDTH-1:0] inst_out;
+
     
     // Instantiate the Unit Under Test (UUT)
     pe uut(
     .clk(clk), 
     .rst(rst), 
-    .din_v(din_v),
-//    .din_ld(din_ld),
+    .din_pe_v(din_pe_v),
     .din_pe(din_pe),
     .inst_in_v(inst_in_v), 
     .inst_in(inst_in),
-    .dout_v(dout_v), 
+    .dout_pe_v(dout_pe_v), 
     .dout_pe(dout_pe),
     .dout_fwd_v(dout_fwd_v),
     .dout_fwd(dout_fwd)
@@ -74,11 +74,9 @@ module tb_pe;
         // Initialize Inputs
         clk = 0;
         rst = 0;
-        din_v = 0;
-//        din_ld = 0;
+        din_pe_v = 0;
         din_pe = 0;
         inst_in_v = 0;
-//        inst_in = 0;
         
         // Wait 100 ns for global reset to finish
         rst = 1;
@@ -120,26 +118,26 @@ module tb_pe;
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_ld = 32'd11; din_pe = 32'h000b_0009; // 11 + j*9
 
         // Load the data
-		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
-		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0003_0001; // 3 + j*1
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0008_0006; // 8 + j*6 
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h0007_0005; // 7 + j*5 
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000c_000a; // 12 + j*10
-		#20; inst_in_v = 0; inst_in = 0; din_v = 1; din_pe = 32'h000b_0009; // 11 + j*9
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 0;
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 0;
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h0003_0001; // 3 + j*1
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h0008_0006; // 8 + j*6 
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h0007_0005; // 7 + j*5 
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h000c_000a; // 12 + j*10
+		#20; inst_in_v = 0; inst_in = 0; din_pe_v = 1; din_pe = 32'h000b_0009; // 11 + j*9
 		
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 //		#20; din_v = 0; din_ld = 32'd0;  din_pe = 0; 
 
-		#20; din_v = 0; din_pe = 1; 
-		#20; din_v = 0; din_pe = 2; 
-		#20; din_v = 0; din_pe = 3; 
-		#20; din_v = 0; din_pe = 4; 
-		#20; din_v = 0; din_pe = 5; 
-		#20; din_v = 0; din_pe = 6; 
+		#20; din_pe_v = 0; din_pe = 1; 
+		#20; din_pe_v = 0; din_pe = 2; 
+		#20; din_pe_v = 0; din_pe = 3; 
+		#20; din_pe_v = 0; din_pe = 4; 
+		#20; din_pe_v = 0; din_pe = 5; 
+		#20; din_pe_v = 0; din_pe = 6; 
 						
 		#1000;
 		
