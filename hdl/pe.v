@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 106 LUTs, 165 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 105 LUTs, 163 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -21,14 +21,16 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_pe_v, din_pe, inst_in_v, inst_in, alpha_v, dout_pe_v, dout_pe, dout_fwd_v, dout_fwd
-//    , inst_out_v, inst_out
+    clk, rst, din_pe_v, din_pe, din_fwd_v, din_fwd, inst_in_v, inst_in, alpha_v, dout_pe_v, dout_pe, dout_fwd_v, dout_fwd
+//    , inst_out_v, inst_out 
     );
     
 input  clk;
 input  rst;
 input  din_pe_v;
 input  [`DATA_WIDTH*2-1:0] din_pe;
+input  din_fwd_v;
+input  [`DATA_WIDTH*2-1:0] din_fwd;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 input  alpha_v;
@@ -69,9 +71,13 @@ reg [2:0] opcode;
 always @ (posedge clk) 
     opcode <= inst_pc[31:29]; 
 
-reg fwd_flag;
-always @ (negedge inst_out_v)
+reg fwd_flag = 0;
+always @ (posedge clk) 
+if (dout_alu_v) begin
     fwd_flag <= 1;
+end
+else
+    fwd_flag <= 0;
 
 always @ (posedge clk) begin
     if (fwd_flag) begin // forward partial alpha
@@ -84,7 +90,7 @@ always @ (posedge clk) begin
     end
     if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
         dout_pe_v <= 1;
-        dout_pe <= dout_alu; 
+        dout_pe   <= dout_alu; 
     end
 end
 
@@ -116,8 +122,11 @@ inst_mem IMEM(
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-    .din_ld(din_pe), // din_ctrl
-    .din_wb(dout_alu), // dout_pe
+    .din_ld_v(din_pe_v), // 
+    .din_ld(din_pe), 
+    .din_fwd_v(din_fwd_v), // 
+    .din_fwd(din_fwd), // 
+    .din_wb(dout_alu), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_alu_v),
@@ -136,12 +145,10 @@ control CTRL(
 
 reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
-//reg [`DATA_WIDTH*2-1:0] din_dmem;
 
 always @ (posedge clk) begin
     if (din_pe_v && dmem_count <= `REG_NUM*2-1) begin
         wren <= 1;
-//        din_dmem <= dout_ctrl;
         dmem_count <= dmem_count + 1;
     end
     else begin
@@ -154,6 +161,7 @@ always @ (posedge clk) begin
         rden <= 0;
 end
 
+//reg [`DATA_WIDTH*2-1:0] din_dmem;
 //always @ (posedge clk) 
 //    if (wren)
 //        din_dmem <= dout_ctrl;
@@ -170,7 +178,7 @@ data_mem DMEM(
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
-    .wdata(din_dmem), // dout_ctrl
+    .wdata(din_dmem), 
     .rdata0(rdata0),
     .rdata1(rdata1)
     );
@@ -187,7 +195,7 @@ complex_alu ALU(
     .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
-    .dout(dout_alu) // dout_pe
+    .dout(dout_alu) 
     );    
     
 endmodule
