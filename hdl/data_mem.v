@@ -76,7 +76,7 @@ always @(posedge clk) begin
         wb_addr <= inst[7:0]; // destination
     end
     
-    if (wren_r) begin // write enable for load & shift load 
+    if (wren) begin // write enable for load & shift load // wren_r
         waddr <= waddr + 1;
         regfile[waddr] <= wdata; 
     end

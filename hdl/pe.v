@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 106 LUTs, 195 FFs, 1.5 BRAMs, 4 DSPs (doesn't meet 600MHz)
+// Dependencies: 106 LUTs, 165 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -62,13 +62,25 @@ wire dout_alu_v;
 
 //reg shift_v; // triggered by the negedge of ctrl signal
 //reg load_v;
-wire[2:0] opcode;
-assign opcode = inst_pc[31:29]; 
+
+//wire[2:0] opcode;
+//assign opcode = inst_pc[31:29]; 
+reg [2:0] opcode; 
+always @ (posedge clk) 
+    opcode <= inst_pc[31:29]; 
+
+reg fwd_flag;
+always @ (negedge inst_out_v)
+    fwd_flag <= 1;
 
 always @ (posedge clk) begin
-    if (opcode == 3'b000) begin // forward partial alpha
+    if (fwd_flag) begin // forward partial alpha
         dout_fwd_v <= 1;
         dout_fwd   <= dout_alu;
+    end
+    else begin
+        dout_fwd_v <= 0;
+        dout_fwd   <= 32'hxxxxxxxx; 
     end
     if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
         dout_pe_v <= 1;
@@ -124,7 +136,7 @@ control CTRL(
 
 reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
-reg [`DATA_WIDTH*2-1:0] din_dmem;
+//reg [`DATA_WIDTH*2-1:0] din_dmem;
 
 always @ (posedge clk) begin
     if (din_pe_v && dmem_count <= `REG_NUM*2-1) begin
@@ -142,10 +154,12 @@ always @ (posedge clk) begin
         rden <= 0;
 end
 
-always @ (posedge clk) 
-    if (wren)
-        din_dmem <= dout_ctrl;
-        
+//always @ (posedge clk) 
+//    if (wren)
+//        din_dmem <= dout_ctrl;
+
+wire [`DATA_WIDTH*2-1:0] din_dmem;
+assign din_dmem = wren ? dout_ctrl : 32'hxxxxxxxx;  
 
 // Data Memory
 data_mem DMEM(
