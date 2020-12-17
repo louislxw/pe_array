@@ -49,7 +49,7 @@ end
     
 genvar i;
 generate
-    for (i = 0; i < `PE_NUM; i = i+1) begin: piso_srl
+    for (i = 0; i < `PE_NUM; i = i+1) begin: PISO_ALPHA
         srl_macro srl_inst(
         .clk(clk), 
         .ce(1'b1), // 1'b1
