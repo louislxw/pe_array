@@ -27,6 +27,8 @@ module tb_pe;
     reg rst;
     reg din_pe_v;
     reg [`DATA_WIDTH*2-1:0] din_pe;
+    reg din_tx_v;
+    reg [`DATA_WIDTH*2-1:0] din_tx;
     reg inst_in_v;
     reg [`INST_WIDTH-1:0] inst_in;
     reg alpha_v; 
@@ -34,11 +36,10 @@ module tb_pe;
     // Outputs
     wire dout_pe_v;
     wire [`DATA_WIDTH*2-1:0] dout_pe; 
-    wire dout_fwd_v;
-    wire [`DATA_WIDTH*2-1:0] dout_fwd;
+    wire dout_tx_v;
+    wire [`DATA_WIDTH*2-1:0] dout_tx;
 //    wire inst_out_v;
 //    wire [`INST_WIDTH-1:0] inst_out;
-
     
     // Instantiate the Unit Under Test (UUT)
     pe uut(
@@ -46,12 +47,15 @@ module tb_pe;
     .rst(rst), 
     .din_pe_v(din_pe_v),
     .din_pe(din_pe),
+    .din_tx_v(din_tx_v),
+    .din_tx(din_tx),
     .inst_in_v(inst_in_v), 
     .inst_in(inst_in),
+    .alpha_v(alpha_v),
     .dout_pe_v(dout_pe_v), 
     .dout_pe(dout_pe),
-    .dout_fwd_v(dout_fwd_v),
-    .dout_fwd(dout_fwd)
+    .dout_tx_v(dout_tx_v),
+    .dout_tx(dout_tx)
 //    .inst_out_v(inst_out_v),
 //    .inst_out(inst_out) 
     ); 
@@ -75,8 +79,11 @@ module tb_pe;
         clk = 0;
         rst = 0;
         din_pe_v = 0;
-        din_pe = 0;
+        din_pe = 0; 
+        din_tx_v = 0;
+        din_tx = 0;
         inst_in_v = 0;
+        alpha_v = 0; 
         
         // Wait 100 ns for global reset to finish
         rst = 1;

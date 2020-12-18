@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 105 LUTs, 163 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 111 LUTs, 171 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -21,7 +21,8 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_pe_v, din_pe, din_fwd_v, din_fwd, inst_in_v, inst_in, alpha_v, dout_pe_v, dout_pe, dout_fwd_v, dout_fwd
+    clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, inst_in_v, inst_in, alpha_v, 
+    dout_pe_v, dout_pe, dout_tx_v, dout_tx
 //    , inst_out_v, inst_out 
     );
     
@@ -29,23 +30,23 @@ input  clk;
 input  rst;
 input  din_pe_v;
 input  [`DATA_WIDTH*2-1:0] din_pe;
-input  din_fwd_v;
-input  [`DATA_WIDTH*2-1:0] din_fwd;
+input  din_tx_v;
+input  [`DATA_WIDTH*2-1:0] din_tx;
 input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 input  alpha_v;
 
 output dout_pe_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
-output dout_fwd_v;
-output [`DATA_WIDTH*2-1:0] dout_fwd;
+output dout_tx_v;
+output [`DATA_WIDTH*2-1:0] dout_tx;
 //output reg inst_out_v;
 //output reg [`INST_WIDTH-1:0] inst_out;
 
 reg dout_pe_v;
 reg [`DATA_WIDTH*2-1:0] dout_pe;
-reg dout_fwd_v;
-reg [`DATA_WIDTH*2-1:0] dout_fwd;
+reg dout_tx_v;
+reg [`DATA_WIDTH*2-1:0] dout_tx;
 
 wire inst_out_v;
 wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
@@ -71,22 +72,25 @@ reg [2:0] opcode;
 always @ (posedge clk) 
     opcode <= inst_pc[31:29]; 
 
-reg fwd_flag = 0;
-always @ (posedge clk) 
-if (dout_alu_v) begin
-    fwd_flag <= 1;
-end
-else
-    fwd_flag <= 0;
+wire tx_flag;
+assign tx_flag = dout_alu_v ? 1 : 0;
+
+//reg tx_flag = 0;
+//always @ (posedge clk) 
+//if (dout_alu_v) begin
+//    tx_flag <= 1;
+//end
+//else
+//    tx_flag <= 0;
 
 always @ (posedge clk) begin
-    if (fwd_flag) begin // forward partial alpha
-        dout_fwd_v <= 1;
-        dout_fwd   <= dout_alu;
+    if (tx_flag) begin // forward partial alpha
+        dout_tx_v <= 1;
+        dout_tx   <= dout_alu;
     end
     else begin
-        dout_fwd_v <= 0;
-        dout_fwd   <= 32'hxxxxxxxx; 
+        dout_tx_v <= 0;
+        dout_tx   <= 32'hxxxxxxxx; 
     end
     if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
         dout_pe_v <= 1;
@@ -122,15 +126,13 @@ inst_mem IMEM(
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-    .din_ld_v(din_pe_v), // 
+    .din_ld_v(din_pe_v), 
     .din_ld(din_pe), 
-    .din_fwd_v(din_fwd_v), // 
-    .din_fwd(din_fwd), // 
     .din_wb(dout_alu), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_alu_v),
-    .dout(dout_ctrl), // input data of DMEM
+    .dout(dout_ctrl), // data output of the controller
     .alumode(alumode), 
     .inmode(inmode), 
     .opmode(opmode), 
@@ -161,26 +163,28 @@ always @ (posedge clk) begin
         rden <= 0;
 end
 
-//reg [`DATA_WIDTH*2-1:0] din_dmem;
+//reg [`DATA_WIDTH*2-1:0] din_comp;
 //always @ (posedge clk) 
 //    if (wren)
-//        din_dmem <= dout_ctrl;
+//        din_comp <= dout_ctrl;
 
-wire [`DATA_WIDTH*2-1:0] din_dmem;
-assign din_dmem = wren ? dout_ctrl : 32'hxxxxxxxx;  
+wire [`DATA_WIDTH*2-1:0] din_comp;
+assign din_comp = wren ? dout_ctrl : 32'hxxxxxxxx;  
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wren(wren), // valid for din_pe
-    .wben(dout_alu_v), // valid for dout_alu
+    .wea(wren), // valid of din_comp
+    .web(din_tx_v), // valid of din_tx
+    .dina(din_comp), // data for computation
+    .dinb(din_tx), // data transmitted from previous PE
+    .wben(dout_alu_v), 
     .rden(rden), 
     .inst_v(inst_out_v),
     .inst(inst_pc), // instructions triggered by program counter
-    .wdata(din_dmem), 
-    .rdata0(rdata0),
-    .rdata1(rdata1)
+    .douta(rdata0),
+    .doutb(rdata1)
     );
 
 // ALU for Complex Data
