@@ -42,9 +42,9 @@ wire [`IM_ADDR_WIDTH-1:0] addr;
 assign addr = control ? pc : inst_cnt; // read or write
 
 /*** BRAM-based Instruction Memory (perhaps can be changed to LUT-based) ***/
-(* ram_style="block" *)
-reg [`INST_WIDTH-1:0] imem [0:(2**`IM_ADDR_WIDTH)-1];
-reg [`INST_WIDTH-1:0] inst_out = 0;
+//(* ram_style="block" *)
+//reg [`INST_WIDTH-1:0] imem [0:(2**`IM_ADDR_WIDTH)-1];
+//reg [`INST_WIDTH-1:0] inst_out = 0;
 reg [`IM_ADDR_WIDTH-1:0] inst_cnt = 0;
 reg [`IM_ADDR_WIDTH-1:0] pc = 0;
 
@@ -54,15 +54,32 @@ always @(posedge clk) begin
         inst_cnt <= 0;
     end
     else if (wr_en) begin
-        imem[addr] <= inst_in; // load instructions to IMEM
+//        imem[addr] <= inst_in; // load instructions to IMEM
         inst_cnt <= inst_cnt + 1;
     end
     else if (control) 
         pc <= pc + 1; // program counter
     else
         pc <= 0;
-    inst_out <= imem[addr]; // instructions triggered by program counter
+//    inst_out <= imem[addr]; // instructions triggered by program counter
 end
+
+  sdp_bram #(
+    .RAM_WIDTH(36),                       // Specify RAM data width
+    .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)
+    .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
+  ) inst_bram (
+    .addra(addr),   // Write address bus, width determined from RAM_DEPTH
+    .addrb(addr),   // Read address bus, width determined from RAM_DEPTH
+    .dina(inst_in),     // RAM input data, width determined from RAM_WIDTH
+    .clka(clk),     // Clock
+    .wea(wr_en),       // Write enable
+    .enb(1),	     // Read Enable, for additional power savings, disable when not in use
+    .rstb(rst),     // Output reset (does not affect memory contents)
+    .regceb(1), // Output register enable
+    .doutb(inst_out)    // RAM output data, width determined from RAM_WIDTH
+  );
 
 /*** Control Logics for Instruction Memory ***/
 parameter DELAY = 16; // how to set automatically set DELAY
