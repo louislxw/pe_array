@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 111 LUTs, 171 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 162 LUTs, 179 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -23,7 +23,6 @@
 module pe( 
     clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, inst_in_v, inst_in, alpha_v, 
     dout_pe_v, dout_pe, dout_tx_v, dout_tx
-//    , inst_out_v, inst_out 
     );
     
 input  clk;
@@ -36,19 +35,14 @@ input  inst_in_v;
 input  [`INST_WIDTH-1:0] inst_in;
 input  alpha_v;
 
-output dout_pe_v;
-output [`DATA_WIDTH*2-1:0] dout_pe;
-output dout_tx_v;
-output [`DATA_WIDTH*2-1:0] dout_tx;
-//output reg inst_out_v;
-//output reg [`INST_WIDTH-1:0] inst_out;
+output reg dout_pe_v;
+output reg [`DATA_WIDTH*2-1:0] dout_pe;
+output reg dout_tx_v;
+output reg [`DATA_WIDTH*2-1:0] dout_tx;
 
-reg dout_pe_v;
-reg [`DATA_WIDTH*2-1:0] dout_pe;
-reg dout_tx_v;
-reg [`DATA_WIDTH*2-1:0] dout_tx;
 
-wire inst_out_v;
+/*** wires for module connection ***/
+wire inst_pc_v;
 wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
 
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -63,25 +57,8 @@ wire [`DATA_WIDTH*2-1:0] rdata0, rdata1;
 wire [`DATA_WIDTH*2-1:0] dout_alu;
 wire dout_alu_v;
 
-//reg shift_v; // triggered by the negedge of ctrl signal
-//reg load_v;
-
-//wire[2:0] opcode;
-//assign opcode = inst_pc[31:29]; 
-reg [2:0] opcode; 
-always @ (posedge clk) 
-    opcode <= inst_pc[31:29]; 
-
 wire tx_flag;
-assign tx_flag = dout_alu_v ? 1 : 0;
-
-//reg tx_flag = 0;
-//always @ (posedge clk) 
-//if (dout_alu_v) begin
-//    tx_flag <= 1;
-//end
-//else
-//    tx_flag <= 0;
+assign tx_flag = dout_alu_v ? 1 : 0; // this will be changed later
 
 always @ (posedge clk) begin
     if (tx_flag) begin // forward partial alpha
@@ -98,19 +75,14 @@ always @ (posedge clk) begin
     end
 end
 
-//always @ (posedge clk) begin
-//    inst_out_v <= inst_in_v;
-//    inst_out <= inst_in;
+//parameter DELAY = 14;
+//reg shift_v = 0; 
+//reg [DELAY-1:0] shift_reg_v = 0;
+//always @ (posedge clk) begin 
+//    shift_reg_v <= {shift_reg_v[DELAY-2:0], shift_v};
 //end
-
-parameter DELAY = 14;
-reg shift_v = 0; 
-reg [DELAY-1:0] shift_reg_v = 0;
-always @ (posedge clk) begin 
-    shift_reg_v <= {shift_reg_v[DELAY-2:0], shift_v};
-end
-wire shift_v_d;
-assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
+//wire shift_v_d;
+//assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
 
 
 // Instruction Memory
@@ -119,7 +91,7 @@ inst_mem IMEM(
     .rst(rst), 
     .inst_in_v(inst_in_v), 
     .inst_in(inst_in), 
-    .inst_out_v(inst_out_v),
+    .inst_out_v(inst_pc_v),
     .inst_out(inst_pc) // instructions triggered by program counter
     ); 
 
@@ -129,7 +101,7 @@ control CTRL(
     .din_ld_v(din_pe_v), 
     .din_ld(din_pe), 
     .din_wb(dout_alu), 
-    .inst_v(inst_out_v),
+    .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_alu_v),
     .dout(dout_ctrl), // data output of the controller
@@ -141,47 +113,41 @@ control CTRL(
     .usemult(usemult)
     );
 
-//wire wren, rden; // write enable & read enable signal for DMEM
-//assign wren = din_v | reg_v;
-//assign rden = inst_out_v ? 1 : 0; // inst_pc[`INST_WIDTH-5] : 0; 
-
-reg wren, rden; // register write/read enable signal to synchronize with dout_ctrl
+reg load_v, rden; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 
 always @ (posedge clk) begin
     if (din_pe_v && dmem_count <= `REG_NUM*2-1) begin
-        wren <= 1;
+        load_v <= 1;
         dmem_count <= dmem_count + 1;
     end
     else begin
-        wren <= 0;
+        load_v <= 0;
         dmem_count <= 0;
     end  
-    if (inst_out_v)
+    if (inst_pc_v)
         rden <= 1; // inst_pc[`INST_WIDTH-5]; 
     else
         rden <= 0;
 end
 
-//reg [`DATA_WIDTH*2-1:0] din_comp;
-//always @ (posedge clk) 
-//    if (wren)
-//        din_comp <= dout_ctrl;
-
 wire [`DATA_WIDTH*2-1:0] din_comp;
-assign din_comp = wren ? dout_ctrl : 32'hxxxxxxxx;  
+assign din_comp = load_v ? dout_ctrl : 32'hxxxxxxxx;  
+
+wire dout_ctrl_v;
+assign dout_ctrl_v = load_v | dout_alu_v;
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wea(wren), // valid of din_comp
+    .wea(dout_ctrl_v), // valid of dout_ctrl
     .web(din_tx_v), // valid of din_tx
-    .dina(din_comp), // data for computation
+    .dina(dout_ctrl), // din_comp
     .dinb(din_tx), // data transmitted from previous PE
     .wben(dout_alu_v), 
     .rden(rden), 
-    .inst_v(inst_out_v),
+    .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
     .douta(rdata0),
     .doutb(rdata1)
