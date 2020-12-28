@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 158 LUTs, 179 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 176 LUTs, 245 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created

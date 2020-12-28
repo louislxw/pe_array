@@ -1,6 +1,6 @@
 // Data & Instructions
 `define DATA_WIDTH     16
-`define INST_WIDTH     36 // 32
+`define INST_WIDTH     32
 
 // DSP48E2
 `define PORTA_WIDTH    30
@@ -14,6 +14,7 @@
 // Memories
 `define DM_ADDR_WIDTH   8
 `define IM_ADDR_WIDTH   8
+`define WN_ADDR_WIDTH   4
 
 // Top PE
 `define PE_NUM          4 // 256 
