@@ -59,8 +59,10 @@ always @(posedge clk) begin
     end
     else if (control) 
         pc <= pc + 1; // program counter
-    else
-        pc <= 0;
+//    else begin
+//        pc <= pc;
+//        inst_cnt <= inst_cnt;
+//    end
 //    inst_out <= imem[addr]; // instructions triggered by program counter
 end
 

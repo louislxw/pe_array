@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module complex_alu( 
-    clk, rst, alumode, inmode, opmode, cea2, ceb2, usemult, din_1, din_2, dout 
+    clk, rst, alumode, inmode, opmode, cea2, ceb2, usemult, din_1, din_2, din_3, dout 
     );
 
 input  clk; 
@@ -34,6 +34,7 @@ input  [3:0] ceb2; // 1-bit * 4
 input  [3:0] usemult; // 1-bit * 4
 input  [`DATA_WIDTH*2-1:0] din_1; // 32-bit
 input  [`DATA_WIDTH*2-1:0] din_2; // 32-bit
+input  [`DATA_WIDTH*2-1:0] din_3; // 32-bit
 
 output [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
@@ -44,16 +45,16 @@ wire [`PORTP_WIDTH-1:0] p_o_1, p_o_2, p_o_3, p_o_4; // 48-bit
 
 assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
 assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_1 = 0;
+assign c_1 = din_3;
 assign b_2 = din_1[`DATA_WIDTH-1:0]; // b
 assign a_2 = din_2[`DATA_WIDTH-1:0]; // d
-assign c_2 = 0;
+assign c_2 = din_3;
 assign b_3 = din_1[`DATA_WIDTH-1:0]; // b
 assign a_3 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_3 = 0;
+assign c_3 = din_3;
 assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
 assign a_4 = din_2[`DATA_WIDTH-1:0]; // d
-assign c_4 = 0;
+assign c_4 = din_3;
 
 reg [`ALUMODE_WIDTH-1:0] alumode_1, alumode_2, alumode_3, alumode_4; // 4-bit
 reg [`INMODE_WIDTH-1:0]  inmode_1, inmode_2, inmode_3, inmode_4;     // 5-bit

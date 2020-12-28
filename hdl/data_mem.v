@@ -128,6 +128,7 @@ assign din_bram = wea_real ? dina : (web ? dinb : 0);
 wire [`DM_ADDR_WIDTH-1:0] waddr;
 assign waddr = wea_real ? waddra : (web ? waddrb : 0);
 
+//  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(
     .RAM_WIDTH(32),                       // Specify RAM data width
     .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)
@@ -145,6 +146,7 @@ assign waddr = wea_real ? waddra : (web ? waddrb : 0);
     .doutb(douta)    // RAM output data, width determined from RAM_WIDTH
   );
 
+//  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(
     .RAM_WIDTH(32),                       // Specify RAM data width
     .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)

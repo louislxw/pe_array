@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 162 LUTs, 179 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 158 LUTs, 179 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -131,8 +131,8 @@ always @ (posedge clk) begin
         rden <= 0;
 end
 
-wire [`DATA_WIDTH*2-1:0] din_comp;
-assign din_comp = load_v ? dout_ctrl : 32'hxxxxxxxx;  
+//wire [`DATA_WIDTH*2-1:0] din_comp;
+//assign din_comp = load_v ? dout_ctrl : 32'hxxxxxxxx;  
 
 wire dout_ctrl_v;
 assign dout_ctrl_v = load_v | dout_alu_v;
@@ -153,6 +153,24 @@ data_mem DMEM(
     .doutb(rdata1)
     );
 
+wire [`DATA_WIDTH*2-1:0] dout_rom;
+reg en;
+reg [`WN_ADDR_WIDTH-1:0] addr; 
+always @ (posedge clk) begin
+    if (inst_pc[`INST_WIDTH-4]) 
+        en <= 1'b1;
+    else 
+        en <= 1'b0;
+    addr <= inst_pc[27:24];
+end
+
+const_rom ROM(
+    .clk(clk), 
+    .en(en), 
+    .addr(addr), 
+    .data_out(dout_rom)
+    );
+
 // ALU for Complex Data
 complex_alu ALU( 
     .clk(clk), 
@@ -165,6 +183,7 @@ complex_alu ALU(
     .usemult(usemult),
     .din_1(rdata0), 
     .din_2(rdata1), 
+    .din_3(dout_rom),
     .dout(dout_alu) 
     );    
     

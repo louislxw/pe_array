@@ -27,11 +27,7 @@ module const_rom(
 input clk;
 input en;
 input [3:0] addr;
-
-output [`DATA_WIDTH*2-1:0] data_out;
-
-reg [`DATA_WIDTH*2-1:0] data_out;
-//wire [3:0] addr;
+output reg [`DATA_WIDTH*2-1:0] data_out;
 
    always @(posedge clk)
       if (en)
