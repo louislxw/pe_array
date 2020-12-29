@@ -35,8 +35,10 @@ output [`INST_WIDTH-1:0] inst_out;
 wire wr_en;
 wire control; 
 reg  control_d1 = 0;
+reg  control_d2 = 0; //
 assign wr_en = inst_in_v & (~control);
-assign inst_out_v = control_d1;
+//assign inst_out_v = control_d1; 
+assign inst_out_v = control_d2; //
  
 wire [`IM_ADDR_WIDTH-1:0] addr;
 assign addr = control ? pc : inst_cnt; // read or write
@@ -69,7 +71,7 @@ end
   sdp_bram #(
     .RAM_WIDTH(36),                       // Specify RAM data width
     .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)
-    .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) inst_bram (
     .addra(addr),   // Write address bus, width determined from RAM_DEPTH
@@ -84,7 +86,7 @@ end
   );
 
 /*** Control Logics for Instruction Memory ***/
-parameter DELAY = 16; // how to set automatically set DELAY
+parameter DELAY = 18; // 16; // how to set automatically set DELAY
 reg [DELAY-1:0] shift_reg = 0;
 
 always @ (posedge clk) begin 
@@ -95,6 +97,7 @@ assign control = shift_reg[DELAY-1]; // signal to triger the program counter
 
 always@(posedge clk) begin
     control_d1 <= control; 
+    control_d2 <= control_d1; //
 end
 
 endmodule

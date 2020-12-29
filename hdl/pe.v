@@ -113,7 +113,7 @@ control CTRL(
     .usemult(usemult)
     );
 
-reg load_v, rden; // register write/read enable signal to synchronize with dout_ctrl
+reg load_v, re, re_d1; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 
 always @ (posedge clk) begin
@@ -125,10 +125,14 @@ always @ (posedge clk) begin
         load_v <= 0;
         dmem_count <= 0;
     end  
-    if (inst_pc_v)
-        rden <= 1; // inst_pc[`INST_WIDTH-5]; 
-    else
-        rden <= 0;
+    if (inst_pc_v) begin
+        re <= 1; // inst_pc[`INST_WIDTH-5]; 
+        re_d1 <= re;
+    end    
+    else begin
+        re <= 0;
+        re_d1 <= re;
+    end 
 end
 
 //wire [`DATA_WIDTH*2-1:0] din_comp;
@@ -146,7 +150,7 @@ data_mem DMEM(
     .dina(dout_ctrl), // din_comp
     .dinb(din_tx), // data transmitted from previous PE
     .wben(dout_alu_v), 
-    .rden(rden), 
+    .rden(re), // re
     .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
     .douta(rdata0),
