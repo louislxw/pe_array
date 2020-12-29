@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module overlay(
-    clk, rst, ce, load, din_overlay_v, din_overlay, inst_in_v, inst_in, dout_overlay_v, dout_overlay
+    clk, rst, ce, load, din_overlay_v, din_overlay, inst_in_v, inst_in, alpha_v, dout_overlay_v, dout_overlay
     );
     
 input  clk; 
@@ -32,6 +32,7 @@ input  din_overlay_v;
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 input  inst_in_v; 
 input  [`INST_WIDTH-1:0] inst_in; 
+input  alpha_v;
 
 output dout_overlay_v; 
 output [`DATA_WIDTH*2-1:0] dout_overlay; 
@@ -41,9 +42,9 @@ output [`DATA_WIDTH*2-1:0] dout_overlay;
 //reg [`DATA_WIDTH*2-1:0] dout_overlay; //
 
 wire pe_out_v [`PE_NUM-1:0];
-//wire pe_fwd_v [`PE_NUM-1:0];
+wire pe_tx_v [`PE_NUM-1:0];
 wire [`DATA_WIDTH*2-1:0] pe_out [`PE_NUM-1:0];
-//wire [`DATA_WIDTH*2-1:0] pe_fwd [`PE_NUM-1:0];
+wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
 //wire dout_last_v;
 //wire [`DATA_WIDTH*2-1:0] dout_last;
 wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
@@ -61,17 +62,17 @@ sipo_y in_buffer(
 genvar i;
 generate
     for (i = 0; i < `PE_NUM; i = i + 1) begin : array
-        // PE_0 (Input)
-        pe_simd(
-        .clk(clk), 
-        .rst(rst), 
-        .din_v(din_overlay_v), 
-        .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
-        .inst_in_v(inst_in_v), 
-        .inst_in(inst_in),      
-        .dout_v(pe_out_v[i]),
-        .dout_pe(pe_out[i])
-        );
+        // PE_i
+//        pe_simd(
+//        .clk(clk), 
+//        .rst(rst), 
+//        .din_v(din_overlay_v), 
+//        .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
+//        .inst_in_v(inst_in_v), 
+//        .inst_in(inst_in),      
+//        .dout_v(pe_out_v[i]),
+//        .dout_pe(pe_out[i])
+//        );
 
         // PE_N-1 (Output)
 //        else if (i == `PE_NUM-1) begin
@@ -105,6 +106,63 @@ generate
 //            );
 //        end
         
+        // PE_0
+        if (i == 0) begin
+            pe( 
+            .clk(clk), 
+            .rst(rst), 
+            .din_pe_v(din_overlay_v), 
+            .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
+            .din_tx_v(0), 
+            .din_tx(0), 
+            .inst_in_v(inst_in_v), 
+            .inst_in(inst_in), 
+            .alpha_v(alpha_v), 
+            .dout_pe_v(pe_out_v[0]), 
+            .dout_pe(pe_out[0]), 
+            .dout_tx_v(pe_tx_v[0]), 
+            .dout_tx(pe_tx[0])
+            );
+        end
+        
+        // PE_N-1 (Output)
+        else if (i == `PE_NUM-1) begin
+            pe( 
+            .clk(clk), 
+            .rst(rst), 
+            .din_pe_v(din_overlay_v), 
+            .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
+            .din_tx_v(pe_tx_v[i]), 
+            .din_tx(pe_tx[i]), 
+            .inst_in_v(inst_in_v), 
+            .inst_in(inst_in), 
+            .alpha_v(alpha_v), 
+            .dout_pe_v(pe_out_v[i]), 
+            .dout_pe(pe_out[i]), 
+            .dout_tx_v(pe_tx_v[i]), 
+            .dout_tx(pe_tx[i])
+            );
+        end
+        
+        // PE_1 to PE_N-2
+        else begin
+             pe( 
+            .clk(clk), 
+            .rst(rst), 
+            .din_pe_v(din_overlay_v), 
+            .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
+            .din_tx_v(pe_tx_v[i-1]), 
+            .din_tx(pe_tx[i-1]), 
+            .inst_in_v(inst_in_v), 
+            .inst_in(inst_in), 
+            .alpha_v(alpha_v), 
+            .dout_pe_v(pe_out_v[i]), 
+            .dout_pe(pe_out[i]), 
+            .dout_tx_v(pe_tx_v[i]), 
+            .dout_tx(pe_tx[i])
+            ); 
+        end
+        
         assign p_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
         
     end
@@ -113,7 +171,7 @@ endgenerate
 piso_new out_buffer(
     .clk(clk), 
     .load(load),
-    .p_in_v(), 
+    .p_in_v(), //
     .p_in(p_in), 
     .s_out_v(dout_overlay_v), 
     .s_out(dout_overlay)
