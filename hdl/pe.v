@@ -135,6 +135,9 @@ always @ (posedge clk) begin
     end 
 end
 
+wire ren;
+assign ren = inst_pc_v ? 1: 0;
+
 //wire [`DATA_WIDTH*2-1:0] din_comp;
 //assign din_comp = load_v ? dout_ctrl : 32'hxxxxxxxx;  
 
@@ -161,7 +164,7 @@ wire [`DATA_WIDTH*2-1:0] dout_rom;
 reg en;
 reg [`WN_ADDR_WIDTH-1:0] addr; 
 always @ (posedge clk) begin
-    if (inst_pc[`INST_WIDTH-4]) 
+    if (inst_pc[`INST_WIDTH-4]) // bit 28
         en <= 1'b1;
     else 
         en <= 1'b0;

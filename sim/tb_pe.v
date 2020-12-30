@@ -146,9 +146,9 @@ module tb_pe;
 		#20; din_pe_v = 0; din_pe = 5; 
 		#20; din_pe_v = 0; din_pe = 6; 
 		
-		#100;
-		#20; inst_in_v = 1; inst_in = 32'h10_01_00_00; // CMPLX_MULT 
-		#20; inst_in_v = 1; inst_in = 32'h11_03_02_00; // CMPLX_MULT 
+		#200;
+		#20; inst_in_v = 1; inst_in = 32'hF1_01_00_00; // MULADD (Read ROM[1])
+		#20; inst_in_v = 1; inst_in = 32'hF2_03_02_00; // MULADD (Read ROM[2])
 		#20; inst_in_v = 0; inst_in = 32'hxx_xx_xx_xx;
 						
 		#1000;
