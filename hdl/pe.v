@@ -172,13 +172,23 @@ const_rom ROM(
     .data_out(dout_rom)
     );
 
-wire three_operand; 
-wire [`DATA_WIDTH*2-1:0] din_1, din_2, din_3; 
+reg  three_operand, three_operand_d1, three_operand_d2;
+always @ (posedge clk) begin
+    if (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110)
+        three_operand <= 1; 
+    else 
+        three_operand <= 0; 
+    
+    three_operand_d1 <= three_operand; 
+    three_operand_d2 <= three_operand_d1;
+end    
 
-assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0;
-assign din_1 = three_operand ? dout_rom : rdata0;
+//wire three_operand; 
+//assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0;
+wire [`DATA_WIDTH*2-1:0] din_1, din_2, din_3; 
+assign din_1 = three_operand_d2 ? dout_rom : rdata0;
 assign din_2 = rdata1;
-assign din_3 = three_operand ? rdata0 : 0;
+assign din_3 = three_operand_d2 ? rdata0 : 0;
 
 reg [2:0] opcode;
 always @ (posedge clk) 

@@ -112,16 +112,16 @@ wire [`DATA_WIDTH-1:0] i_out, q_out; // 16-bit
 
 assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
 assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_1 = din_3;
+assign c_1 = din_3[`DATA_WIDTH*2-1:`DATA_WIDTH];
 assign b_2 = din_1[`DATA_WIDTH-1:0]; // b
 assign a_2 = din_2[`DATA_WIDTH-1:0]; // d
-assign c_2 = din_3;
+assign c_2 = 16'd0;
 assign b_3 = din_1[`DATA_WIDTH-1:0]; // b
 assign a_3 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_3 = din_3;
+assign c_3 = din_3[`DATA_WIDTH-1:0];
 assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
 assign a_4 = din_2[`DATA_WIDTH-1:0]; // d
-assign c_4 = din_3;
+assign c_4 = 16'd0;
 
 assign i_out = (opcode == 3'b110) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2);
 assign q_out = (opcode == 3'b110) ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4);
