@@ -111,9 +111,9 @@ module tb_pe;
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_03_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_04_00_00; // din_pe
 		#20; // inst_in_v = 1; inst_in = 64'h0_0_0000000_0_05_00_00; // din_pe
-		#20; inst_in_v = 1; inst_in = 32'h60_01_00_80; // CMPLX_MULT 
-		#20; inst_in_v = 1; inst_in = 32'h60_03_02_81; // CMPLX_MULT 
-		#20; inst_in_v = 1; inst_in = 32'h60_05_04_82; // CMPLX_MULT 
+		#20; inst_in_v = 1; inst_in = 32'h80_01_00_80; // CMPLX_MULT (opcode = 100)
+		#20; inst_in_v = 1; inst_in = 32'h80_03_02_81; // CMPLX_MULT (opcode = 100)
+		#20; inst_in_v = 1; inst_in = 32'h80_05_04_82; // CMPLX_MULT (opcode = 100)
 		
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
 //		#20; inst_in_v = 0; inst_in = 0; din_v = 0;
@@ -147,8 +147,8 @@ module tb_pe;
 		#20; din_pe_v = 0; din_pe = 6; 
 		
 		#200;
-		#20; inst_in_v = 1; inst_in = 32'hF1_01_00_00; // MULADD (Read ROM[1])
-		#20; inst_in_v = 1; inst_in = 32'hF2_03_02_00; // MULADD (Read ROM[2])
+		#20; inst_in_v = 1; inst_in = 32'hA1_01_00_00; // MULADD (opcode = 101 & Read ROM[1])
+		#20; inst_in_v = 1; inst_in = 32'hA2_03_02_00; // MULADD (opcode = 101 & Read ROM[2])
 		#20; inst_in_v = 0; inst_in = 32'hxx_xx_xx_xx;
 						
 		#1000;

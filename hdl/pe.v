@@ -84,7 +84,6 @@ end
 //wire shift_v_d;
 //assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
 
-
 // Instruction Memory
 inst_mem IMEM(
     .clk(clk), 
@@ -113,7 +112,7 @@ control CTRL(
     .usemult(usemult)
     );
 
-reg load_v, re, re_d1; // register write/read enable signal to synchronize with dout_ctrl
+reg load_v, re; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 
 always @ (posedge clk) begin
@@ -127,20 +126,14 @@ always @ (posedge clk) begin
     end  
     if (inst_pc_v) begin
         re <= 1; // inst_pc[`INST_WIDTH-5]; 
-        re_d1 <= re;
     end    
     else begin
         re <= 0;
-        re_d1 <= re;
     end 
 end
 
-wire ren;
-assign ren = inst_pc_v ? 1: 0;
-
-//wire [`DATA_WIDTH*2-1:0] din_comp;
-//assign din_comp = load_v ? dout_ctrl : 32'hxxxxxxxx;  
-
+//wire ren;
+//assign ren = inst_pc_v ? 1: 0;
 wire dout_ctrl_v;
 assign dout_ctrl_v = load_v | dout_alu_v;
 
@@ -171,6 +164,7 @@ always @ (posedge clk) begin
     addr <= inst_pc[27:24];
 end
 
+// ROM for Twiddle Factors
 const_rom ROM(
     .clk(clk), 
     .en(en), 
@@ -178,19 +172,32 @@ const_rom ROM(
     .data_out(dout_rom)
     );
 
+wire three_operand; 
+wire [`DATA_WIDTH*2-1:0] din_1, din_2, din_3; 
+
+assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0;
+assign din_1 = three_operand ? dout_rom : rdata0;
+assign din_2 = rdata1;
+assign din_3 = three_operand ? rdata0 : 0;
+
+reg [2:0] opcode;
+always @ (posedge clk) 
+    opcode <= inst_pc[31:29]; 
+
 // ALU for Complex Data
 complex_alu ALU( 
     .clk(clk), 
     .rst(rst), 
+    .opcode(opcode), 
     .alumode(alumode), 
     .inmode(inmode), 
     .opmode(opmode), 
     .cea2(cea2), 
     .ceb2(ceb2), 
     .usemult(usemult),
-    .din_1(rdata0), 
-    .din_2(rdata1), 
-    .din_3(dout_rom),
+    .din_1(din_1), // rdata0
+    .din_2(din_2), // rdata1
+    .din_3(din_3), // dout_rom
     .dout(dout_alu) 
     );    
     
