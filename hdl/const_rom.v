@@ -38,7 +38,7 @@ always @(posedge clk)
 
    always @(posedge clk)
       if (en)
-         case (addr) // Please be careful about the sign bit
+         case (addr) // Be careful about the sign bit and fixed-point values
             4'b0000: rom_out <= 32'h0001_0000; // W0 = 1
             4'b0001: rom_out <= 32'hFB14_31F1; // W1 = 0.98078 - j*0.19509
             4'b0010: rom_out <= 32'hEC83_61F7; // W2 = 0.92388 - j*0.38268
