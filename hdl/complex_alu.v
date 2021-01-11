@@ -110,17 +110,17 @@ wire [`PORTC_WIDTH-1:0] c_1, c_2, c_3, c_4; // 48-bit
 wire [`PORTP_WIDTH-1:0] p_o_1, p_o_2, p_o_3, p_o_4; // 48-bit
 wire [`DATA_WIDTH-1:0] i_out, q_out; // 16-bit
 
-assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
+assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
 assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_1 = din_3[`DATA_WIDTH*2-1:`DATA_WIDTH];
-assign b_2 = din_1[`DATA_WIDTH-1:0]; // b
+assign c_1 = din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
+assign b_2 = din_1[`DATA_WIDTH-1:0]; // Wq
 assign a_2 = din_2[`DATA_WIDTH-1:0]; // d
 assign c_2 = 16'd0;
-assign b_3 = din_1[`DATA_WIDTH-1:0]; // b
-assign a_3 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_3 = din_3[`DATA_WIDTH-1:0];
-assign b_4 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
-assign a_4 = din_2[`DATA_WIDTH-1:0]; // d
+assign b_3 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
+assign a_3 = din_2[`DATA_WIDTH-1:0]; // d
+assign c_3 = din_3[`DATA_WIDTH-1:0]; // b
+assign b_4 = din_1[`DATA_WIDTH-1:0]; // Wq
+assign a_4 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
 assign c_4 = 16'd0;
 
 assign i_out = (opcode == 3'b110) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2);
