@@ -34,3 +34,14 @@ The 32-bit shift register logic (SRL) can be implemented by FFs or LUTs:
 |----------------|-----|-------|
 | Register-based |  0  | 1,024 |
 |  SLICEM-based  |  32 |   64  |
+
+DSP48E2 configuration:
+|         | INMODE |   OPMODE  | ALUMODE |
+|---------|--------|-----------|---------|
+|   ADD   |  00000 | XX0110011 |   0000  |
+|   SUB   |  00000 | XX0110011 |   0011  |
+|   MUL   |  10001 | XX0000101 |   0000  |
+| MULADD  |  10001 | XX0110101 |   0000  |
+| MULSUB  |  10001 | XX0110101 |   0011  |
+| COMPARE |  00000 | XX0110011 |   1100  |
+
