@@ -1,4 +1,4 @@
-# A linear array of PEs with RISC-V ISA working in SIMD fashion. One PE targets for 600MHz on ZYNQ UltraScale+. specificially for SCD and CNNs. 
+# A linear array of PEs with RISC-V ISA. 
 Layout of this repository:
 * **constrs** constraint files
 * **doc** documentations and figures
