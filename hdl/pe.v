@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support
 // 
-// Dependencies: 224 LUTs, 290 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 226 LUTs, 296 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -210,5 +210,97 @@ complex_alu ALU(
     .din_3(din_3), // dout_rom
     .dout(dout_alu) 
     );    
+
+reg shift_v;
+/*** state machine for data transmit & alpha output ***/
+   parameter IDLE = 3'b000;
+   parameter LOAD = 3'b001;
+   parameter COMPUTE = 3'b010;
+   parameter SHIFT = 3'b011;
+   parameter TRANSMIT = 3'b100;
+   parameter OUTPUT = 3'b101;
+//   parameter <state7> = 3'b110;
+//   parameter <state8> = 3'b111;
+
+   reg [2:0] state = IDLE;
+
+   always @(posedge clk)
+      if (rst) begin
+         state <= IDLE;
+      end
+      else
+         case (state)
+            IDLE : begin
+               if (din_pe_v)
+                  state <= LOAD;
+//               else if (<condition>)
+//                  state <= <next_state>;
+               else
+                  state <= IDLE;
+            end
+            LOAD : begin
+               if (inst_pc_v)
+                  state <= COMPUTE;
+//               else if (<condition>)
+//                  state <= <next_state>;
+               else
+                  state <= LOAD;
+            end
+            COMPUTE : begin
+               if (shift_v)
+                  state <= SHIFT;
+               else if (dout_tx_v)
+                  state <= TRANSMIT;
+               else if (alpha_v)
+                  state <= OUTPUT;
+               else
+                  state <= COMPUTE;
+            end
+            SHIFT : begin
+               if (inst_pc_v)
+                  state <= COMPUTE;
+//               else if (<condition>)
+//                  state <= <next_state>;
+               else
+                  state <= SHIFT;
+            end
+            TRANSMIT : begin
+               if (inst_pc_v)
+                  state <= COMPUTE;
+//               else if (<condition>)
+//                  state <= <next_state>;
+               else
+                  state <= TRANSMIT;
+            end
+            OUTPUT : begin
+               if (din_pe_v)
+                  state <= LOAD;
+//               else if (<condition>)
+//                  state <= <next_state>;
+               else
+                  state <= OUTPUT;
+            end
+//            <state7> : begin
+//               if (<condition>)
+//                  state <= <next_state>;
+//               else if (<condition>)
+//                  state <= <next_state>;
+//               else
+//                  state <= <next_state>;
+//            end
+//            <state8> : begin
+//               if (<condition>)
+//                  state <= <next_state>;
+//               else if (<condition>)
+//                  state <= <next_state>;
+//               else
+//                  state <= <next_state>;
+//            end
+         endcase
+
+   assign <output1> = <logic_equation_based_on_states_and_inputs>;
+   assign <output2> = <logic_equation_based_on_states_and_inputs>;
+   // Add other output equations as necessary
+
     
 endmodule
