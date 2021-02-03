@@ -31,7 +31,7 @@ module tb_pe;
     reg [`DATA_WIDTH*2-1:0] din_tx;
     reg inst_in_v;
     reg [`INST_WIDTH-1:0] inst_in;
-    reg alpha_v; 
+//    reg alpha_v; 
     
     // Outputs
     wire dout_pe_v;
@@ -51,7 +51,7 @@ module tb_pe;
     .din_tx(din_tx),
     .inst_in_v(inst_in_v), 
     .inst_in(inst_in),
-    .alpha_v(alpha_v),
+//    .alpha_v(alpha_v),
     .dout_pe_v(dout_pe_v), 
     .dout_pe(dout_pe),
     .dout_tx_v(dout_tx_v),
@@ -83,7 +83,7 @@ module tb_pe;
         din_tx_v = 0;
         din_tx = 0;
         inst_in_v = 0;
-        alpha_v = 0; 
+//        alpha_v = 0; 
         
         // Wait 100 ns for global reset to finish
         rst = 1;
@@ -101,7 +101,7 @@ module tb_pe;
 
         // Load the data
         #20; inst_in_v = 0; din_pe_v = 0; inst_in = 32'hxx_xx_xx_xx;
-        #20; inst_in_v = 0; din_pe_v = 0;
+        #20; inst_in_v = 0; din_pe_v = 1;
         #20; inst_in_v = 0; din_pe_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 
         #20; inst_in_v = 0; din_pe_v = 1; din_pe = 32'h0003_0001; // 3 + j*1
         #20; inst_in_v = 0; din_pe_v = 1; din_pe = 32'h0008_0006; // 8 + j*6 

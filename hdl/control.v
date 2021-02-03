@@ -45,9 +45,9 @@ reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 /*** Control Logics for Data Ouput Valid Signal ***/
 wire wb;
-assign wb = inst_v ? 1 : 0; // inst[`INST_WIDTH-1] : 0; // The most significant 1-bit select input of the PE
+assign wb = inst_v ? 1 : 0; // inst[`INST_WIDTH-1] : 0; // The most significant 1-bit indicates write-back
 
-parameter DELAY = 6; // 5; 
+parameter DELAY = 6; // 6-stage pipeline
 reg [DELAY-1:0] shift_reg = 0; 
 
 always @ (posedge clk) begin 
@@ -118,7 +118,7 @@ case (opcode)
 	            ceb2 <= 4'b0000; 
 	            usemult <= 4'b1111; 
 	          end
-/*`MAX*/ 3'b111: begin // to be testing!
+/*`MAX*/ 3'b111: begin // to be tested!
 	            alumode <= 16'b1100_1100_1100_1100; 
 	            inmode <= 20'b00000_00000_00000_00000; 
 	            opmode <= 28'b0110011_0110011_0110011_0110011; 
