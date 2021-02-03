@@ -101,7 +101,8 @@ control CTRL(
     .din_ld(din_pe), 
     .din_wb(dout_alu), 
     .inst_v(inst_pc_v),
-    .inst(inst_pc), // instructions triggered by program counter
+    .opcode(opcode), 
+//    .inst(inst_pc), // instructions triggered by program counter
     .dout_v(dout_alu_v),
     .dout(dout_ctrl), // data output of the controller
     .alumode(alumode), 
@@ -112,7 +113,7 @@ control CTRL(
     .usemult(usemult)
     );
 
-reg load_v, re; // register write/read enable signal to synchronize with dout_ctrl
+reg load_v, dmem_re; // register write/read enable signal to synchronize with dout_ctrl
 reg [`REG_ADDR_WIDTH-1:0] dmem_count = 0; // counter for data memory
 
 always @ (posedge clk) begin
@@ -125,10 +126,10 @@ always @ (posedge clk) begin
         dmem_count <= 0;
     end  
     if (inst_pc_v) begin
-        re <= 1; // inst_pc[`INST_WIDTH-5]; 
+        dmem_re <= 1; // inst_pc[`INST_WIDTH-5]; 
     end    
     else begin
-        re <= 0;
+        dmem_re <= 0;
     end 
 end
 
@@ -146,7 +147,7 @@ data_mem DMEM(
     .dina(dout_ctrl), // din_comp
     .dinb(din_tx), // data transmitted from previous PE
     .wben(dout_alu_v), 
-    .rden(re), // re
+    .rden(dmem_re), // re
     .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
     .douta(rdata0),
@@ -172,17 +173,16 @@ const_rom ROM(
     .data_out(dout_rom)
     );
 
+/*** Data Memory Feedback Input Map ***/
 reg  three_operand, three_operand_d1, three_operand_d2;
 always @ (posedge clk) begin
     if (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110)
         three_operand <= 1; 
     else 
         three_operand <= 0; 
-    
     three_operand_d1 <= three_operand; 
-    three_operand_d2 <= three_operand_d1;
+    three_operand_d2 <= three_operand_d1; // ROM requires 3-stage pipeline
 end    
-
 //wire three_operand; 
 //assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0; 
 wire [`DATA_WIDTH*2-1:0] din_1, din_2, din_3; 
@@ -211,7 +211,7 @@ complex_alu ALU(
     .dout(dout_alu) 
     );    
 
-reg shift_v;
+
 /*** state machine for data transmit & alpha output ***/
    parameter IDLE = 3'b000;
    parameter LOAD = 3'b001;
@@ -223,6 +223,7 @@ reg shift_v;
 //   parameter <state8> = 3'b111;
 
    reg [2:0] state = IDLE;
+   reg shift_v;
 
    always @(posedge clk)
       if (rst) begin
@@ -298,9 +299,29 @@ reg shift_v;
 //            end
          endcase
 
-   assign <output1> = <logic_equation_based_on_states_and_inputs>;
-   assign <output2> = <logic_equation_based_on_states_and_inputs>;
+//   assign <output1> = <logic_equation_based_on_states_and_inputs>;
+//   assign <output2> = <logic_equation_based_on_states_and_inputs>;
    // Add other output equations as necessary
 
+   reg [6:0] iter_cnt = 0; // iteration
+   reg [4:0] load_cnt = 0; // load
+   reg [7:0] cmpt_cnt = 0; // compute
+   reg [2:0] tx_cnt = 0;  // transmit
+   reg [4:0] shift_cnt = 0; // shift
+   reg [2:0] out_cnt = 0; // output
+   
+   always @(posedge clk)
+      if (rst) begin
+         iter_cnt <= 0;
+         load_cnt <= 0;
+         cmpt_cnt <= 0;
+         tx_cnt <= 0;
+         shift_cnt <= 0;
+         out_cnt <= 0;
+      end
+      else if (state == LOAD)
+         load_cnt <= load_cnt + 1'b1;
+      else if (state == COMPUTE)
+         cmpt_cnt <= cmpt_cnt + 1'b1;
     
 endmodule
