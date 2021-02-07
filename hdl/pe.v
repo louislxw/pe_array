@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: Single PE with data forwarding support
+// Description: Single PE with data forwarding support (-> Add the state machine)
 // 
-// Dependencies: 224 LUTs, 295 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 226 -> 264 LUTs, 295 -> 334 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -208,11 +208,15 @@ complex_alu ALU(
    parameter SHIFT = 3'b100;
    parameter OUTPUT = 3'b101;
 
-   reg load_v = 0; 
-   reg cmpt_v = 0;
-   reg tx_v = 0;
-   reg shift_v = 0;
-   reg alpha_v = 0;
+   reg [5:0] fsm_output = 6'b000000;
+   
+   wire start, load_v, cmpt_v, tx_v, shift_v, alpha_v;
+   assign start = fsm_output[5];
+   assign load_v = fsm_output[4];
+   assign cmpt_v = fsm_output[3];
+   assign tx_v   = fsm_output[2];
+   assign shift_v = fsm_output[1];
+   assign output_v = fsm_output[0];
    
    // counters to control the state machine
    reg [6:0] iter_cnt = 0; // iteration
@@ -220,7 +224,7 @@ complex_alu ALU(
    reg [7:0] cmpt_cnt = 0; // compute
    reg [2:0] tx_cnt = 0;  // transmit
    reg [4:0] shift_cnt = 0; // shift
-   reg [2:0] out_cnt = 0; // output
+   reg [2:0] output_cnt = 0; // output
    reg [2:0] state = IDLE; // initial state
 
    always @(posedge clk)
@@ -234,6 +238,7 @@ complex_alu ALU(
                   state <= LOAD;
                else
                   state <= IDLE;
+               fsm_output <= 6'b100000;  // start = 1
             end
             LOAD : begin
                if (load_cnt == `LOAD_NUM-1) begin
@@ -244,17 +249,13 @@ complex_alu ALU(
                   state <= LOAD;
                   load_cnt <= load_cnt + 1'b1;
                end
-               load_v <= 1;
-               cmpt_v <= 0;
-               tx_v <= 0;
-               shift_v <= 0;
-               alpha_v <= 0;
+               fsm_output <= 6'b010000;  // load_v = 1
             end
             COMPUTE : begin
                if (cmpt_cnt == `INST_NUM-1 && iter_cnt == `ITER_NUM-1) begin
                   state <= OUTPUT;
                   cmpt_cnt <= 0;
-                  iter_cnt <= 0;
+//                  iter_cnt <= 0;
                end
                else if (cmpt_cnt == `INST_NUM-1) begin
                   state <= TRANSMIT;
@@ -264,11 +265,7 @@ complex_alu ALU(
                   state <= COMPUTE;
                   cmpt_cnt <= cmpt_cnt + 1'b1;
                end
-               load_v <= 0;
-               cmpt_v <= 1;
-               tx_v <= 0;
-               shift_v <= 0;
-               alpha_v <= 0;
+               fsm_output <= 6'b001000; // cmpt_v = 1
             end
             TRANSMIT : begin
                if (tx_cnt == `TX_NUM-1) begin
@@ -279,11 +276,7 @@ complex_alu ALU(
                   state <= TRANSMIT;
                   tx_cnt <= tx_cnt + 1'b1;
                end
-               load_v <= 0;
-               cmpt_v <= 0;
-               tx_v <= 1;
-               shift_v <= 0;
-               alpha_v <= 0;
+               fsm_output <= 6'b000100; // tx_v = 1
             end
             SHIFT : begin
                if (shift_cnt == `SHIFT_NUM-1) begin
@@ -294,28 +287,25 @@ complex_alu ALU(
                   state <= SHIFT;
                   shift_cnt <= shift_cnt + 1'b1;
                end 
-               load_v <= 0;
-               cmpt_v <= 0;
-               tx_v <= 0;
-               shift_v <= 1;
-               alpha_v <= 0;
+               fsm_output <= 6'b000010; // shift_V = 1
             end
             OUTPUT : begin
-               if (out_cnt == `ALPHA_NUM-1) begin
+               if (output_cnt == `ALPHA_NUM-1) begin
                   state <= IDLE;
-                  out_cnt <= 0; 
+                  output_cnt <= 0; 
                end
                else begin
                   state <= OUTPUT;
-                  out_cnt <= out_cnt + 1'b1;
+                  output_cnt <= output_cnt + 1'b1;
                end 
-               load_v <= 0;
-               cmpt_v <= 0;
-               tx_v <= 0;
-               shift_v <= 0;
-               alpha_v <= 1;
+               fsm_output <= 6'b000001; // output_v = 1
             end
          endcase
    
+   always @(posedge load_v)
+      if (start)
+         iter_cnt <= 0;
+      else
+         iter_cnt <= iter_cnt + 1'b1;
     
 endmodule
