@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: Single PE with data forwarding support (-> Add the state machine)
 // 
-// Dependencies: 226 -> 264 LUTs, 295 -> 334 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
+// Dependencies: 226 -> 265 LUTs, 295 -> 301 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -56,33 +56,6 @@ wire [`DATA_WIDTH*2-1:0] dout_ctrl;
 wire [`DATA_WIDTH*2-1:0] rdata0, rdata1; 
 wire [`DATA_WIDTH*2-1:0] dout_alu;
 wire dout_alu_v;
-
-//wire tx_flag;
-//assign tx_flag = dout_alu_v ? 1 : 0; // this will be changed later
-
-always @ (posedge clk) begin
-    if (tx_v) begin // tx_flag // partial alpha forward to next PE
-        dout_tx_v <= 1;
-        dout_tx   <= dout_alu;
-    end
-    else begin
-        dout_tx_v <= 0;
-        dout_tx   <= 32'hxxxxxxxx; 
-    end
-    if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
-        dout_pe_v <= 1;
-        dout_pe   <= dout_alu; 
-    end
-end
-
-//parameter DELAY = 14;
-//reg shift_v = 0; 
-//reg [DELAY-1:0] shift_reg_v = 0;
-//always @ (posedge clk) begin 
-//    shift_reg_v <= {shift_reg_v[DELAY-2:0], shift_v};
-//end
-//wire shift_v_d;
-//assign shift_v_d = shift_reg_v[DELAY-1]; // valid signal for shift registers
 
 // Instruction Memory
 inst_mem IMEM(
@@ -269,7 +242,7 @@ complex_alu ALU(
             end
             TRANSMIT : begin
                if (tx_cnt == `TX_NUM-1) begin
-                  state <= SHIFT;
+                  state <= LOAD; // SHIFT
                   tx_cnt <= 0;
                end
                else begin
@@ -278,17 +251,17 @@ complex_alu ALU(
                end
                fsm_output <= 6'b000100; // tx_v = 1
             end
-            SHIFT : begin
-               if (shift_cnt == `SHIFT_NUM-1) begin
-                  state <= LOAD;
-                  shift_cnt <= 0;
-               end
-               else begin
-                  state <= SHIFT;
-                  shift_cnt <= shift_cnt + 1'b1;
-               end 
-               fsm_output <= 6'b000010; // shift_V = 1
-            end
+//            SHIFT : begin
+//               if (shift_cnt == `SHIFT_NUM-1) begin
+//                  state <= LOAD;
+//                  shift_cnt <= 0;
+//               end
+//               else begin
+//                  state <= SHIFT;
+//                  shift_cnt <= shift_cnt + 1'b1;
+//               end 
+//               fsm_output <= 6'b000010; // shift_V = 1
+//            end
             OUTPUT : begin
                if (output_cnt == `ALPHA_NUM-1) begin
                   state <= IDLE;
@@ -302,10 +275,28 @@ complex_alu ALU(
             end
          endcase
    
-   always @(posedge load_v)
+   // counter for iterations
+   always @(posedge cmpt_v)
       if (start)
          iter_cnt <= 0;
       else
          iter_cnt <= iter_cnt + 1'b1;
+   
+   // control logics for data forward & alpha output
+   always @ (posedge clk) begin
+    if (tx_v) begin // tx_flag // partial alpha forward to next PE
+        dout_tx_v <= 1;
+        dout_tx   <= dout_alu;
+    end
+    else begin
+        dout_tx_v <= 0;
+        dout_tx   <= 32'hxxxxxxxx; 
+    end
+    if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
+        dout_pe_v <= 1;
+        dout_pe   <= dout_alu; 
+    end
+    
+end
     
 endmodule

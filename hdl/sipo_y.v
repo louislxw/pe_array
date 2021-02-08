@@ -21,12 +21,13 @@
 `include "parameters.vh"
 
 module sipo_y(
-    clk, s_in_v, s_in, p_out_v, p_out
+    clk, ce, s_in_v, s_in, p_out_v, p_out
     );
     
 input clk;
+input ce;
 //input rst; no reset port in the LUTRAM
-input s_in_v; // ce
+input s_in_v;
 input [`DATA_WIDTH*2-1:0] s_in; // no register
 
 output p_out_v;
@@ -66,12 +67,12 @@ always @(posedge clk)
 
 genvar i;
 generate
-    for (i = 0; i < `PE_NUM; i = i+1) begin: SIPO_Y
+    for (i = 0; i < `PE_NUM; i = i+1) begin: siso_y
         // srl_0 (Input)
         if (i == 0)  
             srl_macro srl_inst(
             .clk(clk), 
-            .ce(1'b1), 
+            .ce(ce), // 1'b1
             .din(srl_in), 
             .dout(srl_out[i])
             );
@@ -79,7 +80,7 @@ generate
         else 
             srl_macro srl_inst(
             .clk(clk),
-            .ce(1'b1), 
+            .ce(ce), // 1'b1
             .din(srl_out[i-1]), 
             .dout(srl_out[i])
             );
