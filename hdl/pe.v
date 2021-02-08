@@ -183,7 +183,7 @@ complex_alu ALU(
 
    reg [5:0] fsm_output = 6'b000000;
    
-   wire start, load_v, cmpt_v, tx_v, shift_v, alpha_v;
+   wire start, load_v, cmpt_v, tx_v, shift_v, output_v;
    assign start = fsm_output[5];
    assign load_v = fsm_output[4];
    assign cmpt_v = fsm_output[3];
@@ -193,6 +193,7 @@ complex_alu ALU(
    
    // counters to control the state machine
    reg [6:0] iter_cnt = 0; // iteration
+   reg [7:0] loop_cnt = 0; // loop
    reg [4:0] load_cnt = 0; // load
    reg [7:0] cmpt_cnt = 0; // compute
    reg [2:0] tx_cnt = 0;  // transmit
@@ -222,6 +223,7 @@ complex_alu ALU(
                   state <= LOAD;
                   load_cnt <= load_cnt + 1'b1;
                end
+//               loop_cnt <= loop_cnt + 1'b1;
                fsm_output <= 6'b010000;  // load_v = 1
             end
             COMPUTE : begin
@@ -238,6 +240,7 @@ complex_alu ALU(
                   state <= COMPUTE;
                   cmpt_cnt <= cmpt_cnt + 1'b1;
                end
+//               loop_cnt <= loop_cnt + 1'b1;
                fsm_output <= 6'b001000; // cmpt_v = 1
             end
             TRANSMIT : begin
@@ -249,6 +252,7 @@ complex_alu ALU(
                   state <= TRANSMIT;
                   tx_cnt <= tx_cnt + 1'b1;
                end
+//               loop_cnt <= loop_cnt + 1'b1;
                fsm_output <= 6'b000100; // tx_v = 1
             end
 //            SHIFT : begin
@@ -276,12 +280,18 @@ complex_alu ALU(
          endcase
    
    // counter for iterations
-   always @(posedge cmpt_v)
-      if (start)
+   always @(posedge clk)
+      if (state == IDLE) begin
+         loop_cnt <= 0;
          iter_cnt <= 0;
-      else
+      end
+      else if (loop_cnt == (`LOAD_NUM + `INST_NUM + `TX_NUM - 1)) begin
+         loop_cnt <= 0;
          iter_cnt <= iter_cnt + 1'b1;
-   
+      end
+      else if (state == LOAD | state == COMPUTE | state == TRANSMIT)
+         loop_cnt <= loop_cnt + 1'b1;
+           
    // control logics for data forward & alpha output
    always @ (posedge clk) begin
     if (tx_v) begin // tx_flag // partial alpha forward to next PE
@@ -292,11 +302,14 @@ complex_alu ALU(
         dout_tx_v <= 0;
         dout_tx   <= 32'hxxxxxxxx; 
     end
-    if (alpha_v) begin // output alpha (alpha_v = 1 when in last iteration)
+    if (output_v) begin // output alpha (output_v = 1 when in last iteration)
         dout_pe_v <= 1;
         dout_pe   <= dout_alu; 
     end
-    
+    else begin
+        dout_pe_v <= 0;
+        dout_pe   <= 32'hxxxxxxxx; 
+    end   
 end
     
 endmodule

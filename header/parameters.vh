@@ -23,7 +23,7 @@
 `define REG_ADDR_WIDTH  5 // 2^5 = 32
 `define LOAD_NUM        6 // 32 
 `define INST_NUM        3 // 224 
-`define ITER_NUM        128 
+`define ITER_NUM        4 // 128 
 `define TX_NUM          8
 `define SHIFT_NUM       32 // 32 
-`define ALPHA_NUM       8
+`define ALPHA_NUM       3 // 8
