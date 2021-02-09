@@ -17,13 +17,12 @@
 `define WN_ADDR_WIDTH   4
 
 // Top PE
-`define PE_NUM          4 // 256 
+`define PE_NUM          4 // 128 
 `define PE_ADDR_WIDTH   8 // 2^8 = 256
 `define REG_NUM         32 // 32 
 `define REG_ADDR_WIDTH  5 // 2^5 = 32
 `define LOAD_NUM        6 // 32 
 `define INST_NUM        3 // 224 
-`define ITER_NUM        4 // 128 
+`define ITER_NUM        4 // 256 
 `define TX_NUM          8
-`define SHIFT_NUM       32 // 32 
 `define ALPHA_NUM       3 // 8

@@ -49,6 +49,7 @@ wire p_out_v;
 sipo_y in_buffer(
     .clk(clk), 
     .ce(ce),
+    .rst(rst),
     .s_in_v(din_overlay_v), 
     .s_in(din_overlay), 
     .p_out_v(p_out_v),

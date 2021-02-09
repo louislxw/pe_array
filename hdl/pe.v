@@ -173,7 +173,7 @@ complex_alu ALU(
     .dout(dout_alu) 
     );    
 
-/*** Moore state machine for data transmit & alpha output ***/
+/*** Moore finite state machine (FSM) for data transmit & alpha output ***/
    parameter IDLE = 3'b000;
    parameter LOAD = 3'b001;
    parameter COMPUTE = 3'b010;
@@ -181,14 +181,14 @@ complex_alu ALU(
    parameter SHIFT = 3'b100;
    parameter OUTPUT = 3'b101;
 
-   reg [5:0] fsm_output = 6'b000000;
+   reg [4:0] fsm_output = 5'b00000;
    
-   wire start, load_v, cmpt_v, tx_v, shift_v, output_v;
-   assign start = fsm_output[5];
-   assign load_v = fsm_output[4];
-   assign cmpt_v = fsm_output[3];
-   assign tx_v   = fsm_output[2];
-   assign shift_v = fsm_output[1];
+   wire start, load_v, cmpt_v, tx_v, output_v;
+   assign start = fsm_output[4];
+   assign load_v = fsm_output[3];
+   assign cmpt_v = fsm_output[2];
+   assign tx_v   = fsm_output[1];
+//   assign shift_v = fsm_output[1];
    assign output_v = fsm_output[0];
    
    // counters to control the state machine
@@ -197,8 +197,9 @@ complex_alu ALU(
    reg [4:0] load_cnt = 0; // load
    reg [7:0] cmpt_cnt = 0; // compute
    reg [2:0] tx_cnt = 0;  // transmit
-   reg [4:0] shift_cnt = 0; // shift
+//   reg [4:0] shift_cnt = 0; // shift
    reg [2:0] output_cnt = 0; // output
+   
    reg [2:0] state = IDLE; // initial state
 
    always @(posedge clk)
@@ -212,7 +213,7 @@ complex_alu ALU(
                   state <= LOAD;
                else
                   state <= IDLE;
-               fsm_output <= 6'b100000;  // start = 1
+               fsm_output <= 5'b10000;  // start = 1
             end
             LOAD : begin
                if (load_cnt == `LOAD_NUM-1) begin
@@ -224,7 +225,7 @@ complex_alu ALU(
                   load_cnt <= load_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 6'b010000;  // load_v = 1
+               fsm_output <= 5'b01000;  // load_v = 1
             end
             COMPUTE : begin
                if (cmpt_cnt == `INST_NUM-1 && iter_cnt == `ITER_NUM-1) begin
@@ -241,7 +242,7 @@ complex_alu ALU(
                   cmpt_cnt <= cmpt_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 6'b001000; // cmpt_v = 1
+               fsm_output <= 5'b00100; // cmpt_v = 1
             end
             TRANSMIT : begin
                if (tx_cnt == `TX_NUM-1) begin
@@ -253,10 +254,10 @@ complex_alu ALU(
                   tx_cnt <= tx_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 6'b000100; // tx_v = 1
+               fsm_output <= 5'b00010; // tx_v = 1
             end
 //            SHIFT : begin
-//               if (shift_cnt == `SHIFT_NUM-1) begin
+//               if (shift_cnt == `REG_NUM-1) begin
 //                  state <= LOAD;
 //                  shift_cnt <= 0;
 //               end
@@ -275,7 +276,7 @@ complex_alu ALU(
                   state <= OUTPUT;
                   output_cnt <= output_cnt + 1'b1;
                end 
-               fsm_output <= 6'b000001; // output_v = 1
+               fsm_output <= 5'b00001; // output_v = 1
             end
          endcase
    
@@ -294,7 +295,7 @@ complex_alu ALU(
            
    // control logics for data forward & alpha output
    always @ (posedge clk) begin
-    if (tx_v) begin // tx_flag // partial alpha forward to next PE
+    if (tx_v) begin // partial alpha forward to next PE
         dout_tx_v <= 1;
         dout_tx   <= dout_alu;
     end
