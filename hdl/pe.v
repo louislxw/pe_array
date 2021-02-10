@@ -22,7 +22,7 @@
 
 module pe( 
     clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, inst_in_v, inst_in,  
-    dout_pe_v, dout_pe, dout_tx_v, dout_tx
+    dout_pe_v, dout_pe, dout_tx_v, dout_tx, shift_v
     );
     
 input  clk;
@@ -39,7 +39,7 @@ output reg dout_pe_v;
 output reg [`DATA_WIDTH*2-1:0] dout_pe;
 output reg dout_tx_v;
 output reg [`DATA_WIDTH*2-1:0] dout_tx;
-
+output reg shift_v; // add
 
 /*** wires for module connection ***/
 wire inst_pc_v;
@@ -183,7 +183,7 @@ complex_alu ALU(
 
    reg [4:0] fsm_output = 5'b00000;
    
-   wire start, load_v, cmpt_v, tx_v, output_v;
+   wire start, load_v, tx_v, cmpt_v, output_v;
    assign start = fsm_output[4];
    assign load_v = fsm_output[3];
    assign cmpt_v = fsm_output[2];
@@ -292,6 +292,12 @@ complex_alu ALU(
       end
       else if (state == LOAD | state == COMPUTE | state == TRANSMIT)
          loop_cnt <= loop_cnt + 1'b1;
+ 
+    always @(posedge clk)
+       if (loop_cnt >= `LOAD_NUM && loop_cnt < (`LOAD_NUM + `REG_NUM)) 
+          shift_v <= 1;
+       else 
+          shift_v <= 0;
            
    // control logics for data forward & alpha output
    always @ (posedge clk) begin

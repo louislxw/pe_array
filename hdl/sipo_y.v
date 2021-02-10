@@ -21,13 +21,14 @@
 `include "parameters.vh"
 
 module sipo_y(
-    clk, ce, rst, s_in_v, s_in, p_out_v, p_out
+    clk, ce, rst, shift_v, s_in_v, s_in, p_out_v, p_out
     );
     
 input clk;
 input ce;
 input rst; // reset of the FSM
 //input rst; no reset port in the LUTRAM
+input shift_v;
 input s_in_v;
 input [`DATA_WIDTH*2-1:0] s_in; // no register
 
@@ -64,7 +65,6 @@ output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; // no register
    
    reg [3:0] fsm_output = 4'b0000;
 
-   reg shift_v;
    reg [12:0] input_cnt = 0; // input
    reg [6:0] iter_cnt = 0; // iteration
    reg [4:0] shift_cnt = 0; // shift

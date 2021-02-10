@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module overlay(
-    clk, rst, ce, load, din_overlay_v, din_overlay, inst_in_v, inst_in, alpha_v, dout_overlay_v, dout_overlay
+    clk, rst, ce, load, din_overlay_v, din_overlay, inst_in_v, inst_in, dout_overlay_v, dout_overlay
     );
     
 input  clk; 
@@ -32,7 +32,6 @@ input  din_overlay_v;
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 input  inst_in_v; 
 input  [`INST_WIDTH-1:0] inst_in; 
-input  alpha_v;
 
 output dout_overlay_v; 
 output [`DATA_WIDTH*2-1:0] dout_overlay; 
@@ -45,11 +44,13 @@ wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
 wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
 wire [`PE_NUM*`DATA_WIDTH*2-1:0] pe_in;
 wire p_out_v;
+wire shift_v;
 
 sipo_y in_buffer(
     .clk(clk), 
     .ce(ce),
     .rst(rst),
+    .shift_v(shift_v),
     .s_in_v(din_overlay_v), 
     .s_in(din_overlay), 
     .p_out_v(p_out_v),
@@ -70,11 +71,11 @@ generate
             .din_tx(0), 
             .inst_in_v(inst_in_v), 
             .inst_in(inst_in), 
-            .alpha_v(alpha_v), 
             .dout_pe_v(pe_out_v[0]), 
             .dout_pe(pe_out[0]), 
             .dout_tx_v(pe_tx_v[0]), 
-            .dout_tx(pe_tx[0])
+            .dout_tx(pe_tx[0]),
+            .shift_v(shift_v) // add
             );
         end       
         // PE_N-1 (Output)
@@ -88,11 +89,11 @@ generate
             .din_tx(pe_tx[i]), 
             .inst_in_v(inst_in_v), 
             .inst_in(inst_in), 
-            .alpha_v(alpha_v), 
             .dout_pe_v(pe_out_v[i]), 
             .dout_pe(pe_out[i]), 
             .dout_tx_v(pe_tx_v[i]), 
-            .dout_tx(pe_tx[i])
+            .dout_tx(pe_tx[i]),
+            .shift_v() // add
             );
         end        
         // PE_1 to PE_N-2
@@ -106,11 +107,11 @@ generate
             .din_tx(pe_tx[i-1]), 
             .inst_in_v(inst_in_v), 
             .inst_in(inst_in), 
-            .alpha_v(alpha_v), 
             .dout_pe_v(pe_out_v[i]), 
             .dout_pe(pe_out[i]), 
             .dout_tx_v(pe_tx_v[i]), 
-            .dout_tx(pe_tx[i])
+            .dout_tx(pe_tx[i]),
+            .shift_v() // add
             ); 
         end
         
