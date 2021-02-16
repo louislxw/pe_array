@@ -144,7 +144,7 @@ generate
     end
 endgenerate    
 
-parameter DELAY = `PE_NUM * `REG_NUM + 1; // ???
+parameter DELAY = `PE_NUM * `REG_NUM; // ???
 reg [DELAY-1:0] shift_reg_v = 0;
 always @ (posedge clk)  
     shift_reg_v <= {shift_reg_v[DELAY-2:0], s_in_v};

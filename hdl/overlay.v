@@ -65,7 +65,7 @@ generate
             pe( 
             .clk(clk), 
             .rst(rst), 
-            .din_pe_v(din_overlay_v), 
+            .din_pe_v(p_out_v), 
             .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
             .din_tx_v(0), 
             .din_tx(0), 
@@ -83,7 +83,7 @@ generate
             pe( 
             .clk(clk), 
             .rst(rst), 
-            .din_pe_v(din_overlay_v), 
+            .din_pe_v(p_out_v), 
             .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
             .din_tx_v(pe_tx_v[i]), 
             .din_tx(pe_tx[i]), 
@@ -101,7 +101,7 @@ generate
              pe( 
             .clk(clk), 
             .rst(rst), 
-            .din_pe_v(din_overlay_v), 
+            .din_pe_v(p_out_v), 
             .din_pe(pe_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2]), 
             .din_tx_v(pe_tx_v[i-1]), 
             .din_tx(pe_tx[i-1]), 
