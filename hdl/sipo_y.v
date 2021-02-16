@@ -32,7 +32,7 @@ input shift_v;
 input s_in_v;
 input [`DATA_WIDTH*2-1:0] s_in; // no register
 
-output p_out_v;
+output reg p_out_v;
 output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; // no register
 
 //reg [`REG_ADDR_WIDTH-1:0] reg_cnt = {`REG_ADDR_WIDTH{1'b0}}; // 2^5 = 32
@@ -85,7 +85,7 @@ output [`PE_NUM*`DATA_WIDTH*2-1:0] p_out; // no register
                fsm_output <= 4'b1000;
             end
             LOAD : begin
-               if (input_cnt == `REG_NUM * `PE_NUM - 1)
+               if (input_cnt == `PE_NUM * `REG_NUM - 1)
                   state <= WAIT;
                else
                   state <= LOAD;
@@ -144,11 +144,25 @@ generate
     end
 endgenerate    
 
-parameter DELAY = `REG_NUM + 1;
+parameter DELAY = `PE_NUM * `REG_NUM + 1; // ???
 reg [DELAY-1:0] shift_reg_v = 0;
-always @ (posedge clk) begin 
+always @ (posedge clk)  
     shift_reg_v <= {shift_reg_v[DELAY-2:0], s_in_v};
-end
-assign p_out_v = shift_reg_v[DELAY-1]; // valid signal for parallel outputs
+
+wire shift_delay; 
+assign shift_delay = shift_reg_v[DELAY-1]; // valid signal for parallel outputs
+
+reg [12:0] p_cnt;
+always @ (posedge clk)  
+    if (shift_delay) 
+        p_cnt <= p_cnt + 1'b1;
+    else
+        p_cnt <= 0;
+
+always @ (posedge clk) 
+    if (p_cnt > 0 && p_cnt <= `REG_NUM)
+        p_out_v <= 1;
+    else 
+        p_out_v <= 0;
     
 endmodule

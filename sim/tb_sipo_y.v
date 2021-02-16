@@ -24,6 +24,9 @@ module tb_sipo_y;
     
     // Inputs
     reg clk;
+    reg ce;
+    reg rst;
+    reg shift_v;
     reg s_in_v;
     reg [`DATA_WIDTH*2-1:0] s_in;
 
@@ -33,12 +36,16 @@ module tb_sipo_y;
     
     // Instantiate the Unit Under Test (UUT)
     sipo_y uut(
-    .clk(clk), 
-    .s_in_v(s_in_v), 
+    .clk(clk),
+    .ce(ce),
+    .rst(rst),
+    .shift_v(shift_v),
+    .s_in_v(s_in_v),
     .s_in(s_in),
     .p_out_v(p_out_v),
-    .p_out(p_out)
+    .p_out(p_out) 
     );
+
     
     parameter PERIOD = 20;
 
@@ -57,14 +64,21 @@ module tb_sipo_y;
     initial begin
         // Initialize Inputs
         clk = 0;
+        ce = 0;
+        shift_v = 0;
         s_in_v = 0;
         s_in = 32'd0;
         
         // Wait 100 ns for global reset to finish
+        rst = 1;
         #100;
         
         // Add stimulus here
-		#20; s_in_v = 1; s_in = 32'd1; 
+        #20; rst = 0;  ce = 1; 
+        
+        // Load state
+        #20; s_in_v = 1;
+		#20; s_in_v = 1; s_in = 32'd1;
 		#20; s_in_v = 1; s_in = 32'd2; 
 		#20; s_in_v = 1; s_in = 32'd3; 
 		#20; s_in_v = 1; s_in = 32'd4;
@@ -96,39 +110,12 @@ module tb_sipo_y;
 		#20; s_in_v = 1; s_in = 32'd30;
 		#20; s_in_v = 1; s_in = 32'd31;
 		#20; s_in_v = 1; s_in = 32'd32;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
-//		#20; s_in_v = 1;
 		#20; s_in_v = 0;	
+		
+		// SHIFT status
+		#20; shift_v = 1;
+		#320; shift_v = 0;
+		
 		#1000;
 		
     end  
