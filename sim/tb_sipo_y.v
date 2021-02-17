@@ -24,7 +24,7 @@ module tb_sipo_y;
     
     // Inputs
     reg clk;
-    reg ce;
+//    reg ce;
     reg rst;
     reg shift_v;
     reg s_in_v;
@@ -37,7 +37,7 @@ module tb_sipo_y;
     // Instantiate the Unit Under Test (UUT)
     sipo_y uut(
     .clk(clk),
-    .ce(ce),
+//    .ce(ce),
     .rst(rst),
     .shift_v(shift_v),
     .s_in_v(s_in_v),
@@ -64,7 +64,7 @@ module tb_sipo_y;
     initial begin
         // Initialize Inputs
         clk = 0;
-        ce = 0;
+//        ce = 0;
         shift_v = 0;
         s_in_v = 0;
         s_in = 32'd0;
@@ -74,7 +74,7 @@ module tb_sipo_y;
         #100;
         
         // Add stimulus here
-        #20; rst = 0;  ce = 1; 
+        #20; rst = 0;  // ce = 1; 
         
         // Load state
         #20; s_in_v = 1;
@@ -210,12 +210,27 @@ module tb_sipo_y;
 		#20; s_in_v = 1; s_in = 32'd127;
 		#20; s_in_v = 1; s_in = 32'd128;
 
-		#20; s_in_v = 0;	
+		#20; s_in_v = 0; // ce = 0; 
 		
 		// SHIFT status
-		#20; shift_v = 1;
-		#320; shift_v = 0;
+		#20; shift_v = 1; // ce = 1; 
+		#640; shift_v = 0; // ce = 0; 
 		
+		#500;
+		// SHIFT status
+		#20; shift_v = 1; // ce = 1; 
+		#640; shift_v = 0; // ce = 0; 		
+
+		#500;
+		// SHIFT status
+		#20; shift_v = 1; // ce = 1; 
+		#640; shift_v = 0; // ce = 0; 
+
+		#500;
+		// SHIFT status
+		#20; shift_v = 1; // ce = 1; 
+		#640; shift_v = 0; // ce = 0; 
+				
 		#1000;
 		
     end  

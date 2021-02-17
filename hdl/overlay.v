@@ -21,12 +21,11 @@
 `include "parameters.vh"
 
 module overlay(
-    clk, rst, ce, load, din_overlay_v, din_overlay, inst_in_v, inst_in, dout_overlay_v, dout_overlay
+    clk, rst, load, din_overlay_v, din_overlay, inst_in_v, inst_in, dout_overlay_v, dout_overlay
     );
     
 input  clk; 
 input  rst; 
-input  ce;
 input  load; 
 input  din_overlay_v; 
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
@@ -48,7 +47,6 @@ wire shift_v;
 
 sipo_y in_buffer(
     .clk(clk), 
-    .ce(ce),
     .rst(rst),
     .shift_v(shift_v),
     .s_in_v(din_overlay_v), 
