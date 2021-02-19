@@ -10,9 +10,9 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: Single PE with data forwarding support (-> Add the state machine)
-// 
+//  IMEM: BRAM -> ROM
 // Dependencies: 226 -> 265 LUTs, 295 -> 301 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
-// 
+//  182 LTUs, 184 FFs, 1.0 BRAM, 4 DSPs (meet 600MHz)
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
@@ -42,9 +42,6 @@ output reg [`DATA_WIDTH*2-1:0] dout_tx;
 output reg shift_v; // add
 
 /*** wires for module connection ***/
-wire inst_pc_v;
-wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
-
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
 wire [`INMODE_WIDTH*4-1:0] inmode;   // 5-bit * 4 
 wire [`OPMODE_WIDTH*4-1:0] opmode;   // 7-bit * 4
@@ -57,15 +54,38 @@ wire [`DATA_WIDTH*2-1:0] rdata0, rdata1;
 wire [`DATA_WIDTH*2-1:0] dout_alu;
 wire dout_alu_v;
 
+//wire inst_pc_v;  
+wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
+
 // Instruction Memory
-inst_mem IMEM(
+//inst_mem IMEM(
+//    .clk(clk), 
+//    .rst(rst), 
+//    .inst_in_v(inst_in_v), 
+//    .inst_in(inst_in), 
+//    .inst_out_v(inst_pc_v),
+//    .inst_out(inst_pc) // instructions triggered by program counter
+//    ); 
+
+reg [`IM_ADDR_WIDTH-1:0] inst_addr;
+always @ (posedge clk) 
+    if (cmpt_v)
+        inst_addr <= inst_addr + 1'b1;
+    else
+        inst_addr <= 0; 
+
+reg cmpt_v_reg, inst_pc_v;
+always @ (posedge clk) 
+    inst_pc_v <= cmpt_v;
+
+// Instruction ROM
+inst_rom INST_ROM(
     .clk(clk), 
-    .rst(rst), 
-    .inst_in_v(inst_in_v), 
-    .inst_in(inst_in), 
-    .inst_out_v(inst_pc_v),
-    .inst_out(inst_pc) // instructions triggered by program counter
-    ); 
+    .en(cmpt_v), 
+    .addr(inst_addr), 
+    .data_out(inst_pc)
+    );
+
 
 reg [2:0] opcode;
 always @ (posedge clk) 
