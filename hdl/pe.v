@@ -21,25 +21,29 @@
 `include "parameters.vh"
 
 module pe( 
-    clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, inst_in_v, inst_in,  
-    dout_pe_v, dout_pe, dout_tx_v, dout_tx, shift_v
+    clk, rst, din_pe_v, din_pe, din_shift_v, din_shift, din_tx_v, din_tx, 
+//    inst_in_v, inst_in,  
+    dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift
     );
     
 input  clk;
 input  rst;
 input  din_pe_v;
 input  [`DATA_WIDTH*2-1:0] din_pe;
+input  din_shift_v; // 
+input  [`DATA_WIDTH*2-1:0] din_shift; //
 input  din_tx_v;
 input  [`DATA_WIDTH*2-1:0] din_tx;
-input  inst_in_v;
-input  [`INST_WIDTH-1:0] inst_in;
+//input  inst_in_v;
+//input  [`INST_WIDTH-1:0] inst_in;
 //input  alpha_v;
 
 output reg dout_pe_v;
 output reg [`DATA_WIDTH*2-1:0] dout_pe;
 output reg dout_tx_v;
 output reg [`DATA_WIDTH*2-1:0] dout_tx;
-output reg shift_v; // add
+output reg dout_shift_v;
+output reg [`DATA_WIDTH*2-1:0] dout_shift;
 
 /*** wires for module connection ***/
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -50,9 +54,11 @@ wire [3:0] ceb2;    // 1-bit * 4
 wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] dout_ctrl;
-wire [`DATA_WIDTH*2-1:0] rdata0, rdata1; 
-wire [`DATA_WIDTH*2-1:0] dout_alu;
+wire [`DATA_WIDTH*2-1:0] rdata0, rdata1;
+wire din_ld_v;
+wire [`DATA_WIDTH*2-1:0] din_ld;
 wire dout_alu_v;
+wire [`DATA_WIDTH*2-1:0] dout_alu;
 
 //wire inst_pc_v;  
 wire [`INST_WIDTH-1:0] inst_pc; // instructions triggered by program counter
@@ -86,16 +92,18 @@ inst_rom INST_ROM(
     .data_out(inst_pc)
     );
 
-
 reg [2:0] opcode;
 always @ (posedge clk) 
     opcode <= inst_pc[31:29]; 
 
+assign din_ld_v = din_pe_v | din_shift_v;
+assign din_ld = din_pe | din_shift;
+
 // Control Logics & Decoder
 control CTRL(
     .clk(clk),
-    .din_ld_v(din_pe_v), 
-    .din_ld(din_pe), 
+    .din_ld_v(din_ld_v), // din_pe_v
+    .din_ld(din_ld), // din_pe
     .din_wb(dout_alu), 
     .inst_v(inst_pc_v),
     .opcode(opcode), 
@@ -113,7 +121,7 @@ control CTRL(
 reg dmem_re; // register write/read enable signal to synchronize with dout_ctrl
 
 always @ (posedge clk) begin
-    if (inst_pc_v) begin
+    if (inst_pc_v | shift_v) begin
         dmem_re <= 1; // inst_pc[`INST_WIDTH-5]; 
     end    
     else begin
@@ -123,6 +131,16 @@ end
 
 wire dout_ctrl_v;
 assign dout_ctrl_v = load_v | dout_alu_v;
+
+always @ (posedge clk) 
+    if (shift_v) begin
+        dout_shift_v <= 1;
+        dout_shift <= rdata0; 
+    end
+    else begin
+        dout_shift_v <= 0;
+        dout_shift <= 0;
+    end
 
 // Data Memory
 data_mem DMEM(
@@ -136,6 +154,7 @@ data_mem DMEM(
     .rden(dmem_re), // re
     .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
+    .shift_v(shift_v),
     .douta(rdata0),
     .doutb(rdata1)
     );
@@ -201,14 +220,14 @@ complex_alu ALU(
    parameter SHIFT = 3'b100;
    parameter OUTPUT = 3'b101;
 
-   reg [4:0] fsm_output = 5'b00000;
+   reg [5:0] fsm_output = 6'b000000;
    
-   wire start, load_v, tx_v, cmpt_v, output_v;
-   assign start = fsm_output[4];
-   assign load_v = fsm_output[3];
-   assign cmpt_v = fsm_output[2];
-   assign tx_v   = fsm_output[1];
-//   assign shift_v = fsm_output[1];
+   wire start, load_v, cmpt_v, tx_v, shift_v, output_v;
+   assign start = fsm_output[5];
+   assign load_v = fsm_output[4];
+   assign cmpt_v = fsm_output[3];
+   assign tx_v   = fsm_output[2];
+   assign shift_v = fsm_output[1];
    assign output_v = fsm_output[0];
    
    // counters to control the state machine
@@ -217,7 +236,7 @@ complex_alu ALU(
    reg [4:0] load_cnt = 0; // load
    reg [7:0] cmpt_cnt = 0; // compute
    reg [2:0] tx_cnt = 0;  // transmit
-//   reg [4:0] shift_cnt = 0; // shift
+   reg [4:0] shift_cnt = 0; // shift
    reg [2:0] output_cnt = 0; // output
    
    reg [2:0] state = IDLE; // initial state
@@ -233,7 +252,7 @@ complex_alu ALU(
                   state <= LOAD;
                else
                   state <= IDLE;
-               fsm_output <= 5'b10000;  // start = 1
+               fsm_output <= 6'b100000;  // start = 1
             end
             LOAD : begin
                if (load_cnt == `LOAD_NUM-1) begin
@@ -245,7 +264,7 @@ complex_alu ALU(
                   load_cnt <= load_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 5'b01000;  // load_v = 1
+               fsm_output <= 6'b010000;  // load_v = 1
             end
             COMPUTE : begin
                if (cmpt_cnt == `INST_NUM-1 && iter_cnt == `ITER_NUM-1) begin
@@ -262,11 +281,11 @@ complex_alu ALU(
                   cmpt_cnt <= cmpt_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 5'b00100; // cmpt_v = 1
+               fsm_output <= 6'b001000; // cmpt_v = 1
             end
             TRANSMIT : begin
                if (tx_cnt == `TX_NUM-1) begin
-                  state <= LOAD; // SHIFT
+                  state <= SHIFT;
                   tx_cnt <= 0;
                end
                else begin
@@ -274,19 +293,19 @@ complex_alu ALU(
                   tx_cnt <= tx_cnt + 1'b1;
                end
 //               loop_cnt <= loop_cnt + 1'b1;
-               fsm_output <= 5'b00010; // tx_v = 1
+               fsm_output <= 6'b000100; // tx_v = 1
             end
-//            SHIFT : begin
-//               if (shift_cnt == `REG_NUM-1) begin
-//                  state <= LOAD;
-//                  shift_cnt <= 0;
-//               end
-//               else begin
-//                  state <= SHIFT;
-//                  shift_cnt <= shift_cnt + 1'b1;
-//               end 
-//               fsm_output <= 6'b000010; // shift_V = 1
-//            end
+            SHIFT : begin
+               if (shift_cnt == `REG_NUM-1) begin
+                  state <= COMPUTE;
+                  shift_cnt <= 0;
+               end
+               else begin
+                  state <= SHIFT;
+                  shift_cnt <= shift_cnt + 1'b1;
+               end 
+               fsm_output <= 6'b000010; // shift_V = 1
+            end
             OUTPUT : begin
                if (output_cnt == `ALPHA_NUM-1) begin
                   state <= IDLE;
@@ -296,7 +315,7 @@ complex_alu ALU(
                   state <= OUTPUT;
                   output_cnt <= output_cnt + 1'b1;
                end 
-               fsm_output <= 5'b00001; // output_v = 1
+               fsm_output <= 6'b000001; // output_v = 1
             end
          endcase
    
@@ -313,11 +332,11 @@ complex_alu ALU(
       else if (state == LOAD | state == COMPUTE | state == TRANSMIT)
          loop_cnt <= loop_cnt + 1'b1;
  
-    always @(posedge clk)
-       if (loop_cnt >= `LOAD_NUM && loop_cnt < (`LOAD_NUM + `REG_NUM)) 
-          shift_v <= 1;
-       else 
-          shift_v <= 0;
+//    always @(posedge clk)
+//       if (loop_cnt >= `LOAD_NUM && loop_cnt < (`LOAD_NUM + `REG_NUM)) 
+//          shift_v <= 1;
+//       else 
+//          shift_v <= 0;
            
    // control logics for data forward & alpha output
    always @ (posedge clk) begin

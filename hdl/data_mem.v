@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module data_mem(
-    clk, rst, wea, web, dina, dinb, wben, rden, inst_v, inst, douta, doutb
+    clk, rst, wea, web, dina, dinb, wben, rden, inst_v, inst, shift_v, douta, doutb
     );
  
 input clk; 
@@ -34,6 +34,7 @@ input wben;
 input rden;
 input inst_v;
 input [`INST_WIDTH-1:0] inst;
+input shift_v;
 
 output [`DATA_WIDTH*2-1:0] douta;
 output [`DATA_WIDTH*2-1:0] doutb;
@@ -76,6 +77,9 @@ always @(posedge clk) begin
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
+        end
+        else if (shift_v) begin
+            raddra <= raddra + 1;
         end
         
         if (web) begin
