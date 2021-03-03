@@ -48,7 +48,7 @@ output [`DATA_WIDTH*2-1:0] doutb;
 reg [`DM_ADDR_WIDTH-1:0] raddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddrb = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddra = 0;
-reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h8F;
+reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h80; // alpha[k-1] address: 128
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
 reg wben_r; // ADD
@@ -62,7 +62,7 @@ always @(posedge clk) begin
     
     if (rst) begin
         waddra <= 0;
-        waddrb = 8'h8F; // Add 
+        waddrb = 8'h80; // Add 
         raddra <= 0;
         raddrb <= 0;
     end
