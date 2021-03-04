@@ -44,14 +44,14 @@ assign data_out = rom_out;
 //            8'b00000001: rom_out <= 32'h80_03_02_81; // CMPLX_MULT (opcode = 100)
 //            8'b00000010: rom_out <= 32'h80_05_04_82; // CMPLX_MULT (opcode = 100)
             // 8-pt example
-            8'b00000000: rom_out <= 32'h80200040; // mul 
-            8'b00000001: rom_out <= 32'h80210141; // mul
-            8'b00000010: rom_out <= 32'h80220242; // mul
-            8'b00000011: rom_out <= 32'h80230343; // mul
-            8'b00000100: rom_out <= 32'h80240444; // mul
-            8'b00000101: rom_out <= 32'h80250545; // mul
-            8'b00000110: rom_out <= 32'h80260646; // mul
-            8'b00000111: rom_out <= 32'h80270747; // mul
+            8'b00000000: rom_out <= 32'h80000040; // mul 
+            8'b00000001: rom_out <= 32'h80010141; // mul
+            8'b00000010: rom_out <= 32'h80020242; // mul
+            8'b00000011: rom_out <= 32'h80030343; // mul
+            8'b00000100: rom_out <= 32'h80040444; // mul
+            8'b00000101: rom_out <= 32'h80050545; // mul
+            8'b00000110: rom_out <= 32'h80060646; // mul
+            8'b00000111: rom_out <= 32'h80070747; // mul
             8'b00001000: rom_out <= 32'hB0444048; // muladd
             8'b00001001: rom_out <= 32'hD0444049; // mulsub
             8'b00001010: rom_out <= 32'hB046424A;

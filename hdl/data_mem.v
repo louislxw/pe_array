@@ -73,17 +73,17 @@ always @(posedge clk) begin
         else if (wben) begin // write enable for write back 
             waddra <= wb_addr_d4; 
         end
-        else if (inst_v) begin
+        else if (shift_v) begin // write enable for shift
+            raddra <= raddra + 1;
+        end
+        else if (web) begin // // write enable for tx
+            waddrb <= waddrb + 1;
+        end
+        
+        if (inst_v) begin // read ports
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
-        end
-        else if (shift_v) begin
-            raddra <= raddra + 1;
-        end
-        
-        if (web) begin
-            waddrb <= waddrb + 1;
         end
     end 
 end

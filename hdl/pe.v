@@ -190,10 +190,10 @@ always @ (posedge clk) begin
 end    
 //wire three_operand; 
 //assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0; 
-wire [`DATA_WIDTH*2-1:0] din_1, din_2, din_3; 
-assign din_1 = three_operand_d2 ? dout_rom : rdata0;
-assign din_2 = rdata1;
-assign din_3 = three_operand_d2 ? rdata0 : 0;
+wire [`DATA_WIDTH*2-1:0] din_alu_1, din_alu_2, din_alu_3; 
+assign din_alu_1 = three_operand_d2 ? dout_rom : rdata0;
+assign din_alu_2 = rdata1;
+assign din_alu_3 = three_operand_d2 ? rdata0 : 0;
 
 // ALU for Complex Data
 complex_alu ALU( 
@@ -206,9 +206,9 @@ complex_alu ALU(
     .cea2(cea2), 
     .ceb2(ceb2), 
     .usemult(usemult), 
-    .din_1(din_1), // rdata0
-    .din_2(din_2), // rdata1
-    .din_3(din_3), // dout_rom
+    .din_1(din_alu_1), // rdata0
+    .din_2(din_alu_2), // rdata1
+    .din_3(din_alu_3), // dout_rom
     .dout(dout_alu) 
     );    
 

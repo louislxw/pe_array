@@ -124,8 +124,8 @@ module tb_pe;
         #20; din_pe_v = 1; din_pe = 32'h0007_0005; // 7 + j*5 
         #20; din_pe_v = 1; din_pe = 32'h000c_000a; // 12 + j*10
         #20; din_pe_v = 1; din_pe = 32'h000b_0009; // 11 + j*9
-        #20; din_pe_v = 1; din_pe = 32'h0010_000e; // 16 + j*14 // add
-        #20; din_pe_v = 1; din_pe = 32'h000f_000d; // 15 + j*13 // add 
+        #20; din_pe_v = 1; din_pe = 32'h0004_0002; // 4 + j*2 // add
+        #20; din_pe_v = 1; din_pe = 32'h0003_0001; // 3 + j*1 // add 
                 
         #20; din_pe_v = 0; din_pe = 1; 
         #20; din_pe_v = 0; din_pe = 2; 

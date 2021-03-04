@@ -39,12 +39,12 @@ always @(posedge clk)
    always @(posedge clk)
       if (en)
          case (addr) // left shift 15-bit & represented by Hex signed 2's complement
-            4'b0000: rom_out <= 32'h0001_0000; // 1
-            4'b0001: rom_out <= 32'h0002_0004; // 2 + j*4
-            4'b0010: rom_out <= 32'h0003_0005; // 3 + j*5
-//            4'b0000: rom_out <= 32'h0001_0000; // W0 = 1
-//            4'b0001: rom_out <= 32'h7D8A_E707; // W1 = 0.98078 - j*0.19509
-//            4'b0010: rom_out <= 32'h7642_CF04; // W2 = 0.92388 - j*0.38268
+//            4'b0000: rom_out <= 32'h0001_0000; // 1
+//            4'b0001: rom_out <= 32'h0002_0004; // 2 + j*4
+//            4'b0010: rom_out <= 32'h0003_0005; // 3 + j*5
+            4'b0000: rom_out <= 32'h0001_0000; // W0 = 1
+            4'b0001: rom_out <= 32'h7D8A_E707; // W1 = 0.98078 - j*0.19509
+            4'b0010: rom_out <= 32'h7642_CF04; // W2 = 0.92388 - j*0.38268
             4'b0011: rom_out <= 32'h6A6E_B8E3; // W3 = 0.83147 - j*0.55557
             4'b0100: rom_out <= 32'h5A83_A57D; // W4 = 0.70711 - j*0.70711
             4'b0101: rom_out <= 32'h471D_9592; // W5 = 0.55557 - j*0.83147
