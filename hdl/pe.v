@@ -89,6 +89,7 @@ inst_rom INST_ROM(
     .clk(clk), 
     .en(cmpt_v), 
     .addr(inst_addr), 
+    
     .data_out(inst_pc)
     );
 
@@ -96,19 +97,40 @@ reg [2:0] opcode;
 always @ (posedge clk) 
     opcode <= inst_pc[31:29]; 
 
-assign din_ld_v = din_pe_v | din_shift_v;
-assign din_ld = din_pe | din_shift;
+//assign din_ld_v = din_pe_v | din_shift_v;
+//assign din_ld = din_pe | din_shift;
 
 // Control Logics & Decoder
+//control CTRL(
+//    .clk(clk),
+//    .din_ld_v(din_ld_v), // din_pe_v
+//    .din_ld(din_ld), // din_pe
+//    .din_wb(dout_alu), 
+//    .inst_v(inst_pc_v),
+//    .opcode(opcode), 
+    
+//    .dout_v(dout_alu_v),
+//    .dout(dout_ctrl), // data output of the controller
+//    .alumode(alumode), 
+//    .inmode(inmode), 
+//    .opmode(opmode), 
+//    .cea2(cea2), 
+//    .ceb2(ceb2), 
+//    .usemult(usemult)
+//    );
 control CTRL(
     .clk(clk),
-    .din_ld_v(din_ld_v), // din_pe_v
-    .din_ld(din_ld), // din_pe
-    .din_wb(dout_alu), 
+    .din_pe_v(din_pe_v), 
+    .din_pe(din_pe), 
+    .din_shift_v(din_shift_v), 
+    .din_shift(din_shift),
+    .din_tx_v(din_tx_v), 
+    .din_tx(din_tx),
+//    .din_wb(dout_alu), 
     .inst_v(inst_pc_v),
     .opcode(opcode), 
-//    .inst(inst_pc), // instructions triggered by program counter
-    .dout_v(dout_alu_v),
+    
+    .dout_v(dout_alu_v), // generate valid signal for alu
     .dout(dout_ctrl), // data output of the controller
     .alumode(alumode), 
     .inmode(inmode), 
@@ -130,7 +152,7 @@ always @ (posedge clk) begin
 end
 
 wire dout_ctrl_v;
-assign dout_ctrl_v = load_v | dout_alu_v;
+//assign dout_ctrl_v = load_v | dout_alu_v;
 
 always @ (posedge clk) 
     if (shift_v) begin
@@ -146,18 +168,21 @@ always @ (posedge clk)
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wea(dout_ctrl_v), // valid of dout_ctrl
-    .web(din_tx_v), // valid of din_tx
+    .wea(din_pe_v), // valid of load
+    .web(din_shift_v), // valid of shift
+    .wec(dout_tx_v), // valid of tx
+    .wed(dout_alu_v), // valid of write back
     .dina(dout_ctrl), // din_comp
-    .dinb(din_tx), // data transmitted from previous PE
-    .wben(dout_alu_v), 
-    .rden(dmem_re), // re
+    .dinb(dout_alu), // data write back
+    .rden(dmem_re), 
     .inst_v(inst_pc_v),
     .inst(inst_pc), // instructions triggered by program counter
     .shift_v(shift_v),
+    
     .douta(rdata0),
     .doutb(rdata1)
     );
+
 
 wire [`DATA_WIDTH*2-1:0] dout_rom;
 reg en;
@@ -175,6 +200,7 @@ const_rom ROM(
     .clk(clk), 
     .en(en), 
     .addr(addr), 
+    
     .data_out(dout_rom)
     );
 
@@ -209,6 +235,7 @@ complex_alu ALU(
     .din_1(din_alu_1), // rdata0
     .din_2(din_alu_2), // rdata1
     .din_3(din_alu_3), // dout_rom
+    
     .dout(dout_alu) 
     );    
 

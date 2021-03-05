@@ -15,22 +15,23 @@
 // 
 // Revision:
 // Revision 0.01 - File Created
-// Additional Comments:
+// Additional Comments: 2 cycles to write in; 2 cycles to read out
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `include "parameters.vh"
 
 module data_mem(
-    clk, rst, wea, web, dina, dinb, wben, rden, inst_v, inst, shift_v, douta, doutb
+    clk, rst, wea, web, wec, wed, dina, dinb, rden, inst_v, inst, shift_v, douta, doutb
     );
  
 input clk; 
 input rst;
 input wea; 
 input web; 
+input wec;
+input wed; // write back
 input [`DATA_WIDTH*2-1:0] dina;
 input [`DATA_WIDTH*2-1:0] dinb;
-input wben;
 input rden;
 input inst_v;
 input [`INST_WIDTH-1:0] inst;
@@ -48,39 +49,67 @@ output [`DATA_WIDTH*2-1:0] doutb;
 reg [`DM_ADDR_WIDTH-1:0] raddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddrb = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddra = 0;
-reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h80; // alpha[k-1] address: 128
+reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h20; // Y shift address: 32
+reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'h80; // alpha[k-1] address: 128
+reg [`DM_ADDR_WIDTH-1:0] waddrd = 8'h40; // write-back address: 64
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
-reg wben_r; // ADD
+reg [`DM_ADDR_WIDTH-1:0] waddr;
+reg dina_v, dinb_v;
+reg [`DATA_WIDTH*2-1:0] dinb_r;
 
 always @(posedge clk) begin
-    wben_r <= wben;
     wb_addr_d1 <= wb_addr; 
     wb_addr_d2 <= wb_addr_d1; 
     wb_addr_d3 <= wb_addr_d2; 
     wb_addr_d4 <= wb_addr_d3; // write back requires a few delays
+    dinb_r <= dinb;
     
     if (rst) begin
         waddra <= 0;
-        waddrb = 8'h80; // Add 
+        waddrb = 8'h20; // Add 
+        waddrc = 8'h80; // Add 
+        waddrd = 8'h40; // Add 
         raddra <= 0;
         raddrb <= 0;
+        dina_v <= 0;
+        dinb_v <= 0;
     end
     else begin
-        if (wea) begin // write enable for load or write back
+        if (wea) begin // write enable for load 
             waddra <= waddra + 1;
+            waddr <= waddra;
+            dina_v <= 1;
+            dinb_v <= 0;
         end
-        else if (wben) begin // write enable for write back 
-            waddra <= wb_addr_d4; 
-        end
-        else if (shift_v) begin // write enable for shift
-            raddra <= raddra + 1;
-        end
-        else if (web) begin // // write enable for tx
+        else if (web) begin // write enable for shift 
             waddrb <= waddrb + 1;
+            waddr <= waddrb;
+            dina_v <= 1;
+            dinb_v <= 0;
+        end
+        else if (wec) begin // write enable for tx
+            waddrc <= waddrc + 1;
+            waddr <= waddrc;
+            dina_v <= 1;
+            dinb_v <= 0;
+        end
+        else if (wed) begin // write enable for write back 
+            waddrd <= wb_addr_d4; 
+            waddr <= waddrd;
+            dina_v <= 0;
+            dinb_v <= 1;
+        end
+        else begin
+            dina_v <= 0;
+            dinb_v <= 0;
         end
         
-        if (inst_v) begin // read ports
+        if (shift_v) begin // read enable for shift
+            raddra <= raddra + 1;
+        end
+        
+        if (inst_v) begin // read ports & write-back address
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
@@ -88,49 +117,10 @@ always @(posedge clk) begin
     end 
 end
 
-wire wea_real;
-assign wea_real = wea | wben_r;
-
-/*** Block RAM for din_pe & dout_alu ***/
-//(* ram_style="block" *)
-//reg [`DATA_WIDTH*2-1:0] regfile [0:(2**`DM_ADDR_WIDTH)-1];
-//reg [`DATA_WIDTH*2-1:0] douta = 0;
-
-//always @(posedge clk) begin
-//    if (wea_real) begin // write enable for load or write back
-//        regfile[waddra] <= dina; 
-//    end
-//    else if (web) begin
-//        regfile[waddrb] <= dinb; 
-//    end
-//    if (rden) begin 
-//        douta <= regfile[raddra]; 
-//    end
-//end
-
-/*** ADD another Block RAM for din_tx ***/
-//(* ram_style="block" *)
-//reg [`DATA_WIDTH*2-1:0] regfile1 [0:(2**`DM_ADDR_WIDTH)-1];
-//reg [`DATA_WIDTH*2-1:0] doutb = 0;
-
-//always @(posedge clk) begin
-//    if (wea_real) begin
-//        regfile1[waddra] <= dina;
-//    end 
-//    else if (web) begin // write enable for transfer data
-//        regfile1[waddrb] <= dinb; 
-//    end
-//    if (rden) begin 
-//        doutb <= regfile1[raddrb];
-//    end
-//end
-
 wire wren;
-assign wren = wea | wben_r | web;
 wire [`DATA_WIDTH*2-1:0] din_bram;
-assign din_bram = wea_real ? dina : (web ? dinb : 0);
-wire [`DM_ADDR_WIDTH-1:0] waddr;
-assign waddr = wea_real ? waddra : (web ? waddrb : 0);
+assign wren = dina_v | dinb_v;
+assign din_bram = dina_v ? dina : (dinb_v ? dinb_r : 0); // dina is already pipelined by CTRL
 
 //  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(

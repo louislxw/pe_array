@@ -21,16 +21,23 @@
 `include "parameters.vh"
 
 module control(
-    clk, din_ld_v, din_ld, din_wb, inst_v, opcode, dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
+//    clk, din_ld_v, din_ld, din_wb, inst_v, opcode, 
+    clk, din_pe_v, din_pe, din_shift_v, din_shift, din_tx_v, din_tx, inst_v, opcode, 
+    dout_v, dout, alumode, inmode, opmode, cea2, ceb2, usemult
     );
     
 input clk;
-input din_ld_v;
-input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
-input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
+//input din_ld_v;
+//input [`DATA_WIDTH*2-1:0] din_ld; // 32-bit data
+input din_pe_v;
+input [`DATA_WIDTH*2-1:0] din_pe; // 32-bit data
+input din_shift_v;
+input [`DATA_WIDTH*2-1:0] din_shift; // 32-bit data
+input din_tx_v;
+input [`DATA_WIDTH*2-1:0] din_tx; // 32-bit data
+//input [`DATA_WIDTH*2-1:0] din_wb; // 32-bit data
 input inst_v;
 input [2:0] opcode;
-//input [`INST_WIDTH-1:0] inst; // 32-bit instruction
 
 output dout_v;
 output [`DATA_WIDTH*2-1:0] dout; // 32-bit
@@ -44,25 +51,31 @@ output [3:0] usemult; // 1-bit * 4
 reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 /*** Control Logics for Data Ouput Valid Signal ***/
-wire wb;
-assign wb = inst_v ? 1 : 0; // inst[`INST_WIDTH-1] : 0; // The most significant 1-bit indicates write-back
-
 parameter DELAY = 6; // 6-stage pipeline
-reg [DELAY-1:0] shift_reg = 0; 
+reg [DELAY-1:0] inst_v_reg = 0; 
 
 always @ (posedge clk) begin 
-    shift_reg <= {shift_reg[DELAY-2:0], wb};
+    inst_v_reg <= {inst_v_reg[DELAY-2:0], inst_v};
 end
 
-assign dout_v = shift_reg[DELAY-1]; // delayed_signal
+assign dout_v = inst_v_reg[DELAY-1]; // delayed_signal
 
-//assign dout = dout_v ? din_wb : din_ld;
+//always @ (posedge clk) begin
+//    if (din_ld_v)
+//        dout <= din_ld; // load data
+//    if (dout_v)
+//        dout <= din_wb; // write back
+//end
 
 always @ (posedge clk) begin
-    if (din_ld_v)
-        dout <= din_ld; // load data
-    if (dout_v)
-        dout <= din_wb; // write back
+    if (din_pe_v)
+        dout <= din_pe; // load 
+    else if (din_shift_v)
+        dout <= din_shift; // shift 
+    else if (din_tx_v)
+        dout <= din_tx; // transmit 
+//    else if (dout_v)
+//        dout <= din_wb; // write back
 end
 
 /***************** INSTRUCTION DECODE***************/	 
