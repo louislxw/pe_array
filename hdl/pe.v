@@ -38,12 +38,12 @@ input  [`DATA_WIDTH*2-1:0] din_tx;
 //input  [`INST_WIDTH-1:0] inst_in;
 //input  alpha_v;
 
-output reg dout_pe_v;
-output reg [`DATA_WIDTH*2-1:0] dout_pe;
-output reg dout_tx_v;
-output reg [`DATA_WIDTH*2-1:0] dout_tx;
-output reg dout_shift_v;
-output reg [`DATA_WIDTH*2-1:0] dout_shift;
+output dout_pe_v;
+output [`DATA_WIDTH*2-1:0] dout_pe;
+output dout_tx_v;
+output [`DATA_WIDTH*2-1:0] dout_tx;
+output dout_shift_v;
+output [`DATA_WIDTH*2-1:0] dout_shift;
 
 /*** wires for module connection ***/
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -154,28 +154,40 @@ end
 wire dout_ctrl_v;
 //assign dout_ctrl_v = load_v | dout_alu_v;
 
-always @ (posedge clk) 
-    if (shift_v) begin
-        dout_shift_v <= 1;
-        dout_shift <= rdata0; 
-    end
-    else begin
-        dout_shift_v <= 0;
-        dout_shift <= 0;
-    end
+//always @ (posedge clk) 
+//    if (shift_v) begin
+//        dout_shift_v <= 1;
+//        dout_shift <= rdata0; 
+//    end
+//    else begin
+//        dout_shift_v <= 0;
+//        dout_shift <= 0;
+//    end
+
+reg shift_v_d1, shift_v_d2, shift_v_d3;
+always @ (posedge clk) begin
+    shift_v_d1 <= shift_v;
+    shift_v_d2 <= shift_v_d1;
+    shift_v_d3 <= shift_v_d2;
+end
+
+assign dout_shift = shift_v ? rdata0 : 0;
+assign dout_shift_v = shift_v_d3 ? 1 : 0;
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
-    .wea(din_pe_v), // valid of load
-    .web(din_shift_v), // valid of shift
-    .wec(dout_tx_v), // valid of tx
-    .wed(dout_alu_v), // valid of write back
-    .dina(dout_ctrl), // din_comp
-    .dinb(dout_alu), // data write back
+    .wea(din_pe_v), // valid in of load
+    .web(din_shift_v), // valid in of shift
+    .wec(din_tx_v), // valid in of tx
+    .wed(dout_alu_v), // valid in of write back
+    .dina(dout_ctrl), 
+    .dinb(dout_alu_r), // dout_alu
     .rden(dmem_re), 
     .inst_v(inst_pc_v),
+//    .rea(inst_pc_v),
+//    .reb(shift_v),    
     .inst(inst_pc), // instructions triggered by program counter
     .shift_v(shift_v),
     
@@ -365,24 +377,33 @@ complex_alu ALU(
 //       else 
 //          shift_v <= 0;
            
-   // control logics for data forward & alpha output
-   always @ (posedge clk) begin
-    if (tx_v) begin // partial alpha forward to next PE
-        dout_tx_v <= 1;
-        dout_tx   <= dout_alu;
-    end
-    else begin
-        dout_tx_v <= 0;
-        dout_tx   <= 32'hxxxxxxxx; 
-    end
-    if (output_v) begin // output alpha (output_v = 1 when in last iteration)
-        dout_pe_v <= 1;
-        dout_pe   <= dout_alu; 
-    end
-    else begin
-        dout_pe_v <= 0;
-        dout_pe   <= 32'hxxxxxxxx; 
-    end   
-end
+// control logics for data forward & alpha output
+//always @ (posedge clk) begin
+//    if (tx_v) begin // partial alpha forward to next PE
+//        dout_tx_v <= 1;
+//        dout_tx   <= dout_alu;
+//    end
+//    else begin
+//        dout_tx_v <= 0;
+//        dout_tx   <= 32'hxxxxxxxx; 
+//    end
+//    if (output_v) begin // output alpha (output_v = 1 when in last iteration)
+//        dout_pe_v <= 1;
+//        dout_pe   <= dout_alu; 
+//    end
+//    else begin
+//        dout_pe_v <= 0;
+//        dout_pe   <= 32'hxxxxxxxx; 
+//    end   
+//end
+
+reg [`DATA_WIDTH*2-1:0] dout_alu_r;
+always @ (posedge clk)
+    dout_alu_r <= dout_alu;
+
+assign dout_tx_v = tx_v ? 1 : 0;
+assign dout_tx = tx_v ? dout_alu_r : 0;
+assign dout_pe_v = output_v ? 1 : 0;
+assign dout_pe = output_v ? dout_alu_r : 0;
     
 endmodule

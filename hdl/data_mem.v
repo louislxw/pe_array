@@ -56,14 +56,14 @@ reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
 reg [`DM_ADDR_WIDTH-1:0] waddr;
 reg dina_v, dinb_v;
-reg [`DATA_WIDTH*2-1:0] dinb_r;
+//reg [`DATA_WIDTH*2-1:0] dinb_r;
 
 always @(posedge clk) begin
     wb_addr_d1 <= wb_addr; 
     wb_addr_d2 <= wb_addr_d1; 
     wb_addr_d3 <= wb_addr_d2; 
     wb_addr_d4 <= wb_addr_d3; // write back requires a few delays
-    dinb_r <= dinb;
+//    dinb_r <= dinb;
     
     if (rst) begin
         waddra <= 0;
@@ -76,19 +76,19 @@ always @(posedge clk) begin
         dinb_v <= 0;
     end
     else begin
-        if (wea) begin // write enable for load 
+        if (wea) begin // write enable for LOAD 
             waddra <= waddra + 1;
             waddr <= waddra;
             dina_v <= 1;
             dinb_v <= 0;
         end
-        else if (web) begin // write enable for shift 
+        else if (web) begin // write enable for SHIFT 
             waddrb <= waddrb + 1;
             waddr <= waddrb;
             dina_v <= 1;
             dinb_v <= 0;
         end
-        else if (wec) begin // write enable for tx
+        else if (wec) begin // write enable for TX
             waddrc <= waddrc + 1;
             waddr <= waddrc;
             dina_v <= 1;
@@ -105,22 +105,25 @@ always @(posedge clk) begin
             dinb_v <= 0;
         end
         
-        if (shift_v) begin // read enable for shift
-            raddra <= raddra + 1;
-        end
-        
+//        if (shift_v) begin // read enable for shift
+//            raddra <= raddra + 1;
+//        end        
         if (inst_v) begin // read ports & write-back address
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
         end
+        else if (shift_v) 
+            raddra <= raddra + 1; 
+        else 
+            raddra <= 0;
     end 
 end
 
 wire wren;
 wire [`DATA_WIDTH*2-1:0] din_bram;
 assign wren = dina_v | dinb_v;
-assign din_bram = dina_v ? dina : (dinb_v ? dinb_r : 0); // dina is already pipelined by CTRL
+assign din_bram = dina_v ? dina : (dinb_v ? dinb : 0); // dina is already pipelined by CTRL
 
 //  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(
