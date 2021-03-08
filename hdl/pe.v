@@ -164,15 +164,15 @@ wire dout_ctrl_v;
 //        dout_shift <= 0;
 //    end
 
-reg shift_v_d1, shift_v_d2, shift_v_d3;
+reg shift_v_d1, shift_v_d2;
 always @ (posedge clk) begin
     shift_v_d1 <= shift_v;
     shift_v_d2 <= shift_v_d1;
-    shift_v_d3 <= shift_v_d2;
 end
 
-assign dout_shift = shift_v ? rdata0 : 0;
-assign dout_shift_v = shift_v_d3 ? 1 : 0;
+// It takes 2 cycles to read the data from DMEM.
+assign dout_shift = shift_v_d2 ? rdata0 : 0;
+assign dout_shift_v = shift_v_d2 ? 1 : 0;
 
 // Data Memory
 data_mem DMEM(

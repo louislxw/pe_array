@@ -113,7 +113,12 @@ always @(posedge clk) begin
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
         end
-        else if (shift_v) 
+        else begin
+            raddrb <= 0;
+            raddra <= 0;
+        end
+            
+        if (shift_v) 
             raddra <= raddra + 1; 
         else 
             raddra <= 0;
