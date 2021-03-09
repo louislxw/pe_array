@@ -85,11 +85,10 @@ always @ (posedge clk)
     inst_pc_v <= cmpt_v;
 
 // Instruction ROM
-inst_rom INST_ROM(
+inst_rom IMEM(
     .clk(clk), 
     .en(cmpt_v), 
     .addr(inst_addr), 
-    
     .data_out(inst_pc)
     );
 
@@ -97,27 +96,7 @@ reg [2:0] opcode;
 always @ (posedge clk) 
     opcode <= inst_pc[31:29]; 
 
-//assign din_ld_v = din_pe_v | din_shift_v;
-//assign din_ld = din_pe | din_shift;
-
 // Control Logics & Decoder
-//control CTRL(
-//    .clk(clk),
-//    .din_ld_v(din_ld_v), // din_pe_v
-//    .din_ld(din_ld), // din_pe
-//    .din_wb(dout_alu), 
-//    .inst_v(inst_pc_v),
-//    .opcode(opcode), 
-    
-//    .dout_v(dout_alu_v),
-//    .dout(dout_ctrl), // data output of the controller
-//    .alumode(alumode), 
-//    .inmode(inmode), 
-//    .opmode(opmode), 
-//    .cea2(cea2), 
-//    .ceb2(ceb2), 
-//    .usemult(usemult)
-//    );
 control CTRL(
     .clk(clk),
     .din_pe_v(din_pe_v), 
@@ -144,35 +123,23 @@ reg dmem_re; // register write/read enable signal to synchronize with dout_ctrl
 
 always @ (posedge clk) begin
     if (inst_pc_v | shift_v) begin
-        dmem_re <= 1; // inst_pc[`INST_WIDTH-5]; 
+        dmem_re <= 1; 
     end    
     else begin
         dmem_re <= 0;
     end 
 end
 
-wire dout_ctrl_v;
-//assign dout_ctrl_v = load_v | dout_alu_v;
-
-//always @ (posedge clk) 
-//    if (shift_v) begin
-//        dout_shift_v <= 1;
-//        dout_shift <= rdata0; 
-//    end
-//    else begin
-//        dout_shift_v <= 0;
-//        dout_shift <= 0;
-//    end
-
-reg shift_v_d1, shift_v_d2;
+reg shift_v_d1, shift_v_d2, shift_v_d3;
 always @ (posedge clk) begin
     shift_v_d1 <= shift_v;
     shift_v_d2 <= shift_v_d1;
+    shift_v_d3 <= shift_v_d2;
 end
 
 // It takes 2 cycles to read the data from DMEM.
-assign dout_shift = shift_v_d2 ? rdata0 : 0;
-assign dout_shift_v = shift_v_d2 ? 1 : 0;
+assign dout_shift = shift_v_d3 ? rdata0 : 0;
+assign dout_shift_v = shift_v_d3 ? 1 : 0;
 
 // Data Memory
 data_mem DMEM(
@@ -195,43 +162,33 @@ data_mem DMEM(
     .doutb(rdata1)
     );
 
-
+// Synchronize dout_rom with rdata0 and rdata1. 
 wire [`DATA_WIDTH*2-1:0] dout_rom;
-reg en;
-reg [`WN_ADDR_WIDTH-1:0] addr; 
+reg [`WN_ADDR_WIDTH-1:0] rom_addr; 
+reg  rom_en, rom_en_d1, rom_en_d2;
 always @ (posedge clk) begin
-    if (inst_pc[`INST_WIDTH-4]) // bit 28
-        en <= 1'b1;
+    if (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110)
+        rom_en <= 1; 
     else 
-        en <= 1'b0;
-    addr <= inst_pc[27:24];
+        rom_en <= 0; 
+    rom_en_d1 <= rom_en; 
+    rom_en_d2 <= rom_en_d1; // ROM requires 3-stage pipeline
+    rom_addr <= inst_pc[27:24];    
 end
 
 // ROM for Twiddle Factors
 const_rom ROM(
     .clk(clk), 
-    .en(en), 
-    .addr(addr), 
-    
+    .en(rom_en), 
+    .addr(rom_addr), 
     .data_out(dout_rom)
     );
 
 /*** Data Memory Feedback Input Map ***/
-reg  three_operand, three_operand_d1, three_operand_d2;
-always @ (posedge clk) begin
-    if (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110)
-        three_operand <= 1; 
-    else 
-        three_operand <= 0; 
-    three_operand_d1 <= three_operand; 
-    three_operand_d2 <= three_operand_d1; // ROM requires 3-stage pipeline
-end    
-//wire three_operand; 
-//assign three_operand = (inst_pc[31:29] == 3'b101 | inst_pc[31:29] == 3'b110) ? 1 : 0; 
 wire [`DATA_WIDTH*2-1:0] din_alu_1, din_alu_2, din_alu_3; 
-assign din_alu_1 = three_operand_d2 ? dout_rom : rdata0;
+assign din_alu_1 = rom_en_d2 ? dout_rom : rdata0;
 assign din_alu_2 = rdata1;
-assign din_alu_3 = three_operand_d2 ? rdata0 : 0;
+assign din_alu_3 = rom_en_d2 ? rdata0 : 0;
 
 // ALU for Complex Data
 complex_alu ALU( 
@@ -378,25 +335,6 @@ complex_alu ALU(
 //          shift_v <= 0;
            
 // control logics for data forward & alpha output
-//always @ (posedge clk) begin
-//    if (tx_v) begin // partial alpha forward to next PE
-//        dout_tx_v <= 1;
-//        dout_tx   <= dout_alu;
-//    end
-//    else begin
-//        dout_tx_v <= 0;
-//        dout_tx   <= 32'hxxxxxxxx; 
-//    end
-//    if (output_v) begin // output alpha (output_v = 1 when in last iteration)
-//        dout_pe_v <= 1;
-//        dout_pe   <= dout_alu; 
-//    end
-//    else begin
-//        dout_pe_v <= 0;
-//        dout_pe   <= 32'hxxxxxxxx; 
-//    end   
-//end
-
 reg [`DATA_WIDTH*2-1:0] dout_alu_r;
 always @ (posedge clk)
     dout_alu_r <= dout_alu;

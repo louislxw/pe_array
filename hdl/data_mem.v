@@ -48,6 +48,7 @@ output [`DATA_WIDTH*2-1:0] doutb;
 
 reg [`DM_ADDR_WIDTH-1:0] raddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddrb = 0;
+reg [`DM_ADDR_WIDTH-1:0] raddrc = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h20; // Y shift address: 32
 reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'h80; // alpha[k-1] address: 128
@@ -57,6 +58,7 @@ reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
 reg [`DM_ADDR_WIDTH-1:0] waddr;
 reg dina_v, dinb_v;
 //reg [`DATA_WIDTH*2-1:0] dinb_r;
+reg shift_v_r;
 
 always @(posedge clk) begin
     wb_addr_d1 <= wb_addr; 
@@ -64,6 +66,7 @@ always @(posedge clk) begin
     wb_addr_d3 <= wb_addr_d2; 
     wb_addr_d4 <= wb_addr_d3; // write back requires a few delays
 //    dinb_r <= dinb;
+    shift_v_r <= shift_v;
     
     if (rst) begin
         waddra <= 0;
@@ -72,6 +75,7 @@ always @(posedge clk) begin
         waddrd = 8'h40; // Add 
         raddra <= 0;
         raddrb <= 0;
+        raddrc <= 0;
         dina_v <= 0;
         dinb_v <= 0;
     end
@@ -101,27 +105,41 @@ always @(posedge clk) begin
             dinb_v <= 1;
         end
         else begin
+            waddra <= 0;
+            waddrb = 8'h20; // Add 
+            waddrc = 8'h80; // Add 
+            waddrd = 8'h40; // Add 
             dina_v <= 0;
             dinb_v <= 0;
         end
-        
-//        if (shift_v) begin // read enable for shift
+           
+//        if (inst_v) begin // read ports & write-back address
+//            raddrb <= inst[23:16]; // source 2
+//            raddra <= inst[15:8]; // source 1
+//            wb_addr <= inst[7:0]; // destination
+//        end
+//        else if (shift_v)
 //            raddra <= raddra + 1;
-//        end        
-        if (inst_v) begin // read ports & write-back address
+//        else begin
+//            raddrb <= 0;
+//            raddra <= 0;
+//        end
+        
+        if (~inst_v && ~shift_v) begin 
+            raddrb <= 0;
+            raddra <= 0;
+            raddrc <= 0;
+        end
+        else if (inst_v) begin // read ports & write-back address
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
         end
-        else begin
-            raddrb <= 0;
-            raddra <= 0;
+        else if (shift_v) begin
+            raddrc <= raddrc + 1;
+            raddra <= raddrc;
         end
-            
-        if (shift_v) 
-            raddra <= raddra + 1; 
-        else 
-            raddra <= 0;
+
     end 
 end
 
