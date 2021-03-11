@@ -76,6 +76,43 @@ module tb_pe_array;
         // Load the data
         #20; din_overlay_v = 0; 
         #20; din_overlay_v = 0;
+        
+        #20; din_overlay_v = 1; din_overlay = 32'h0004_0002; // 4 + j*2 
+        #20; din_overlay_v = 1; din_overlay = 32'h0003_0001; // 3 + j*1
+        #20; din_overlay_v = 1; din_overlay = 32'h0008_0006; // 8 + j*6 
+        #20; din_overlay_v = 1; din_overlay = 32'h0007_0005; // 7 + j*5 
+        #20; din_overlay_v = 1; din_overlay = 32'h000c_000a; // 12 + j*10
+        #20; din_overlay_v = 1; din_overlay = 32'h000b_0009; // 11 + j*9
+        #20; din_overlay_v = 1; din_overlay = 32'h0004_0002; // 4 + j*2 // add
+        #20; din_overlay_v = 1; din_overlay = 32'h0003_0001; // 3 + j*1 // add 
+
+        #20; din_overlay_v = 1; din_overlay = 32'h0001_0001; // 1 + j*1 
+        #20; din_overlay_v = 1; din_overlay = 32'h0002_0002; // 2 + j*2
+        #20; din_overlay_v = 1; din_overlay = 32'h0003_0003; // 3 + j*3 
+        #20; din_overlay_v = 1; din_overlay = 32'h0004_0004; // 4 + j*4 
+        #20; din_overlay_v = 1; din_overlay = 32'h0005_0005; // 5 + j*5
+        #20; din_overlay_v = 1; din_overlay = 32'h0006_0006; // 6 + j*6
+        #20; din_overlay_v = 1; din_overlay = 32'h0007_0007; // 7 + j*7
+        #20; din_overlay_v = 1; din_overlay = 32'h0008_0008; // 8 + j*8 
+
+        #20; din_overlay_v = 1; din_overlay = 32'h0009_0009; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000a_000a; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000b_000b; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000c_000c; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000d_000d; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000e_000e; 
+        #20; din_overlay_v = 1; din_overlay = 32'h000f_000f; 
+        #20; din_overlay_v = 1; din_overlay = 32'h0010_0010; 
+
+        #20; din_overlay_v = 1; din_overlay = 32'h0001_0001; // 1 + j*1 
+        #20; din_overlay_v = 1; din_overlay = 32'h0002_0002; // 2 + j*2
+        #20; din_overlay_v = 1; din_overlay = 32'h0003_0003; // 3 + j*3 
+        #20; din_overlay_v = 1; din_overlay = 32'h0004_0004; // 4 + j*4 
+        #20; din_overlay_v = 1; din_overlay = 32'h0005_0005; // 5 + j*5
+        #20; din_overlay_v = 1; din_overlay = 32'h0006_0006; // 6 + j*6
+        #20; din_overlay_v = 1; din_overlay = 32'h0007_0007; // 7 + j*7
+        #20; din_overlay_v = 1; din_overlay = 32'h0008_0008; // 8 + j*8 
+
         #20; din_overlay_v = 1; din_overlay = 32'h0004_0002; // 4 + j*2 
         #20; din_overlay_v = 1; din_overlay = 32'h0003_0001; // 3 + j*1
         #20; din_overlay_v = 1; din_overlay = 32'h0008_0006; // 8 + j*6 

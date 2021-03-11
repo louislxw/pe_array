@@ -12,7 +12,7 @@
 // Description: Single PE with data forwarding support (-> Add the state machine)
 //  IMEM: BRAM -> ROM
 // Dependencies: 226 -> 265 LUTs, 295 -> 301 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
-//  182 LTUs, 184 FFs, 1.0 BRAM, 4 DSPs (meet 600MHz)
+//  358 LTUs, 339 FFs, 1.5 BRAM, 4 DSPs (meet 600MHz)
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
@@ -229,7 +229,7 @@ complex_alu ALU(
    // counters to control the state machine
    reg [6:0] iter_cnt = 0; // iteration
    reg [7:0] loop_cnt = 0; // loop
-   reg [4:0] load_cnt = 0; // load
+   reg [5:0] load_cnt = 0; // load
    reg [7:0] cmpt_cnt = 0; // compute
    reg [2:0] tx_cnt = 0;  // transmit
    reg [4:0] shift_cnt = 0; // shift
@@ -303,7 +303,7 @@ complex_alu ALU(
                fsm_output <= 6'b000010; // shift_V = 1
             end
             OUTPUT : begin
-               if (output_cnt == `ALPHA_NUM-1) begin
+               if (output_cnt == `OUT_NUM-1) begin
                   state <= IDLE;
                   output_cnt <= 0; 
                end

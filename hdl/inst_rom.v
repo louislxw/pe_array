@@ -11,7 +11,7 @@
 // Tool Versions: 
 // Description: 
 // 
-// Dependencies: 
+// Dependencies: 0.5 BRAM
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -53,41 +53,42 @@ assign data_out = rom_out;
 //            8'b00000101: rom_out <= 32'h80050545; // mul
 //            8'b00000110: rom_out <= 32'h80060646; // mul
 //            8'b00000111: rom_out <= 32'h80070747; // mul
-//            8'b00001000: rom_out <= 32'hB0444048; // muladd
-//            8'b00001001: rom_out <= 32'hD0444049; // mulsub
-//            8'b00001010: rom_out <= 32'hB046424A;
-//            8'b00001011: rom_out <= 32'hD046424B;
-//            8'b00001100: rom_out <= 32'hB045414C;
-//            8'b00001101: rom_out <= 32'hD045414D;
-//            8'b00001110: rom_out <= 32'hB047434E;
-//            8'b00001111: rom_out <= 32'hD047434F;
-//            8'b00010000: rom_out <= 32'hB04A4850;
-//            8'b00010001: rom_out <= 32'hD04A4852;
-//            8'b00010010: rom_out <= 32'hB24B4951;
-//            8'b00010011: rom_out <= 32'hD24B4953;
-//            8'b00010100: rom_out <= 32'hB04E4C54;
-//            8'b00010101: rom_out <= 32'hD04E4C56;
-//            8'b00010110: rom_out <= 32'hB24F4D55;
-//            8'b00010111: rom_out <= 32'hD24F4D57;
-//            8'b00011000: rom_out <= 32'hB0545058;
-//            8'b00011001: rom_out <= 32'hD054505C;
-//            8'b00011010: rom_out <= 32'hB1565259;
-//            8'b00011011: rom_out <= 32'hD156525D;
-//            8'b00011100: rom_out <= 32'hB255515A;
-//            8'b00011101: rom_out <= 32'hD255515E;
-//            8'b00011110: rom_out <= 32'hB357535B;
-//            8'b00011111: rom_out <= 32'hD357535F;
+//            8'b00001000: rom_out <= 32'hA0444048; // muladd
+//            8'b00001001: rom_out <= 32'hC0444049; // mulsub
+//            8'b00001010: rom_out <= 32'hA046424A;
+//            8'b00001011: rom_out <= 32'hC046424B;
+//            8'b00001100: rom_out <= 32'hA045414C;
+//            8'b00001101: rom_out <= 32'hC045414D;
+//            8'b00001110: rom_out <= 32'hA047434E;
+//            8'b00001111: rom_out <= 32'hC047434F;
+//            8'b00010000: rom_out <= 32'hA04A4850;
+//            8'b00010001: rom_out <= 32'hC04A4852;
+//            8'b00010010: rom_out <= 32'hA24B4951;
+//            8'b00010011: rom_out <= 32'hC24B4953;
+//            8'b00010100: rom_out <= 32'hA04E4C54;
+//            8'b00010101: rom_out <= 32'hC04E4C56;
+//            8'b00010110: rom_out <= 32'hA24F4D55;
+//            8'b00010111: rom_out <= 32'hC24F4D57;
+//            8'b00011000: rom_out <= 32'hA0545058;
+//            8'b00011001: rom_out <= 32'hC054505C;
+//            8'b00011010: rom_out <= 32'hA1565259;
+//            8'b00011011: rom_out <= 32'hC156525D;
+//            8'b00011100: rom_out <= 32'hA255515A;
+//            8'b00011101: rom_out <= 32'hC255515E;
+//            8'b00011110: rom_out <= 32'hA357535B;
+//            8'b00011111: rom_out <= 32'hC357535F;
             // SCD Instructions
+            // 32 element-wise complex multiplications
             8'b00000000: rom_out <= 32'h80200040; // mul 
-            8'b00000001: rom_out <= 32'h80210141; // mul
-            8'b00000010: rom_out <= 32'h80220242; // mul
-            8'b00000011: rom_out <= 32'h80230343; // mul
-            8'b00000100: rom_out <= 32'h80240444; // mul
-            8'b00000101: rom_out <= 32'h80250545; // mul
-            8'b00000110: rom_out <= 32'h80260646; // mul
-            8'b00000111: rom_out <= 32'h80270747; // mul
-            8'b00001000: rom_out <= 32'h80280848; // 
-            8'b00001001: rom_out <= 32'h80290949; // 
+            8'b00000001: rom_out <= 32'h80210141; 
+            8'b00000010: rom_out <= 32'h80220242; 
+            8'b00000011: rom_out <= 32'h80230343; 
+            8'b00000100: rom_out <= 32'h80240444; 
+            8'b00000101: rom_out <= 32'h80250545; 
+            8'b00000110: rom_out <= 32'h80260646; 
+            8'b00000111: rom_out <= 32'h80270747; 
+            8'b00001000: rom_out <= 32'h80280848; 
+            8'b00001001: rom_out <= 32'h80290949; 
             8'b00001010: rom_out <= 32'h802A0A4A;
             8'b00001011: rom_out <= 32'h802B0B4B;
             8'b00001100: rom_out <= 32'h802C0C4C;
@@ -111,8 +112,8 @@ assign data_out = rom_out;
             8'b00011110: rom_out <= 32'h803E1E5E;
             8'b00011111: rom_out <= 32'h803F1F5F;
             // Stage-1
-            8'b00100000: rom_out <= 32'hA0504060;
-            8'b00100001: rom_out <= 32'hC0504061;
+            8'b00100000: rom_out <= 32'hA0504060; // muladd
+            8'b00100001: rom_out <= 32'hC0504061; // mulsub
             8'b00100010: rom_out <= 32'hA0584862;
             8'b00100011: rom_out <= 32'hC0584863;
             8'b00100100: rom_out <= 32'hA0544464;
@@ -144,8 +145,8 @@ assign data_out = rom_out;
             8'b00111110: rom_out <= 32'hA05F4F7E;
             8'b00111111: rom_out <= 32'hC05F4F7F;
             // Stage-2
-            8'b01000000: rom_out <= 32'hA0626040; 
-            8'b01000001: rom_out <= 32'hC0626042; 
+            8'b01000000: rom_out <= 32'hA0626040; // muladd
+            8'b01000001: rom_out <= 32'hC0626042; // mulsub
             8'b01000010: rom_out <= 32'hA8636141; 
             8'b01000011: rom_out <= 32'hC8636143;
             8'b01000100: rom_out <= 32'hA0666444;
@@ -177,8 +178,8 @@ assign data_out = rom_out;
             8'b01011110: rom_out <= 32'hA87F7D5D;
             8'b01011111: rom_out <= 32'hC87F7D5F;
             // Stage-3
-            8'b01100000: rom_out <= 32'hA0444060;
-            8'b01100001: rom_out <= 32'hC0444064;
+            8'b01100000: rom_out <= 32'hA0444060; // muladd
+            8'b01100001: rom_out <= 32'hC0444064; // mulsub
             8'b01100010: rom_out <= 32'hA4454161;
             8'b01100011: rom_out <= 32'hC4454165;
             8'b01100100: rom_out <= 32'hA8464262;
@@ -210,8 +211,8 @@ assign data_out = rom_out;
             8'b01111110: rom_out <= 32'hAC5F5B7B;
             8'b01111111: rom_out <= 32'hCC5F5B7F;
             // Stage-4
-            8'b10000000: rom_out <= 32'hA0686040; 
-            8'b10000001: rom_out <= 32'hC0686048; 
+            8'b10000000: rom_out <= 32'hA0686040; // muladd
+            8'b10000001: rom_out <= 32'hC0686048; // mulsub
             8'b10000010: rom_out <= 32'hA2696141; 
             8'b10000011: rom_out <= 32'hC2696149;
             8'b10000100: rom_out <= 32'hA46A6242;
@@ -243,8 +244,8 @@ assign data_out = rom_out;
             8'b10011110: rom_out <= 32'hAE7F7757;
             8'b10011111: rom_out <= 32'hCE7F775F;
             // Stage-5
-            8'b10100000: rom_out <= 32'hA0504060;
-            8'b10100001: rom_out <= 32'hC0504070;
+            8'b10100000: rom_out <= 32'hA0504060; // muladd
+            8'b10100001: rom_out <= 32'hC0504070; // mulsub
             8'b10100010: rom_out <= 32'hA1514161;
             8'b10100011: rom_out <= 32'hC1514171;
             8'b10100100: rom_out <= 32'hA2524262;

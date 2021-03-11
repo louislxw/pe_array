@@ -32,7 +32,8 @@ input  [`DATA_WIDTH*2-1:0] din_overlay;
 
 output dout_overlay_v; 
 output [`DATA_WIDTH*2-1:0] dout_overlay; 
-//reg [`DATA_WIDTH*2-1:0] dout_overlay; //
+reg dout_overlay_v; //
+reg [`DATA_WIDTH*2-1:0] dout_overlay; //
 
 reg  [`PE_NUM-1:0] pe_in_v;
 reg  [`DATA_WIDTH*2-1:0] pe_in [`PE_NUM-1:0];
@@ -42,9 +43,10 @@ wire [`PE_NUM-1:0] pe_tx_v;
 wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
 wire [`PE_NUM-1:0] pe_shift_v;
 wire [`DATA_WIDTH*2-1:0] pe_shift [`PE_NUM-1:0];
-wire p_in_v;
-wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
+wire array_out_v;
+wire [`DATA_WIDTH*2-1:0] array_out;
 //wire [`PE_NUM*`DATA_WIDTH*2-1:0] pe_in;
+//wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
 //wire p_out_v;
 //wire shift_v;
 
@@ -80,13 +82,12 @@ always @ (posedge clk) begin
     end
 end
 
-
 genvar i;
 generate
     for (i = 0; i < `PE_NUM; i = i + 1) begin : array
         // PE_0
         if (i == 0) begin
-            pe PE0( 
+            pe ( // PE0( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[0]), 
@@ -105,7 +106,7 @@ generate
         end       
         // PE_N-1 (Output)
         else if (i == `PE_NUM-1) begin
-            pe PE_N_1( 
+            pe ( // PE_N_1( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
@@ -124,7 +125,7 @@ generate
         end        
         // PE_1 to PE_N-2
         else begin
-             pe PE_K( 
+             pe ( // PE_K( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
@@ -142,19 +143,31 @@ generate
             ); 
         end
         
-        assign p_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
-//        assign p_in_v = pe_out_v[i];
+//        assign p_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
+        assign array_out_v = pe_out_v[i] ? 1 : 0;
+        assign array_out = pe_out_v[i] ? pe_out[i] : 0;
         
     end
 endgenerate
 
-piso_new out_buffer(
-    .clk(clk), 
-    .load(load),
-    .p_in_v(), //
-    .p_in(p_in), 
-    .s_out_v(dout_overlay_v), 
-    .s_out(dout_overlay)
-    );
+//piso_new out_buffer(
+//    .clk(clk), 
+//    .load(load),
+//    .p_in_v(), //
+//    .p_in(p_in), 
+//    .s_out_v(dout_overlay_v), 
+//    .s_out(dout_overlay)
+//    );
+
+always @ (posedge clk) begin
+    if(array_out_v) begin
+        dout_overlay_v <= 1;
+        dout_overlay <= array_out;
+    end
+    else begin
+        dout_overlay_v <= 0;
+        dout_overlay <= 0;
+    end
+end
     
 endmodule
