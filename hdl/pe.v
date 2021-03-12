@@ -321,11 +321,11 @@ complex_alu ALU(
          loop_cnt <= 0;
          iter_cnt <= 0;
       end
-      else if (loop_cnt == (`LOAD_NUM + `INST_NUM + `TX_NUM - 1)) begin
+      else if (loop_cnt == (`INST_NUM + `TX_NUM + `REG_NUM - 1)) begin
          loop_cnt <= 0;
          iter_cnt <= iter_cnt + 1'b1;
       end
-      else if (state == LOAD | state == COMPUTE | state == TRANSMIT)
+      else if (state == COMPUTE | state == TRANSMIT | state == SHIFT)
          loop_cnt <= loop_cnt + 1'b1;
  
 //    always @(posedge clk)
