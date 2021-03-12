@@ -17,7 +17,7 @@
 `define WN_ADDR_WIDTH   4
 
 // Top PE
-`define PE_NUM          32 // 128 
+`define PE_NUM          4 // 128 
 `define PE_ADDR_WIDTH   7 // 2^7 = 128
 `define REG_NUM         32 // 32 
 `define REG_ADDR_WIDTH  5 // 2^5 = 32

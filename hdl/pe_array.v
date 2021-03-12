@@ -60,18 +60,18 @@ wire [`DATA_WIDTH*2-1:0] array_out;
 //    .p_out(pe_in)
 //    );
 
-reg [4:0] load_cnt = 0;
+//reg [5:0] load_cnt = 0; // 2^6 = 64
 reg [13:0] stream_cnt = 0;
 always @ (posedge clk) 
     if(din_overlay_v) 
-        load_cnt <= load_cnt + 1;
+        stream_cnt <= stream_cnt + 1;
     else 
-        load_cnt <= 0;
+        stream_cnt <= 0;
 
 integer j;
 always @ (posedge clk) begin
     for (j = 0; j < `PE_NUM; j = j + 1) begin 
-        if(load_cnt >= j*`LOAD_NUM && load_cnt < (j+1)*`LOAD_NUM) begin
+        if(stream_cnt >= j*`LOAD_NUM && stream_cnt < (j+1)*`LOAD_NUM) begin
             pe_in_v[j] <= din_overlay_v;
             pe_in[j] <= din_overlay;
         end
@@ -87,7 +87,11 @@ generate
     for (i = 0; i < `PE_NUM; i = i + 1) begin : array
         // PE_0
         if (i == 0) begin
-            pe ( // PE0( 
+            pe #
+            (
+            .ITER_NUM(`ITER_NUM-i)
+            )
+            PE0( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[0]), 
@@ -106,7 +110,11 @@ generate
         end       
         // PE_N-1 (Output)
         else if (i == `PE_NUM-1) begin
-            pe ( // PE_N_1( 
+            pe #
+            (
+            .ITER_NUM(`ITER_NUM-i)
+            )
+            PE_N_1( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
@@ -125,7 +133,11 @@ generate
         end        
         // PE_1 to PE_N-2
         else begin
-             pe ( // PE_K( 
+             pe #
+            (
+            .ITER_NUM(`ITER_NUM-i)
+            )
+            PE_K( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 

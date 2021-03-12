@@ -20,7 +20,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "parameters.vh"
 
-module pe( 
+module pe #
+(
+    parameter ITER_NUM = 4
+)
+( 
     clk, rst, din_pe_v, din_pe, din_shift_v, din_shift, din_tx_v, din_tx, 
 //    inst_in_v, inst_in,  
     dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift
@@ -36,7 +40,6 @@ input  din_tx_v;
 input  [`DATA_WIDTH*2-1:0] din_tx;
 //input  inst_in_v;
 //input  [`INST_WIDTH-1:0] inst_in;
-//input  alpha_v;
 
 output dout_pe_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
@@ -120,7 +123,6 @@ control CTRL(
     );
 
 reg dmem_re; // register write/read enable signal to synchronize with dout_ctrl
-
 always @ (posedge clk) begin
     if (inst_pc_v | shift_v) begin
         dmem_re <= 1; 
@@ -209,14 +211,15 @@ complex_alu ALU(
     );    
 
 /*** Moore finite state machine (FSM) for data transmit & alpha output ***/
-   parameter IDLE = 3'b000;
-   parameter LOAD = 3'b001;
-   parameter COMPUTE = 3'b010;
-   parameter TRANSMIT = 3'b011;
-   parameter SHIFT = 3'b100;
-   parameter OUTPUT = 3'b101;
+localparam [2:0] 
+   IDLE = 3'b000,
+   LOAD = 3'b001,
+   COMPUTE = 3'b010,
+   TRANSMIT = 3'b011,
+   SHIFT = 3'b100,
+   OUTPUT = 3'b101;
 
-   reg [5:0] fsm_output = 6'b000000;
+   reg [5:0] fsm_output = 6'b000000; // indicate valid signal of each state
    
    wire start, load_v, cmpt_v, tx_v, shift_v, output_v;
    assign start = fsm_output[5];
@@ -263,7 +266,7 @@ complex_alu ALU(
                fsm_output <= 6'b010000;  // load_v = 1
             end
             COMPUTE : begin
-               if (cmpt_cnt == `INST_NUM-1 && iter_cnt == `ITER_NUM-1) begin
+               if (cmpt_cnt == `INST_NUM-1 && iter_cnt == ITER_NUM-1) begin
                   state <= OUTPUT;
                   cmpt_cnt <= 0;
 //                  iter_cnt <= 0;
