@@ -21,7 +21,8 @@
 `include "parameters.vh"
 
 module pe_array(
-    clk, rst, load, din_overlay_v, din_overlay, dout_overlay_v, dout_overlay
+    clk, rst, load, din_overlay_v, din_overlay, dout_overlay
+//    array_out
     );
     
 input  clk; 
@@ -30,9 +31,9 @@ input  load;
 input  din_overlay_v; 
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 
-output dout_overlay_v; 
+//output dout_overlay_v; 
 output [`DATA_WIDTH*2-1:0] dout_overlay; 
-reg dout_overlay_v; //
+//reg dout_overlay_v; //
 reg [`DATA_WIDTH*2-1:0] dout_overlay; //
 
 reg  [`PE_NUM-1:0] pe_in_v;
@@ -43,8 +44,8 @@ wire [`PE_NUM-1:0] pe_tx_v;
 wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
 wire [`PE_NUM-1:0] pe_shift_v;
 wire [`DATA_WIDTH*2-1:0] pe_shift [`PE_NUM-1:0];
-wire array_out_v;
-wire [`DATA_WIDTH*2-1:0] array_out;
+//output array_out_v;
+wire [`PE_NUM*`DATA_WIDTH*2-1:0] array_out;
 //wire [`PE_NUM*`DATA_WIDTH*2-1:0] pe_in;
 //wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
 //wire p_out_v;
@@ -91,7 +92,7 @@ generate
             (
             .ITER_NUM(`ITER_NUM-i)
             )
-            PE0( 
+            PE_i( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[0]), 
@@ -114,7 +115,7 @@ generate
             (
             .ITER_NUM(`ITER_NUM-i)
             )
-            PE_N_1( 
+            PE_i( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
@@ -137,7 +138,7 @@ generate
             (
             .ITER_NUM(`ITER_NUM-i)
             )
-            PE_K( 
+            PE_i( 
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
@@ -156,11 +157,20 @@ generate
         end
         
 //        assign p_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
-        assign array_out_v = pe_out_v[i] ? 1 : 0;
-        assign array_out = pe_out_v[i] ? pe_out[i] : 0;
+//        assign array_out_v = pe_out_v[i] ? 1 : 0;
+//        assign array_out = array_out_v ? pe_out[i] : 0;
+        
+        assign array_out[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
         
     end
 endgenerate
+
+//genvar k;
+//generate
+//    for (k = 0; k < `PE_NUM-1; k = k + 1) begin : out_valid
+//        array_out_v = pe_out_v[k] | pe_out_v[k+1];
+//    end
+//endgenerate 
 
 //piso_new out_buffer(
 //    .clk(clk), 
@@ -172,12 +182,12 @@ endgenerate
 //    );
 
 always @ (posedge clk) begin
-    if(array_out_v) begin
-        dout_overlay_v <= 1;
+    if(load) begin
+//        dout_overlay_v <= 1;
         dout_overlay <= array_out;
     end
     else begin
-        dout_overlay_v <= 0;
+//        dout_overlay_v <= 0;
         dout_overlay <= 0;
     end
 end
