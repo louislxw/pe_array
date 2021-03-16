@@ -19,6 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `include "parameters.vh"
+`define NULL 0  
 
 module tb_pe_array;
 
@@ -57,6 +58,19 @@ module tb_pe_array;
     always @(posedge clk)
         cycle = cycle + 1;
 
+    integer data_file; // file handler
+    integer scan_file; // file handler
+    reg [`DATA_WIDTH*2-1:0] captured_data;
+    
+    always @(posedge clk) begin
+        scan_file = $fscanf(data_file, "%x\n", captured_data); 
+        if (!$feof(data_file) && !rst) begin
+            //use captured_data as you would any other wire or reg value;
+            din_overlay = captured_data;
+            din_overlay_v = 1;
+        end
+    end
+    
     initial begin
         // Initialize Inputs
         clk = 0;
@@ -70,12 +84,14 @@ module tb_pe_array;
         
         // Add stimulus here
         #20; rst = 0; 
-        #20;
-        #20;
-
-        // Load the data
-        #20; din_overlay_v = 0; 
-        #20; din_overlay_v = 0;
+        // Load the data  
+        data_file = $fopen("array_input_hex.txt", "rb"); //read mode, binary
+        if (data_file == `NULL) begin
+            $display("data_file handle was NULL");
+            $finish;
+        end
+        
+        /*
         // X0, Y0
         #20; din_overlay_v = 1; din_overlay = 32'h0004_0002; // 4 + j*2 
         #20; din_overlay_v = 1; din_overlay = 32'h0003_0001; // 3 + j*1
@@ -375,6 +391,7 @@ module tb_pe_array;
         #20; din_overlay_v = 0; din_overlay = 4; 
         #20; din_overlay_v = 0; din_overlay = 5; 
         #20; din_overlay_v = 0; din_overlay = 6; 
+        */
         
         #2000;
 		
