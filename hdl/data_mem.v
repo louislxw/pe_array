@@ -51,7 +51,7 @@ reg [`DM_ADDR_WIDTH-1:0] raddrb = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddrc = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h20; // Y shift address: 32
-reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'h80; // alpha[k-1] address: 128
+reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'hA0; // alpha[k-1] address: 160
 reg [`DM_ADDR_WIDTH-1:0] waddrd = 8'h40; // write-back address: 64
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4;
@@ -71,7 +71,7 @@ always @(posedge clk) begin
     if (rst) begin
         waddra <= 0;
         waddrb = 8'h20; // Add 
-        waddrc = 8'h80; // Add 
+        waddrc = 8'hA0; // Add 
         waddrd = 8'h40; // Add 
         raddra <= 0;
         raddrb <= 0;
@@ -107,7 +107,7 @@ always @(posedge clk) begin
         else begin
             waddra <= 0;
             waddrb = 8'h20; // Add 
-            waddrc = 8'h80; // Add 
+            waddrc = 8'hA0; // Add 
             waddrd = 8'h40; // Add 
             dina_v <= 0;
             dinb_v <= 0;

@@ -91,6 +91,7 @@ always @ (posedge clk)
 inst_rom IMEM(
     .clk(clk), 
     .en(cmpt_v), 
+    .iter(iter_cnt),
     .addr(inst_addr), 
     .data_out(inst_pc)
     );
@@ -230,7 +231,7 @@ localparam [2:0]
    assign output_v = fsm_output[0];
    
    // counters to control the state machine
-   reg [6:0] iter_cnt = 0; // iteration
+   reg [7:0] iter_cnt = 0; // iteration
    reg [7:0] loop_cnt = 0; // loop
    reg [5:0] load_cnt = 0; // load
    reg [7:0] cmpt_cnt = 0; // compute
