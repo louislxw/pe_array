@@ -147,7 +147,7 @@ end
 assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2); 
 assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4); 
 assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
-assign dout = (mux == 2'b11) ? 0 : {i_out, q_out}; // 32-bit
+assign dout = (mux == 2'b11) ? a_out : {i_out, q_out}; // 32-bit
 
 assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? Wi : a
 assign a_1 = (opcode_d2 == 3'b111) ? din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] : din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // MAX ? a : c

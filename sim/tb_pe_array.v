@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 03/08/2021 01:30:14 PM
+// Create Date: 03/17/2021 10:36:46 PM
 // Design Name: 
 // Module Name: tb_pe_array
 // Project Name: 
@@ -66,9 +66,13 @@ module tb_pe_array;
         scan_file = $fscanf(data_file, "%x\n", captured_data); 
         if (!$feof(data_file) && !rst) begin
             //use captured_data as you would any other wire or reg value;
-            din_overlay = captured_data;
-            din_overlay_v = 1;
+            din_overlay <= captured_data;
+            din_overlay_v <= 1;
         end
+        else begin
+            din_overlay <= 0;
+            din_overlay_v <= 0;
+        end    
     end
     
     initial begin
