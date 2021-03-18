@@ -108,7 +108,7 @@ wire [`PORTB_WIDTH-1:0] b_1, b_2, b_3, b_4; // 18-bit
 wire [`PORTA_WIDTH-1:0] a_1, a_2, a_3, a_4; // 30-bit
 wire [`PORTC_WIDTH-1:0] c_1, c_2, c_3, c_4; // 48-bit
 wire [`PORTP_WIDTH-1:0] p_o_1, p_o_2, p_o_3, p_o_4; // 48-bit
-wire [`DATA_WIDTH-1:0] i_out, q_out; // 16-bit
+wire [`DATA_WIDTH*2-1:0] i_out, q_out; // 16-bit
 wire [`DATA_WIDTH*2-1:0] a_out; // 32-bit
 
 reg [1:0] mux = 2'b00; // Add 5-state pipeline to match with dout_alu
@@ -144,26 +144,27 @@ end
 //assign a_4 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
 //assign c_4 = 16'd0;
 
-assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2); 
-assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4); 
+assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2) ; 
+assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4) ; 
 assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
-assign dout = (mux == 2'b11) ? a_out : {i_out, q_out}; // 32-bit
+assign dout = (mux == 2'b11) ? a_out : {i_out[31:16], q_out[31:16]}; // 32-bit
 
-assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? Wi : a
-assign a_1 = (opcode_d2 == 3'b111) ? din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] : din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // MAX ? a : c
-assign c_1 = din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? a : 0
+// Below are signed extend assignment!!!
+assign b_1 = { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : a
+assign a_1 = (opcode_d2 == 3'b111) ? { {14{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] } : { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // MAX ? a : c
+assign c_1 = { {32{din_3[31]}}, din_3[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? a : 0
 
-assign b_2 = din_1[`DATA_WIDTH-1:0]; // rom_en ? Wq : b
-assign a_2 = (opcode_d2 == 3'b111) ? din_1[`DATA_WIDTH-1:0] : din_2[`DATA_WIDTH-1:0]; // // MAX ? b : d
-assign c_2 = 16'd0;
+assign b_2 = { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : b
+assign a_2 = (opcode_d2 == 3'b111) ? { {14{din_1[15]}}, din_1[`DATA_WIDTH-1:0] } : { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // // MAX ? b : d
+assign c_2 = 48'd0; //
 
-assign b_3 = (opcode_d2 == 3'b111) ? din_2[`DATA_WIDTH-1:0] : din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? Wi : (MAX ? d : a)
-assign a_3 = din_2[`DATA_WIDTH-1:0]; // d
-assign c_3 = din_3[`DATA_WIDTH-1:0]; // rom_en ? b : 0
+assign b_3 = (opcode_d2 == 3'b111) ? { {2{din_2[15]}}, din_2[`DATA_WIDTH-1:0] } : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? d : a)
+assign a_3 = { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // d
+assign c_3 = { {32{din_3[15]}}, din_3[`DATA_WIDTH-1:0] };  // rom_en ? b : 0
 
 assign b_4 = (opcode_d2 == 3'b111) ? din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] : din_1[`DATA_WIDTH-1:0]; // rom_en ? Wq : (MAX ? c : b)
-assign a_4 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-assign c_4 = 16'd0;
+assign a_4 = { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // c
+assign c_4 = 48'd0; // 
 
 // configuration bits for DSP48E2
 reg [`ALUMODE_WIDTH-1:0] alumode_1, alumode_2, alumode_3, alumode_4; // 4-bit
