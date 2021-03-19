@@ -39,77 +39,13 @@ input  [`DATA_WIDTH*2-1:0] din_3; // 32-bit
 
 output [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
-
-//reg [`PORTB_WIDTH-1:0] b_1, b_2, b_3, b_4; // 18-bit
-//reg [`PORTA_WIDTH-1:0] a_1, a_2, a_3, a_4; // 30-bit
-//reg [`PORTC_WIDTH-1:0] c_1, c_2, c_3, c_4; // 48-bit
-//reg [`DATA_WIDTH-1:0] i_out, q_out; // 16-bit
-
-//always @(posedge clk)
-////always @ *
-//    case (opcode)
-////        3'b000: <output> <= <input1>;
-////        3'b001: <output> <= <input2>;
-////        3'b010: <output> <= <input3>;
-////        3'b011: <output> <= <input4>;
-//        3'b100: begin // COMPEX_MULT
-//            b_1 <= din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
-//            a_1 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_1 <= 0;
-//            b_2 <= din_1[`DATA_WIDTH-1:0]; // b
-//            a_2 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_2 <= 0;
-//            b_3 <= din_1[`DATA_WIDTH-1:0]; // b
-//            a_3 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_3 <= 0;
-//            b_4 <= din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
-//            a_4 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_4 <= 0;
-//            i_out <= p_o_1 - p_o_2; // a*c - b*d 
-//            q_out <= p_o_3 + p_o_4; // b*c + a*d
-//         end
-//         3'b101: begin // MULADD
-//            b_1 <= din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
-//            a_1 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_1 <= din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
-//            b_2 <= din_3[`DATA_WIDTH-1:0]; // Wq
-//            a_2 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_2 <= 0;
-//            b_3 <= din_3[`DATA_WIDTH-1:0]; // Wq
-//            a_3 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_3 <= din_1[`DATA_WIDTH-1:0]; // b
-//            b_4 <= din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
-//            a_4 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_4 <= 0;
-//            i_out <= p_o_1 - p_o_2; // a + Wi*c - Wq*d
-//            q_out <= p_o_3 + p_o_4; // b + Wq*c + Wi*d
-//         end
-//         3'b110: begin // MULSUB
-//            b_1 <= din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
-//            a_1 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_1 <= din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // a
-//            b_2 <= din_3[`DATA_WIDTH-1:0]; // Wq
-//            a_2 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_2 <= 0;
-//            b_3 <= din_3[`DATA_WIDTH-1:0]; // Wq
-//            a_3 <= din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//            c_3 <= din_1[`DATA_WIDTH-1:0]; // b
-//            b_4 <= din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // Wi
-//            a_4 <= din_2[`DATA_WIDTH-1:0]; // d
-//            c_4 <= 0;
-//            i_out <= p_o_1 + p_o_2; // a - Wi*c + Wq*d
-//            q_out <= p_o_3 - p_o_4; // b - Wq*c - Wi*d
-//         end
-////        3'b111: <output> <= <input8>;
-//      endcase
-
 /*** Complex ALU Input Map ***/
 wire [`PORTB_WIDTH-1:0] b_1, b_2, b_3, b_4; // 18-bit
 wire [`PORTA_WIDTH-1:0] a_1, a_2, a_3, a_4; // 30-bit
 wire [`PORTC_WIDTH-1:0] c_1, c_2, c_3, c_4; // 48-bit
 wire [`PORTP_WIDTH-1:0] p_o_1, p_o_2, p_o_3, p_o_4; // 48-bit
-wire [`DATA_WIDTH*2-1:0] i_out, q_out; // 16-bit
-wire [`DATA_WIDTH*2-1:0] a_out; // 32-bit
+//wire [`DATA_WIDTH*2-1:0] i_out, q_out; // 16-bit
+//wire [`DATA_WIDTH*2-1:0] a_out; // 32-bit
 
 reg [1:0] mux = 2'b00; // Add 5-state pipeline to match with dout_alu
 reg [2:0] opcode_d1, opcode_d2, opcode_d3, opcode_d4;
@@ -127,26 +63,27 @@ always @ (posedge clk) begin
 end
 
 // MULSUB(110); MULADD(111) and MUL(100) share the same input map!
-//assign i_out = mux ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2); 
-//assign q_out = mux ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4); 
-//assign dout = {i_out, q_out}; // 32-bit
+reg [`DATA_WIDTH*2-1:0] i_out, q_out; // 16-bit
+reg [`DATA_WIDTH*2-1:0] a_out; // 32-bit
+always @ (posedge clk) begin
+    if (mux == 2'b01) begin
+        i_out <= (p_o_1 - p_o_2) << 1;
+        q_out <= (p_o_3 + p_o_4) << 1; 
+    end
+    else if (mux == 2'b10) begin
+        i_out <= (p_o_1 + p_o_2) << 1;
+        q_out <= (p_o_3 - p_o_4) << 1;
+    end
+    
+    if ((p_o_1 + p_o_2) > (p_o_3 + p_o_4)) 
+        a_out <= p_o_1 + p_o_2;
+    else
+        a_out <= p_o_3 + p_o_4;
+end
 
-//assign b_1 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? Wi : a
-//assign a_1 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//assign c_1 = din_3[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? a : 0
-//assign b_2 = din_1[`DATA_WIDTH-1:0]; // rom_en ? Wq : b
-//assign a_2 = din_2[`DATA_WIDTH-1:0]; // d
-//assign c_2 = 16'd0;
-//assign b_3 = din_1[`DATA_WIDTH*2-1:`DATA_WIDTH]; // rom_en ? Wi : a
-//assign a_3 = din_2[`DATA_WIDTH-1:0]; // d
-//assign c_3 = din_3[`DATA_WIDTH-1:0]; // rom_en ? b : 0
-//assign b_4 = din_1[`DATA_WIDTH-1:0]; // rom_en ? Wq : b
-//assign a_4 = din_2[`DATA_WIDTH*2-1:`DATA_WIDTH]; // c
-//assign c_4 = 16'd0;
-
-assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) : (p_o_1 - p_o_2) ; 
-assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) : (p_o_3 + p_o_4) ; 
-assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
+//assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) << 1 : (p_o_1 - p_o_2) << 1 ; 
+//assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) << 1 : (p_o_3 + p_o_4) << 1 ; 
+//assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
 assign dout = (mux == 2'b11) ? a_out : {i_out[31:16], q_out[31:16]}; // 32-bit
 
 // Below are signed extend assignment!!!
