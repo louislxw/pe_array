@@ -64,27 +64,36 @@ end
 
 // MULSUB(110); MULADD(111) and MUL(100) share the same input map!
 reg [`DATA_WIDTH*2-1:0] i_out, q_out; // 16-bit
+reg [`DATA_WIDTH*2-1:0] i_out_r, q_out_r; // 16-bit
+reg [`DATA_WIDTH*2-1:0] p_1_2, p_3_4; // 32-bit
 reg [`DATA_WIDTH*2-1:0] a_out; // 32-bit
 always @ (posedge clk) begin
     if (mux == 2'b01) begin
-        i_out <= (p_o_1 - p_o_2) << 1;
-        q_out <= (p_o_3 + p_o_4) << 1; 
+        i_out <= (p_o_1 - p_o_2); // << 1;
+        q_out <= (p_o_3 + p_o_4); // << 1; 
+        i_out_r <= i_out << 1;
+        q_out_r <= q_out << 1;
     end
     else if (mux == 2'b10) begin
-        i_out <= (p_o_1 + p_o_2) << 1;
-        q_out <= (p_o_3 - p_o_4) << 1;
+        i_out <= (p_o_1 + p_o_2); // << 1;
+        q_out <= (p_o_3 - p_o_4); // << 1;
+        i_out_r <= i_out << 1;
+        q_out_r <= q_out << 1;
     end
     
-    if ((p_o_1 + p_o_2) > (p_o_3 + p_o_4)) 
-        a_out <= p_o_1 + p_o_2;
+    p_1_2 <= p_o_1 + p_o_2;
+    p_3_4 <= p_o_3 + p_o_4;
+    
+    if (p_1_2 > p_3_4) 
+        a_out <= p_1_2; // p_o_1 + p_o_2;
     else
-        a_out <= p_o_3 + p_o_4;
+        a_out <= p_3_4; // p_o_3 + p_o_4;
 end
 
 //assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) << 1 : (p_o_1 - p_o_2) << 1 ; 
 //assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) << 1 : (p_o_3 + p_o_4) << 1 ; 
 //assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
-assign dout = (mux == 2'b11) ? a_out : {i_out[31:16], q_out[31:16]}; // 32-bit
+assign dout = (mux == 2'b11) ? a_out : {i_out_r[31:16], q_out_r[31:16]}; // 32-bit
 
 // Below are signed extend assignment!!!
 assign b_1 = { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : a
