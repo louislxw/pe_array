@@ -51,7 +51,7 @@ output [3:0] usemult; // 1-bit * 4
 reg [`DATA_WIDTH*2-1:0] dout; // 32-bit
 
 /*** Control Logics for Data Ouput Valid Signal ***/
-parameter DELAY = 8; // 6-stage pipeline // 6->8
+parameter DELAY = 7; // 6-stage pipeline // 6 -> 7
 reg [DELAY-1:0] inst_v_reg = 0; 
 
 always @ (posedge clk) begin 
