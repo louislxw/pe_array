@@ -103,7 +103,7 @@ assign dout = (mux_r == 2'b11) ? (p_1_2 > p_3_4 ? p_1_2 : p_3_4) : {i_out[31:16]
 // Below are signed extend assignment!!!
 assign b_1 = { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : a
 assign a_1 = (opcode_d2 == 3'b111) ? { {14{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] } : { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // MAX ? a : c
-assign c_1 = { {32{din_3[31]}}, din_3[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? a : 0
+assign c_1 = (opcode_d2 == 3'b101 | opcode_d2 == 3'b110) ? { {17{din_3[31]}}, din_3[`DATA_WIDTH*2-1:`DATA_WIDTH], {15{1'b0}} } : { {32{din_3[31]}}, din_3[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? a : 0
 
 assign b_2 = { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : b
 assign a_2 = (opcode_d2 == 3'b111) ? { {14{din_1[15]}}, din_1[`DATA_WIDTH-1:0] } : { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // // MAX ? b : d
@@ -111,7 +111,7 @@ assign c_2 = 48'd0; //
 
 assign b_3 = (opcode_d2 == 3'b111) ? { {2{din_2[15]}}, din_2[`DATA_WIDTH-1:0] } : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? d : a)
 assign a_3 = { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // d
-assign c_3 = { {32{din_3[15]}}, din_3[`DATA_WIDTH-1:0] };  // rom_en ? b : 0
+assign c_3 = (opcode_d2 == 3'b101 | opcode_d2 == 3'b110) ? { {17{din_3[15]}}, din_3[`DATA_WIDTH-1:0], {15{1'b0}} } : { {32{din_3[15]}}, din_3[`DATA_WIDTH-1:0] };  // rom_en ? b : 0
 
 assign b_4 = (opcode_d2 == 3'b111) ? din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] : din_1[`DATA_WIDTH-1:0]; // rom_en ? Wq : (MAX ? c : b)
 assign a_4 = { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // c
