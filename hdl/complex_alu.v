@@ -54,22 +54,22 @@ always @ (posedge clk) begin
     opcode_d2 <= opcode_d1;
     opcode_d3 <= opcode_d2;
     opcode_d4 <= opcode_d3;
+    
+    if (opcode_d4 == 3'b101) // MULADD
+        mux <= 2'b01; 
     if (opcode_d4 == 3'b110) // MULSUB
-        mux <= 2'b10; 
-    else if (opcode_d4 == 3'b111) // MAX
+        mux <= 2'b10;     
+    if (opcode_d4 == 3'b111) // MAX
         mux <= 2'b11;
-    else if (opcode_d4 == 3'b101)
-        mux <= 2'b01; // MULADD
-    else 
-        mux <= 2'b00; // MUL
+    if (opcode_d4 == 3'b100) // MUL
+        mux <= 2'b00; 
 end
 
 // MULSUB(110); MULADD(111) and MUL(100) share the same input map!
 reg [`DATA_WIDTH*2-1:0] i_out, q_out; // 32-bit
 reg [`DATA_WIDTH*2-1:0] p_1_2, p_3_4; // 32-bit
-reg [`DATA_WIDTH*2-1:0] a_out; // 32-bit
 always @ (posedge clk) begin
-    if (mux == 2'b01) begin // MULADD
+    if (mux == 2'b00 || mux == 2'b01) begin // MUL or MULADD
         i_out <= (p_o_1 - p_o_2); // << 1;
         q_out <= (p_o_3 + p_o_4); // << 1; 
     end
@@ -77,18 +77,13 @@ always @ (posedge clk) begin
         i_out <= (p_o_1 + p_o_2); // << 1;
         q_out <= (p_o_3 - p_o_4); // << 1;
     end
-    if (mux == 2'b00) begin // MUL
-        i_out <= (p_o_1 - p_o_2); // << 1;
-        q_out <= (p_o_3 + p_o_4); // << 1;
+    if (mux == 2'b11) begin // MAX
+        i_out <= (p_o_1 + p_o_2); 
+        q_out <= {p_o_4[47:32], p_o_3[47:32]}; // {c:d}
     end
     
     p_1_2 <= p_o_1 + p_o_2;
     p_3_4 <= p_o_3 + p_o_4;
-    
-//    if (p_1_2 > p_3_4) 
-//        a_out <= p_1_2; // p_o_1 + p_o_2;
-//    else
-//        a_out <= p_3_4; // p_o_3 + p_o_4;
 
 end
 
@@ -98,8 +93,8 @@ always @ (posedge clk)
 
 //assign i_out = (mux == 2'b10) ? (p_o_1 + p_o_2) << 1 : (p_o_1 - p_o_2) << 1 ; 
 //assign q_out = (mux == 2'b10) ? (p_o_3 - p_o_4) << 1 : (p_o_3 + p_o_4) << 1 ; 
-//assign a_out = (p_o_1 + p_o_2) > (p_o_3 + p_o_4) ? (p_o_1 + p_o_2) : (p_o_3 + p_o_4);
-assign dout = mux_r == 2'b11 ? (p_1_2 > p_3_4 ? p_1_2 : p_3_4) : {i_out[31:16], q_out[31:16]}; // 32-bit
+//assign dout = mux_r == 2'b11 ? (p_1_2 > p_3_4 ? p_1_2 : p_3_4) : {i_out[31:16], q_out[31:16]}; // 32-bit
+assign dout = (mux_r == 2'b11) ? (i_out > q_out ? i_out : q_out) : {i_out[31:16], q_out[31:16]}; // 32-bit
 
 // Below are signed extend assignment!!!
 assign b_1 = { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : a
@@ -110,11 +105,11 @@ assign b_2 = { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : b
 assign a_2 = (opcode_d2 == 3'b111) ? { {14{din_1[15]}}, din_1[`DATA_WIDTH-1:0] } : { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // // MAX ? b : d
 assign c_2 = 48'd0; //
 
-assign b_3 = (opcode_d2 == 3'b111) ? { {2{din_2[15]}}, din_2[`DATA_WIDTH-1:0] } : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? d : a)
+assign b_3 = (opcode_d2 == 3'b111) ? 18'd0 : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? 0 : a)
 assign a_3 = { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // d
 assign c_3 = (opcode_d2 == 3'b101 | opcode_d2 == 3'b110) ? { {17{din_3[15]}}, din_3[`DATA_WIDTH-1:0], {15{1'b0}} } : { {32{din_3[15]}}, din_3[`DATA_WIDTH-1:0] };  // rom_en ? b : 0
 
-assign b_4 = (opcode_d2 == 3'b111) ? { {2{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] } : { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : (MAX ? c : b)
+assign b_4 = (opcode_d2 == 3'b111) ? 18'd0 : { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : (MAX ? 0 : b)
 assign a_4 = { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // c
 assign c_4 = 48'd0; // 
 
