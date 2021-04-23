@@ -25,19 +25,20 @@ module pe #
     parameter ITER_NUM = 4
 )
 ( 
-    clk, rst, din_pe_v, din_pe, din_shift_v, din_shift, din_tx_v, din_tx, 
+    clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, din_shift_v, din_shift, s_shift,
 //    inst_in_v, inst_in,  
-    dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift
+    dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift, m_shift 
     );
     
 input  clk;
 input  rst;
 input  din_pe_v;
 input  [`DATA_WIDTH*2-1:0] din_pe;
-input  din_shift_v; // 
-input  [`DATA_WIDTH*2-1:0] din_shift; //
 input  din_tx_v;
 input  [`DATA_WIDTH*2-1:0] din_tx;
+input  din_shift_v; 
+input  [`DATA_WIDTH*2-1:0] din_shift;
+input  s_shift; // slave 
 //input  inst_in_v;
 //input  [`INST_WIDTH-1:0] inst_in;
 
@@ -45,8 +46,9 @@ output dout_pe_v;
 output [`DATA_WIDTH*2-1:0] dout_pe;
 output dout_tx_v;
 output [`DATA_WIDTH*2-1:0] dout_tx;
-output dout_shift_v;
+output dout_shift_v; 
 output [`DATA_WIDTH*2-1:0] dout_shift;
+output m_shift; // master
 
 /*** wires for module connection ***/
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -57,7 +59,7 @@ wire [3:0] ceb2;    // 1-bit * 4
 wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] dout_ctrl;
-wire [`DATA_WIDTH*2-1:0] rdata0, rdata1;
+wire [`DATA_WIDTH*2-1:0] rdata0, rdata1, rdata2;
 wire din_ld_v;
 wire [`DATA_WIDTH*2-1:0] din_ld;
 wire dout_alu_v;
@@ -125,7 +127,7 @@ control CTRL(
 
 reg dmem_re; // register write/read enable signal to synchronize with dout_ctrl
 always @ (posedge clk) begin
-    if (inst_pc_v | shift_v) begin
+    if (inst_pc_v | s_shift) begin  // inst_pc_v | shift_v
         dmem_re <= 1; 
     end    
     else begin
@@ -133,23 +135,25 @@ always @ (posedge clk) begin
     end 
 end
 
-reg shift_v_d1, shift_v_d2, shift_v_d3;
+reg s_shift_d1, s_shift_d2, s_shift_d3;
 always @ (posedge clk) begin
-    shift_v_d1 <= shift_v;
-    shift_v_d2 <= shift_v_d1;
-    shift_v_d3 <= shift_v_d2;
+    s_shift_d1 <= s_shift; // shift_v
+    s_shift_d2 <= s_shift_d1;
+    s_shift_d3 <= s_shift_d2;
 end
 
 // It takes 2 cycles to read the data from DMEM.
-assign dout_shift = shift_v_d3 ? rdata0 : 0;
-assign dout_shift_v = shift_v_d3 ? 1 : 0;
+//assign dout_shift = shift_v_d3 ? rdata0 : 0;
+//assign dout_shift_v = shift_v_d3 ? 1 : 0;
+assign dout_shift   = s_shift_d3 ? rdata2 : 0;
+assign dout_shift_v = s_shift_d3 ? 1 : 0;
 
 // Data Memory
 data_mem DMEM(
     .clk(clk), 
     .rst(rst), 
     .wea(din_pe_v), // valid in of load
-    .web(din_shift_v), // valid in of shift
+    .web(din_shift_v), // valid in of shift 
     .wec(din_tx_v), // valid in of tx
     .wed(dout_alu_v), // valid in of write back
     .dina(dout_ctrl), 
@@ -159,10 +163,11 @@ data_mem DMEM(
 //    .rea(inst_pc_v),
 //    .reb(shift_v),    
     .inst(inst_pc), // instructions triggered by program counter
-    .shift_v(shift_v),
+    .shift_v(s_shift), // shift_v
     
     .douta(rdata0),
-    .doutb(rdata1)
+    .doutb(rdata1),
+    .doutc(rdata2) // add one read port for slave_shift
     );
 
 // Synchronize dout_rom with rdata0 and rdata1. 
@@ -188,10 +193,10 @@ const_rom ROM(
     );
 
 /*** Data Memory Feedback Input Map ***/
-wire [`DATA_WIDTH*2-1:0] din_alu_1, din_alu_2, din_alu_3; 
-assign din_alu_1 = rom_en_d2 ? dout_rom : rdata0;
-assign din_alu_2 = rdata1;
-assign din_alu_3 = rom_en_d2 ? rdata0 : 0;
+wire [`DATA_WIDTH*2-1:0] alu_in_1, alu_in_2, alu_in_3; 
+assign alu_in_1 = rom_en_d2 ? dout_rom : rdata0;
+assign alu_in_2 = rdata1;
+assign alu_in_3 = rom_en_d2 ? rdata0 : 0;
 
 // ALU for Complex Data
 complex_alu ALU( 
@@ -204,9 +209,9 @@ complex_alu ALU(
     .cea2(cea2), 
     .ceb2(ceb2), 
     .usemult(usemult), 
-    .din_1(din_alu_1), // rdata0
-    .din_2(din_alu_2), // rdata1
-    .din_3(din_alu_3), // dout_rom
+    .din_1(alu_in_1), // rdata0
+    .din_2(alu_in_2), // rdata1
+    .din_3(alu_in_3), // dout_rom
     
     .dout(dout_alu) 
     );    
@@ -229,6 +234,7 @@ localparam [2:0]
    assign tx_v   = fsm_output[2];
    assign shift_v = fsm_output[1];
    assign output_v = fsm_output[0];
+   assign m_shift = shift_v;
    
    // counters to control the state machine
    reg [7:0] iter_cnt = 0; // iteration
@@ -331,12 +337,6 @@ localparam [2:0]
       end
       else if (state == COMPUTE | state == TRANSMIT | state == SHIFT)
          loop_cnt <= loop_cnt + 1'b1;
- 
-//    always @(posedge clk)
-//       if (loop_cnt >= `LOAD_NUM && loop_cnt < (`LOAD_NUM + `REG_NUM)) 
-//          shift_v <= 1;
-//       else 
-//          shift_v <= 0;
            
 // control logics for data forward & alpha output
 reg [`DATA_WIDTH*2-1:0] dout_alu_r;
@@ -344,8 +344,8 @@ always @ (posedge clk)
     dout_alu_r <= dout_alu;
 
 assign dout_tx_v = tx_v ? 1 : 0;
-assign dout_tx = tx_v ? dout_alu_r : 0;
+assign dout_tx = tx_v ? dout_alu : 0;
 assign dout_pe_v = output_v ? 1 : 0;
-assign dout_pe = output_v ? dout_alu_r : 0;
+assign dout_pe = output_v ? dout_alu : 0;
     
 endmodule

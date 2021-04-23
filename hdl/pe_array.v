@@ -31,21 +31,11 @@ input  load;
 input  din_overlay_v; 
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 
-//output dout_overlay_v; 
-output [`DATA_WIDTH*2-1:0] dout_overlay; 
-//reg dout_overlay_v; //
-reg [`DATA_WIDTH*2-1:0] dout_overlay; //
+//output reg dout_overlay_v; 
+output reg [`DATA_WIDTH*2-1:0] dout_overlay; 
 
 reg  [`PE_NUM-1:0] pe_in_v;
 reg  [`DATA_WIDTH*2-1:0] pe_in [`PE_NUM-1:0];
-wire [`PE_NUM-1:0] pe_out_v;
-wire [`DATA_WIDTH*2-1:0] pe_out [`PE_NUM-1:0];
-wire [`PE_NUM-1:0] pe_tx_v;
-wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
-wire [`PE_NUM-1:0] pe_shift_v;
-wire [`DATA_WIDTH*2-1:0] pe_shift [`PE_NUM-1:0];
-//output array_out_v;
-wire [`PE_NUM*`DATA_WIDTH*2-1:0] array_out;
 //wire [`PE_NUM*`DATA_WIDTH*2-1:0] pe_in;
 //wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
 //wire p_out_v;
@@ -61,8 +51,7 @@ wire [`PE_NUM*`DATA_WIDTH*2-1:0] array_out;
 //    .p_out(pe_in)
 //    );
 
-//reg [5:0] load_cnt = 0; // 2^6 = 64
-reg [13:0] stream_cnt = 0;
+reg [13:0] stream_cnt = 0; // 2^14 = 16384 = 256*32*2 (X, Y matrices)
 always @ (posedge clk) 
     if(din_overlay_v) 
         stream_cnt <= stream_cnt + 1;
@@ -83,6 +72,15 @@ always @ (posedge clk) begin
     end
 end
 
+wire [`PE_NUM-1:0] pe_out_v;
+wire [`DATA_WIDTH*2-1:0] pe_out [`PE_NUM-1:0];
+wire [`PE_NUM-1:0] pe_tx_v;
+wire [`DATA_WIDTH*2-1:0] pe_tx [`PE_NUM-1:0];
+wire [`PE_NUM-1:0] pe_shift_v;
+wire [`DATA_WIDTH*2-1:0] pe_shift [`PE_NUM-1:0];
+wire [`PE_NUM-1:0] shift;
+wire [`PE_NUM*`DATA_WIDTH*2-1:0] array_out;
+
 genvar i;
 generate
     for (i = 0; i < `PE_NUM; i = i + 1) begin : array
@@ -97,16 +95,19 @@ generate
             .rst(rst), 
             .din_pe_v(pe_in_v[0]), 
             .din_pe(pe_in[0]), 
-            .din_shift_v(pe_shift_v[0]), 
-            .din_shift(pe_shift[0]),
             .din_tx_v(0), 
             .din_tx(0), 
+            .din_shift_v(pe_shift_v[0]), 
+            .din_shift(pe_shift[0]), 
+            .s_shift(0), 
+            
             .dout_pe_v(pe_out_v[0]), 
             .dout_pe(pe_out[0]), 
             .dout_tx_v(pe_tx_v[0]), 
             .dout_tx(pe_tx[0]),
-            .dout_shift_v(), 
-            .dout_shift()
+            .dout_shift_v(), //
+            .dout_shift(), //
+            .m_shift(shift[0])
             );
         end       
         // PE_N-1 (Output)
@@ -120,16 +121,19 @@ generate
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
             .din_pe(pe_in[i]), 
-            .din_shift_v(), 
-            .din_shift(),   
             .din_tx_v(pe_tx_v[i]), 
             .din_tx(pe_tx[i]),  
+            .din_shift_v(0), //
+            .din_shift(0), //
+            .s_shift(shift[i-1]), 
+            
             .dout_pe_v(pe_out_v[i]), 
             .dout_pe(pe_out[i]), 
             .dout_tx_v(pe_tx_v[i]), 
             .dout_tx(pe_tx[i]),
             .dout_shift_v(pe_shift_v[i-1]), 
-            .dout_shift(pe_shift[i-1])
+            .dout_shift(pe_shift[i-1]),
+            .m_shift()
             );
         end        
         // PE_1 to PE_N-2
@@ -142,17 +146,20 @@ generate
             .clk(clk), 
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
-            .din_pe(pe_in[i]), 
-            .din_shift_v(pe_shift_v[i]), 
-            .din_shift(pe_shift[i]),            
+            .din_pe(pe_in[i]),           
             .din_tx_v(pe_tx_v[i-1]), 
-            .din_tx(pe_tx[i-1]), 
+            .din_tx(pe_tx[i-1]),
+            .din_shift_v(pe_shift_v[i]), 
+            .din_shift(pe_shift[i]),  
+            .s_shift(shift[i-1]), 
+            
             .dout_pe_v(pe_out_v[i]), 
             .dout_pe(pe_out[i]), 
             .dout_tx_v(pe_tx_v[i]), 
             .dout_tx(pe_tx[i]),
             .dout_shift_v(pe_shift_v[i-1]), 
-            .dout_shift(pe_shift[i-1])
+            .dout_shift(pe_shift[i-1]),
+            .m_shift(shift[i])
             ); 
         end
         

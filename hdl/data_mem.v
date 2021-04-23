@@ -21,7 +21,7 @@
 `include "parameters.vh"
 
 module data_mem(
-    clk, rst, wea, web, wec, wed, dina, dinb, rden, inst_v, inst, shift_v, douta, doutb
+    clk, rst, wea, web, wec, wed, dina, dinb, rden, inst_v, inst, shift_v, douta, doutb, doutc
     );
  
 input clk; 
@@ -39,6 +39,7 @@ input shift_v;
 
 output [`DATA_WIDTH*2-1:0] douta;
 output [`DATA_WIDTH*2-1:0] doutb;
+output [`DATA_WIDTH*2-1:0] doutc;
 
 //wire [`DM_ADDR_WIDTH-1:0] raddra, raddrb, waddra, waddrb;
 // 8-bit read/write address
@@ -48,7 +49,7 @@ output [`DATA_WIDTH*2-1:0] doutb;
 
 reg [`DM_ADDR_WIDTH-1:0] raddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] raddrb = 0;
-reg [`DM_ADDR_WIDTH-1:0] raddrc = 0;
+reg [`DM_ADDR_WIDTH-1:0] raddrc = 8'h20; // Y shift address: 32
 reg [`DM_ADDR_WIDTH-1:0] waddra = 0;
 reg [`DM_ADDR_WIDTH-1:0] waddrb = 8'h20; // Y shift address: 32
 reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'hA0; // alpha[k-1] address: 160
@@ -64,19 +65,19 @@ always @(posedge clk) begin
     wb_addr_d1 <= wb_addr; 
     wb_addr_d2 <= wb_addr_d1; 
     wb_addr_d3 <= wb_addr_d2; 
-    wb_addr_d4 <= wb_addr_d3; // write back requires a few delays
+    wb_addr_d4 <= wb_addr_d3; 
     wb_addr_d5 <= wb_addr_d4; // write back requires a few delays
 //    dinb_r <= dinb;
     shift_v_r <= shift_v;
     
     if (rst) begin
         waddra <= 0;
-        waddrb = 8'h20; // Add 
+        waddrb = 8'h20; // will be changed 
         waddrc = 8'hA0; // Add 
         waddrd = 8'h40; // Add 
         raddra <= 0;
         raddrb <= 0;
-        raddrc <= 0;
+        raddrc <= 8'h20;;
         dina_v <= 0;
         dinb_v <= 0;
     end
@@ -87,7 +88,7 @@ always @(posedge clk) begin
             dina_v <= 1;
             dinb_v <= 0;
         end
-        else if (web) begin // write enable for SHIFT 
+        else if (web) begin // write enable for slave_shift 
             waddrb <= waddrb + 1;
             waddr <= waddrb;
             dina_v <= 1;
@@ -107,39 +108,42 @@ always @(posedge clk) begin
         end
         else begin
             waddra <= 0;
-            waddrb = 8'h20; // Add 
+            waddrb = 8'h20; // will be changed  
             waddrc = 8'hA0; // Add 
             waddrd = 8'h40; // Add 
             dina_v <= 0;
             dinb_v <= 0;
         end
            
-//        if (inst_v) begin // read ports & write-back address
-//            raddrb <= inst[23:16]; // source 2
-//            raddra <= inst[15:8]; // source 1
-//            wb_addr <= inst[7:0]; // destination
-//        end
-//        else if (shift_v)
-//            raddra <= raddra + 1;
-//        else begin
-//            raddrb <= 0;
-//            raddra <= 0;
-//        end
-        
-        if (~inst_v && ~shift_v) begin 
-            raddrb <= 0;
-            raddra <= 0;
-            raddrc <= 0;
-        end
-        else if (inst_v) begin // read ports & write-back address
+        if (inst_v) begin // read ports & write-back address
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
             wb_addr <= inst[7:0]; // destination
         end
-        else if (shift_v) begin
-            raddrc <= raddrc + 1;
-            raddra <= raddrc;
+        else begin
+            raddrb <= 0;
+            raddra <= 0;
         end
+        
+        if (shift_v_r) // shift_v
+            raddrc <= raddrc + 1;
+        else 
+            raddrc <= 8'h20;;
+        
+//        if (~inst_v && ~shift_v) begin 
+//            raddrb <= 0;
+//            raddra <= 0;
+//            raddrc <= 0;
+//        end
+//        else if (inst_v) begin // read ports & write-back address
+//            raddrb <= inst[23:16]; // source 2
+//            raddra <= inst[15:8]; // source 1
+//            wb_addr <= inst[7:0]; // destination
+//        end
+//        else if (shift_v) begin
+//            raddrc <= raddrc + 1;
+//            raddra <= raddrc;
+//        end
 
     end 
 end
@@ -149,40 +153,60 @@ wire [`DATA_WIDTH*2-1:0] din_bram;
 assign wren = dina_v | dinb_v;
 assign din_bram = dina_v ? dina : (dinb_v ? dinb : 0); // dina is already pipelined by CTRL
 
+//  A 3-port RAM which supports 2 reads and 1 write in a single cycle. (I just added one more RAMB18E2 to support 3 reads and 1 write concurrently.)
+//  solution -> https://forums.xilinx.com/t5/Virtex-Family-FPGAs-Archived/3-port-BRAM/td-p/133954
 //  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(
     .RAM_WIDTH(32),                       // Specify RAM data width
-    .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)
+    .RAM_DEPTH(256),                      // Specify RAM depth (number of entries)
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_bram_0 (
-    .addra(waddr),   // Write address bus, width determined from RAM_DEPTH
+    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
     .addrb(raddra),   // Read address bus, width determined from RAM_DEPTH
-    .dina(din_bram),     // RAM input data, width determined from RAM_WIDTH
-    .clka(clk),     // Clock
+    .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
+    .clka(clk),       // Clock
     .wea(wren),       // Write enable
-    .enb(rden),	     // Read Enable, for additional power savings, disable when not in use
-    .rstb(rst),     // Output reset (does not affect memory contents)
-    .regceb(1), // Output register enable
-    .doutb(douta)    // RAM output data, width determined from RAM_WIDTH
+    .enb(rden),	      // Read Enable, for additional power savings, disable when not in use
+    .rstb(rst),       // Output reset (does not affect memory contents)
+    .regceb(1),       // Output register enable
+    .doutb(douta)     // RAM output data, width determined from RAM_WIDTH
   );
 
 //  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
   sdp_bram #(
     .RAM_WIDTH(32),                       // Specify RAM data width
-    .RAM_DEPTH(256),                     // Specify RAM depth (number of entries)
+    .RAM_DEPTH(256),                      // Specify RAM depth (number of entries)
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_bram_1 (
-    .addra(waddr),   // Write address bus, width determined from RAM_DEPTH
+    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
     .addrb(raddrb),   // Read address bus, width determined from RAM_DEPTH
-    .dina(din_bram),     // RAM input data, width determined from RAM_WIDTH
-    .clka(clk),     // Clock
+    .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
+    .clka(clk),       // Clock
     .wea(wren),       // Write enable
-    .enb(rden),	     // Read Enable, for additional power savings, disable when not in use
-    .rstb(rst),     // Output reset (does not affect memory contents)
-    .regceb(1), // Output register enable
-    .doutb(doutb)    // RAM output data, width determined from RAM_WIDTH
+    .enb(rden),	      // Read Enable, for additional power savings, disable when not in use
+    .rstb(rst),       // Output reset (does not affect memory contents)
+    .regceb(1),       // Output register enable
+    .doutb(doutb)     // RAM output data, width determined from RAM_WIDTH
+  );
+
+//  Xilinx Simple Dual Port Single Clock RAM (RAMB18E2)
+  sdp_bram #(
+    .RAM_WIDTH(32),                       // Specify RAM data width
+    .RAM_DEPTH(256),                      // Specify RAM depth (number of entries)
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
+  ) data_bram_2 (
+    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
+    .addrb(raddrc),   // Read address bus, width determined from RAM_DEPTH
+    .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
+    .clka(clk),       // Clock
+    .wea(wren),      // Write enable
+    .enb(rden),	      // Read Enable, for additional power savings, disable when not in use
+    .rstb(rst),       // Output reset (does not affect memory contents)
+    .regceb(1),       // Output register enable
+    .doutb(doutc)     // RAM output data, width determined from RAM_WIDTH
   );
     
 endmodule
