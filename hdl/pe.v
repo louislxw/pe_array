@@ -125,15 +125,15 @@ control CTRL(
     .usemult(usemult)
     );
 
-reg dmem_re; // register write/read enable signal to synchronize with dout_ctrl
-always @ (posedge clk) begin
-    if (inst_pc_v | s_shift) begin  // inst_pc_v | shift_v
-        dmem_re <= 1; 
-    end    
-    else begin
-        dmem_re <= 0;
-    end 
-end
+//reg dmem_re; // register read enable signal to synchronize with dout_ctrl
+//always @ (posedge clk) begin
+//    if (inst_pc_v | s_shift) begin  // inst_pc_v | shift_v
+//        dmem_re <= 1; 
+//    end    
+//    else begin
+//        dmem_re <= 0;
+//    end 
+//end
 
 reg s_shift_d1, s_shift_d2, s_shift_d3;
 always @ (posedge clk) begin
@@ -158,12 +158,12 @@ data_mem DMEM(
     .wed(dout_alu_v), // valid in of write back
     .dina(dout_ctrl), 
     .dinb(dout_alu_r), // dout_alu
-    .rden(dmem_re), 
-    .inst_v(inst_pc_v),
-//    .rea(inst_pc_v),
-//    .reb(shift_v),    
+//    .rden(dmem_re), 
+//    .inst_v(inst_pc_v),  
     .inst(inst_pc), // instructions triggered by program counter
-    .shift_v(s_shift), // shift_v
+    .rea(inst_pc_v),
+    .rec(s_shift),  
+//    .shift_v(s_shift), // shift_v
     
     .douta(rdata0),
     .doutb(rdata1),
