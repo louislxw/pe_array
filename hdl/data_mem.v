@@ -72,6 +72,7 @@ always @(posedge clk) begin
     wb_addr_d5 <= wb_addr_d4; // write back requires a few delays
 //    dinb_r <= dinb;
 //    shift_v_r <= shift_v;
+    rea_r <= rea;
     rec_r <= rec;
     
     if (rst) begin
