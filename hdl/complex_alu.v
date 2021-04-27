@@ -79,7 +79,7 @@ always @ (posedge clk) begin
     end
     if (mux == 2'b11) begin // MAX
         i_out <= (p_o_1 + p_o_2); 
-        q_out <= {p_o_4[47:32], p_o_3[47:32]}; // {c:d}
+        q_out <= {p_o_4[`DATA_WIDTH-1:0], p_o_3[`DATA_WIDTH-1:0]}; // {c:d}
     end
     
     p_1_2 <= p_o_1 + p_o_2;
@@ -105,12 +105,12 @@ assign b_2 = { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : b
 assign a_2 = (opcode_d2 == 3'b111) ? { {14{din_1[15]}}, din_1[`DATA_WIDTH-1:0] } : { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // // MAX ? b : d
 assign c_2 = 48'd0; //
 
-assign b_3 = (opcode_d2 == 3'b111) ? 18'd0 : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? 0 : a)
-assign a_3 = { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // d
+assign b_3 = (opcode_d2 == 3'b111) ? 18'd1 : { {2{din_1[31]}}, din_1[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // rom_en ? Wi : (MAX ? 0 : a)
+assign a_3 = (opcode_d2 == 3'b111) ? din_2[`DATA_WIDTH-1:0] : { {14{din_2[15]}}, din_2[`DATA_WIDTH-1:0] }; // d
 assign c_3 = (opcode_d2 == 3'b101 | opcode_d2 == 3'b110) ? { {17{din_3[15]}}, din_3[`DATA_WIDTH-1:0], {15{1'b0}} } : { {32{din_3[15]}}, din_3[`DATA_WIDTH-1:0] };  // rom_en ? b : 0
 
-assign b_4 = (opcode_d2 == 3'b111) ? 18'd0 : { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : (MAX ? 0 : b)
-assign a_4 = { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // c
+assign b_4 = (opcode_d2 == 3'b111) ? 18'd1 : { {2{din_1[15]}}, din_1[`DATA_WIDTH-1:0] }; // rom_en ? Wq : (MAX ? 0 : b)
+assign a_4 = (opcode_d2 == 3'b111) ? din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] : { {14{din_2[31]}}, din_2[`DATA_WIDTH*2-1:`DATA_WIDTH] }; // c
 assign c_4 = 48'd0; // 
 
 // configuration bits for DSP48E2

@@ -9,9 +9,9 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: A linear array of RISC-V PEs
 // 
-// Dependencies: 
+// Dependencies: 8-PE: 4,704 LUTs, 4,530 FFs, 11.5 BRAMs, 32 DSPs (meet 600MHz)
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -121,8 +121,8 @@ generate
             .rst(rst), 
             .din_pe_v(pe_in_v[i]), 
             .din_pe(pe_in[i]), 
-            .din_tx_v(pe_tx_v[i]), 
-            .din_tx(pe_tx[i]),  
+            .din_tx_v(pe_tx_v[i-1]), 
+            .din_tx(pe_tx[i-1]),  
             .din_shift_v(0), //
             .din_shift(0), //
             .s_shift(shift[i-1]), 
