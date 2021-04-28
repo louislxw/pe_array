@@ -40,46 +40,13 @@ assign data_out = rom_out;
 
    always @(posedge clk)
       if (en)
-         if (iter%2 == 0)
+//         if (iter%2 == 0)
          case (addr) // Be careful about the sign bit and fixed-point values
             // Demo
 //            8'b00000000: rom_out <= 32'h80_01_00_80; // CMPLX_MULT (opcode = 100)
 //            8'b00000001: rom_out <= 32'h80_03_02_81; // CMPLX_MULT (opcode = 100)
 //            8'b00000010: rom_out <= 32'h80_05_04_82; // CMPLX_MULT (opcode = 100)
-            // 8-pt example
-//            8'b00000000: rom_out <= 32'h80000040; // mul 
-//            8'b00000001: rom_out <= 32'h80010141; // mul
-//            8'b00000010: rom_out <= 32'h80020242; // mul
-//            8'b00000011: rom_out <= 32'h80030343; // mul
-//            8'b00000100: rom_out <= 32'h80040444; // mul
-//            8'b00000101: rom_out <= 32'h80050545; // mul
-//            8'b00000110: rom_out <= 32'h80060646; // mul
-//            8'b00000111: rom_out <= 32'h80070747; // mul
-//            8'b00001000: rom_out <= 32'hA0444048; // muladd
-//            8'b00001001: rom_out <= 32'hC0444049; // mulsub
-//            8'b00001010: rom_out <= 32'hA046424A;
-//            8'b00001011: rom_out <= 32'hC046424B;
-//            8'b00001100: rom_out <= 32'hA045414C;
-//            8'b00001101: rom_out <= 32'hC045414D;
-//            8'b00001110: rom_out <= 32'hA047434E;
-//            8'b00001111: rom_out <= 32'hC047434F;
-//            8'b00010000: rom_out <= 32'hA04A4850;
-//            8'b00010001: rom_out <= 32'hC04A4852;
-//            8'b00010010: rom_out <= 32'hA24B4951;
-//            8'b00010011: rom_out <= 32'hC24B4953;
-//            8'b00010100: rom_out <= 32'hA04E4C54;
-//            8'b00010101: rom_out <= 32'hC04E4C56;
-//            8'b00010110: rom_out <= 32'hA24F4D55;
-//            8'b00010111: rom_out <= 32'hC24F4D57;
-//            8'b00011000: rom_out <= 32'hA0545058;
-//            8'b00011001: rom_out <= 32'hC054505C;
-//            8'b00011010: rom_out <= 32'hA1565259;
-//            8'b00011011: rom_out <= 32'hC156525D;
-//            8'b00011100: rom_out <= 32'hA255515A;
-//            8'b00011101: rom_out <= 32'hC255515E;
-//            8'b00011110: rom_out <= 32'hA357535B;
-//            8'b00011111: rom_out <= 32'hC357535F;
-            // SCD Instructions
+            /*** SCD Instructions ***/
             // 32 element-wise complex multiplications (verified!)
             8'b00000000: rom_out <= 32'h80200040; // mul 
             8'b00000001: rom_out <= 32'h80210141; 
@@ -247,40 +214,40 @@ assign data_out = rom_out;
             8'b10011111: rom_out <= 32'hCE7F775F;
             // Stage-5 (FFT clock-wise shift first, then output the middle range!) 
             // Pa (BOTTOM)
-            8'b10100000: rom_out <= 32'hA0504080; // FFT_out: 0
-            8'b10100001: rom_out <= 32'hA1514181; // FFT_out: 1
-            8'b10100010: rom_out <= 32'hA2524282; // FFT_out: 2
-            8'b10100011: rom_out <= 32'hA3534383; // FFT_out: 3
-            8'b10100100: rom_out <= 32'hA4544484; // FFT_out: 4
-            8'b10100101: rom_out <= 32'hA5554585; // FFT_out: 5
-            8'b10100110: rom_out <= 32'hA6564686; // FFT_out: 6
-            8'b10100111: rom_out <= 32'hA7574787; // FFT_out: 7
+            8'b10100000: if (iter%2 == 0) rom_out <= 32'hA0504080; else rom_out <= 32'hA0504090; // FFT_out: 0
+            8'b10100001: if (iter%2 == 0) rom_out <= 32'hA1514181; else rom_out <= 32'hA1514191; // FFT_out: 1
+            8'b10100010: if (iter%2 == 0) rom_out <= 32'hA2524282; else rom_out <= 32'hA2524292; // FFT_out: 2
+            8'b10100011: if (iter%2 == 0) rom_out <= 32'hA3534383; else rom_out <= 32'hA3534393; // FFT_out: 3
+            8'b10100100: if (iter%2 == 0) rom_out <= 32'hA4544484; else rom_out <= 32'hA4544494; // FFT_out: 4
+            8'b10100101: if (iter%2 == 0) rom_out <= 32'hA5554585; else rom_out <= 32'hA5554595; // FFT_out: 5
+            8'b10100110: if (iter%2 == 0) rom_out <= 32'hA6564686; else rom_out <= 32'hA6564696; // FFT_out: 6
+            8'b10100111: if (iter%2 == 0) rom_out <= 32'hA7574787; else rom_out <= 32'hA7574797; // FFT_out: 7
             // Pb (TOP)
-            8'b10101000: rom_out <= 32'hC8584888; // FFT_out: 24
-            8'b10101001: rom_out <= 32'hC9594989; // FFT_out: 25
-            8'b10101010: rom_out <= 32'hCA5A4A8A; // FFT_out: 26
-            8'b10101011: rom_out <= 32'hCB5B4B8B; // FFT_out: 27
-            8'b10101100: rom_out <= 32'hCC5C4C8C; // FFT_out: 28
-            8'b10101101: rom_out <= 32'hCD5D4D8D; // FFT_out: 29
-            8'b10101110: rom_out <= 32'hCE5E4E8E; // FFT_out: 30
-            8'b10101111: rom_out <= 32'hCF5F4F8F; // FFT_out: 31
-            // MAX (s3, s2, s1, d)  ith iteration 
-            8'b10110000: rom_out <= 32'hE0_A0_98_A8; // alpha[k-1] Vs. previous TOP 
-            8'b10110001: rom_out <= 32'hE0_A1_99_A9;
-            8'b10110010: rom_out <= 32'hE0_A2_9A_AA; 
-            8'b10110011: rom_out <= 32'hE0_A3_9B_AB;
-            8'b10110100: rom_out <= 32'hE0_A4_9C_AC;
-            8'b10110101: rom_out <= 32'hE0_A5_9D_AD;
-            8'b10110110: rom_out <= 32'hE0_A6_9E_AE;
-            8'b10110111: rom_out <= 32'hE0_A7_9F_AF;
-            8'b10111000: rom_out <= 32'hE0_A8_80_A8; // above results Vs. current BOTTOM
-            8'b10111001: rom_out <= 32'hE0_A9_81_A9;
-            8'b10111010: rom_out <= 32'hE0_AA_82_AA;
-            8'b10111011: rom_out <= 32'hE0_AB_83_AB;
-            8'b10111100: rom_out <= 32'hE0_AC_84_AC;
-            8'b10111101: rom_out <= 32'hE0_AD_85_AD;
-            8'b10111110: rom_out <= 32'hE0_AE_86_AE;
-            8'b10111111: rom_out <= 32'hE0_AF_87_AF;
+            8'b10101000: if (iter%2 == 0) rom_out <= 32'hC8584888; else rom_out <= 32'hC8584898; // FFT_out: 24
+            8'b10101001: if (iter%2 == 0) rom_out <= 32'hC9594989; else rom_out <= 32'hC9594999; // FFT_out: 25
+            8'b10101010: if (iter%2 == 0) rom_out <= 32'hCA5A4A8A; else rom_out <= 32'hCA5A4A9A; // FFT_out: 26
+            8'b10101011: if (iter%2 == 0) rom_out <= 32'hCB5B4B8B; else rom_out <= 32'hCB5B4B9B; // FFT_out: 27
+            8'b10101100: if (iter%2 == 0) rom_out <= 32'hCC5C4C8C; else rom_out <= 32'hCC5C4C9C; // FFT_out: 28
+            8'b10101101: if (iter%2 == 0) rom_out <= 32'hCD5D4D8D; else rom_out <= 32'hCD5D4D9D; // FFT_out: 29
+            8'b10101110: if (iter%2 == 0) rom_out <= 32'hCE5E4E8E; else rom_out <= 32'hCE5E4E9E; // FFT_out: 30
+            8'b10101111: if (iter%2 == 0) rom_out <= 32'hCF5F4F8F; else rom_out <= 32'hCF5F4F9F; // FFT_out: 31
+            // MAX (s3, s2, s1, d)  ith iteration or (i+1)th iteration
+            8'b10110000: if (iter%2 == 0) rom_out <= 32'hE0_A0_98_A8; else rom_out <= 32'hE0_A0_88_A8; // alpha[k-1] Vs. previous TOP 
+            8'b10110001: if (iter%2 == 0) rom_out <= 32'hE0_A1_99_A9; else rom_out <= 32'hE0_A1_89_A9; 
+            8'b10110010: if (iter%2 == 0) rom_out <= 32'hE0_A2_9A_AA; else rom_out <= 32'hE0_A2_8A_AA; 
+            8'b10110011: if (iter%2 == 0) rom_out <= 32'hE0_A3_9B_AB; else rom_out <= 32'hE0_A3_8B_AB;
+            8'b10110100: if (iter%2 == 0) rom_out <= 32'hE0_A4_9C_AC; else rom_out <= 32'hE0_A4_8C_AC;
+            8'b10110101: if (iter%2 == 0) rom_out <= 32'hE0_A5_9D_AD; else rom_out <= 32'hE0_A5_8D_AD;
+            8'b10110110: if (iter%2 == 0) rom_out <= 32'hE0_A6_9E_AE; else rom_out <= 32'hE0_A6_8E_AE;
+            8'b10110111: if (iter%2 == 0) rom_out <= 32'hE0_A7_9F_AF; else rom_out <= 32'hE0_A7_8F_AF;
+            8'b10111000: if (iter%2 == 0) rom_out <= 32'hE0_A8_80_A8; else rom_out <= 32'hE0_A8_90_A8; // above results Vs. current BOTTOM
+            8'b10111001: if (iter%2 == 0) rom_out <= 32'hE0_A9_81_A9; else rom_out <= 32'hE0_A9_91_A9;
+            8'b10111010: if (iter%2 == 0) rom_out <= 32'hE0_AA_82_AA; else rom_out <= 32'hE0_AA_92_AA;
+            8'b10111011: if (iter%2 == 0) rom_out <= 32'hE0_AB_83_AB; else rom_out <= 32'hE0_AB_93_AB;
+            8'b10111100: if (iter%2 == 0) rom_out <= 32'hE0_AC_84_AC; else rom_out <= 32'hE0_AC_94_AC;
+            8'b10111101: if (iter%2 == 0) rom_out <= 32'hE0_AD_85_AD; else rom_out <= 32'hE0_AD_95_AD;
+            8'b10111110: if (iter%2 == 0) rom_out <= 32'hE0_AE_86_AE; else rom_out <= 32'hE0_AE_96_AE;
+            8'b10111111: if (iter%2 == 0) rom_out <= 32'hE0_AF_87_AF; else rom_out <= 32'hE0_AF_97_AF;  
             // Null
             8'b11010000: rom_out <= 32'h0000_0000;
             8'b11010001: rom_out <= 32'h0000_0000;
@@ -332,7 +299,7 @@ assign data_out = rom_out;
             8'b11111111: rom_out <= 32'h0000_0000;
             default: rom_out <= 32'h0000_0000;
          endcase
-         
+/***         
          else
          case (addr) 
             // SCD Instructions
@@ -588,5 +555,5 @@ assign data_out = rom_out;
             8'b11111111: rom_out <= 32'h0000_0000;
             default: rom_out <= 32'h0000_0000;
          endcase
-
+***/
 endmodule
