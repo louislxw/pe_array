@@ -158,7 +158,7 @@ data_mem DMEM(
     .wec(din_tx_v), // valid in of tx
     .wed(dout_alu_v), // valid in of write back
     .dina(dout_ctrl), 
-    .dinb(dout_alu_r), // dout_alu
+    .dinb(dout_alu_r1), // dout_alu
 //    .rden(dmem_re), 
 //    .inst_v(inst_pc_v),  
     .inst(inst_pc), // instructions triggered by program counter
@@ -404,13 +404,21 @@ localparam [2:0]
          loop_cnt <= loop_cnt + 1'b1;
            
 // control logics for data forward & alpha output
-reg [`DATA_WIDTH*2-1:0] dout_alu_r;
-always @ (posedge clk)
-    dout_alu_r <= dout_alu;
+reg [`DATA_WIDTH*2-1:0] dout_alu_r1, dout_alu_r2, dout_alu_r3, dout_alu_r4, dout_alu_r5, dout_alu_r6, dout_alu_r7, dout_alu_r8;
+always @ (posedge clk) begin
+    dout_alu_r1 <= dout_alu;
+    dout_alu_r2 <= dout_alu_r1;
+    dout_alu_r3 <= dout_alu_r2;
+    dout_alu_r4 <= dout_alu_r3;
+    dout_alu_r5 <= dout_alu_r4;
+    dout_alu_r6 <= dout_alu_r5;
+    dout_alu_r7 <= dout_alu_r6;
+    dout_alu_r8 <= dout_alu_r7;
+end    
 
 assign dout_tx_v = tx_v ? 1 : 0;
-assign dout_tx = tx_v ? dout_alu : 0;
+assign dout_tx = tx_v ? dout_alu_r8 : 0;
 assign dout_pe_v = output_v ? 1 : 0;
-assign dout_pe = output_v ? dout_alu : 0;
+assign dout_pe = output_v ? dout_alu_r8 : 0;
     
 endmodule
