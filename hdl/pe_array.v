@@ -88,7 +88,7 @@ generate
         if (i == 0) begin
             pe #
             (
-            .ITER_NUM(`ITER_NUM-i)
+            .ITER_NUM(`ITER_NUM-2*(i+1))
             )
             PE_i( 
             .clk(clk), 
@@ -114,7 +114,7 @@ generate
         else if (i == `PE_NUM-1) begin
             pe #
             (
-            .ITER_NUM(`ITER_NUM-i)
+            .ITER_NUM(`ITER_NUM-2*(i+1))
             )
             PE_i( 
             .clk(clk), 
@@ -140,7 +140,7 @@ generate
         else begin
              pe #
             (
-            .ITER_NUM(`ITER_NUM-i)
+            .ITER_NUM(`ITER_NUM-2*(i+1))
             )
             PE_i( 
             .clk(clk), 
