@@ -99,9 +99,12 @@ inst_rom IMEM(
     .data_out(inst_pc)
     );
 
-reg [2:0] opcode;
-always @ (posedge clk) 
-    opcode <= inst_pc[31:29]; 
+reg [2:0] opcode, opcode_d1, opcode_d2;
+always @ (posedge clk) begin
+    opcode    <= inst_pc[31:29];
+    opcode_d1 <= opcode;
+    opcode_d2 <= opcode_d1;
+end
 
 // Control Logics & Decoder
 control CTRL(
@@ -159,6 +162,10 @@ data_mem DMEM(
     .wed(dout_alu_v), // valid in of write back
     .dina(dout_ctrl), 
     .dinb(dout_alu_r1), // dout_alu
+//    .dina(din_pe),
+//    .dinb(din_shift),
+//    .dinc(din_tx),
+//    .dind(dout_alu),
 //    .rden(dmem_re), 
 //    .inst_v(inst_pc_v),  
     .inst(inst_pc), // instructions triggered by program counter
@@ -196,7 +203,7 @@ const_rom ROM(
 /*** Data Memory Feedback Input Map ***/
 wire [`DATA_WIDTH*2-1:0] alu_in_1, alu_in_2, alu_in_3; 
 assign alu_in_1 = rom_en_d2 ? dout_rom : rdata0;
-assign alu_in_2 = rdata1;
+assign alu_in_2 = (opcode_d2 == 3'b111) ? rdata2 : rdata1; // rdata1
 assign alu_in_3 = rom_en_d2 ? rdata0 : 0;
 
 // ALU for Complex Data

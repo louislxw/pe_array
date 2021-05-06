@@ -60,6 +60,7 @@ reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4, wb_addr_d5;
 reg [`DM_ADDR_WIDTH-1:0] waddr;
 reg dina_v, dinb_v;
+reg load_v, shift_v, wb_v, tx_v;
 //reg [`DATA_WIDTH*2-1:0] dinb_r;
 //reg shift_v_r;
 reg rea_r, rec_r;
@@ -82,44 +83,70 @@ always @(posedge clk) begin
         waddrd = 8'h40; // Add 
         raddra <= 0;
         raddrb <= 0;
-        raddrc <= 8'h20;;
-        dina_v <= 0;
-        dinb_v <= 0;
+        raddrc <= 8'h20;
+//        dina_v <= 0;
+//        dinb_v <= 0;
+        load_v <= 0;
+        shift_v <= 0;
+        wb_v <= 0;
+        tx_v <= 0;
     end
     else begin
         if (wea) begin // write enable for LOAD 
             waddra <= waddra + 1;
             waddr <= waddra;
-            dina_v <= 1;
-            dinb_v <= 0;
+//            dina_v <= 1;
+//            dinb_v <= 0;
+            load_v <= 1;
+            shift_v <= 0;
+            wb_v <= 0;
+//            tx_v <= 0;
         end
         else if (web) begin // write enable for slave_shift 
             waddrb <= waddrb + 1;
             waddr <= waddrb;
-            dina_v <= 1;
-            dinb_v <= 0;
-        end
-        else if (wec) begin // write enable for TX
-            waddrc <= waddrc + 1;
-            waddr <= waddrc;
-            dina_v <= 1;
-            dinb_v <= 0;
+//            dina_v <= 1;
+//            dinb_v <= 0;
+            load_v <= 0;
+            shift_v <= 1;
+            wb_v <= 0;
+//            tx_v <= 0;
         end
         else if (wed) begin // write enable for write back 
             waddrd <= wb_addr_d5; // wb_addr_d4
             waddr <= waddrd;
-            dina_v <= 0;
-            dinb_v <= 1;
+//            dina_v <= 0;
+//            dinb_v <= 1;
+            load_v <= 0;
+            shift_v <= 0;
+            wb_v <= 1;
+//            tx_v <= 0;
         end
         else begin
             waddra <= 0;
             waddrb = 8'h20; // will be changed  
-            waddrc = 8'h90; // Add 
+//            waddrc = 8'h90; // Add 
             waddrd = 8'h40; // Add 
-            dina_v <= 0;
-            dinb_v <= 0;
+//            dina_v <= 0;
+//            dinb_v <= 0;
+            load_v <= 0;
+            shift_v <= 0;
+            wb_v <= 0;
+//            tx_v <= 0;
         end
-           
+        
+        if (wec) begin // write enable for TX
+            waddrc <= waddrc + 1;
+            waddr <= waddrc;
+//            dina_v <= 1;
+//            dinb_v <= 0;
+            tx_v <= 1;
+        end
+        else begin
+            waddrc = 8'h90; // Add 
+            tx_v <= 0;
+        end
+         
         if (rea) begin // read ports & write-back address  // inst_v
             raddrb <= inst[23:16]; // source 2
             raddra <= inst[15:8]; // source 1
@@ -132,31 +159,25 @@ always @(posedge clk) begin
         
         if (rec_r) // shift_v_r
             raddrc <= raddrc + 1;
+        else if (rea)
+            raddrc <= inst[23:16]; // source 2
         else 
             raddrc <= 8'h20;;
         
-//        if (~inst_v && ~shift_v) begin 
-//            raddrb <= 0;
-//            raddra <= 0;
-//            raddrc <= 0;
-//        end
-//        else if (inst_v) begin // read ports & write-back address
-//            raddrb <= inst[23:16]; // source 2
-//            raddra <= inst[15:8]; // source 1
-//            wb_addr <= inst[7:0]; // destination
-//        end
-//        else if (shift_v) begin
-//            raddrc <= raddrc + 1;
-//            raddra <= raddrc;
-//        end
-
     end 
 end
 
-wire wren;
-wire [`DATA_WIDTH*2-1:0] din_bram;
-assign wren = dina_v | dinb_v; // write enable is same for BRAM0 to BRAM2
-assign din_bram = dina_v ? dina : (dinb_v ? dinb : 0);
+wire wren, wren1;
+wire [`DATA_WIDTH*2-1:0] din_bram, din_bram1;
+//assign wren = dina_v | dinb_v; // write enable is same for BRAM0 to BRAM2
+//assign din_bram = dina_v ? dina : (dinb_v ? dinb : 0);
+assign wren = load_v | shift_v | wb_v; // write enable is same for BRAM0 & BRAM1
+assign wren1 = load_v | shift_v | tx_v; // write enable for BRAM2
+assign din_bram = (load_v | shift_v) ? dina : (wb_v ? dinb : 0);
+assign din_bram1 = wren1 ? dina : 0;
+
+wire ren1;
+assign ren1 = rec_r | (~rec_r & rea);
 
 //  A 3-port RAM which supports 2 reads and 1 write in a single cycle? (One more RAMB18E2 is added to support 3 reads and 1 write concurrently.)
 //  solution -> https://forums.xilinx.com/t5/Virtex-Family-FPGAs-Archived/3-port-BRAM/td-p/133954
@@ -205,10 +226,10 @@ assign din_bram = dina_v ? dina : (dinb_v ? dinb : 0);
   ) data_bram_2 (
     .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
     .addrb(raddrc),   // Read address bus, width determined from RAM_DEPTH
-    .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
+    .dina(din_bram1), // RAM input data, width determined from RAM_WIDTH
     .clka(clk),       // Clock
-    .wea(wren),       // Write enable
-    .enb(rec_r),	  // Read Enable, for additional power savings, disable when not in use
+    .wea(wren1),      // Write enable
+    .enb(ren1), 	  // Read Enable, for additional power savings, disable when not in use
     .rstb(rst),       // Output reset (does not affect memory contents)
     .regceb(1),       // Output register enable
     .doutb(doutc)     // RAM output data, width determined from RAM_WIDTH
