@@ -58,7 +58,8 @@ reg [`DM_ADDR_WIDTH-1:0] waddrc = 8'h90; // alpha[k-1] address: 144
 reg [`DM_ADDR_WIDTH-1:0] waddrd = 8'h40; // write-back address: 64
 reg [`DM_ADDR_WIDTH-1:0] wb_addr = 0;
 reg [`DM_ADDR_WIDTH-1:0] wb_addr_d1, wb_addr_d2, wb_addr_d3, wb_addr_d4, wb_addr_d5;
-reg [`DM_ADDR_WIDTH-1:0] waddr;
+//reg [`DM_ADDR_WIDTH-1:0] waddr;
+reg [`DM_ADDR_WIDTH-1:0] waddr0, waddr1;
 reg dina_v, dinb_v;
 reg load_v, shift_v, wb_v, tx_v;
 //reg [`DATA_WIDTH*2-1:0] dinb_r;
@@ -94,7 +95,9 @@ always @(posedge clk) begin
     else begin
         if (wea) begin // write enable for LOAD 
             waddra <= waddra + 1;
-            waddr <= waddra;
+//            waddr <= waddra;
+            waddr0 <= waddra;
+            waddr1 <= waddra;
 //            dina_v <= 1;
 //            dinb_v <= 0;
             load_v <= 1;
@@ -104,7 +107,9 @@ always @(posedge clk) begin
         end
         else if (web) begin // write enable for slave_shift 
             waddrb <= waddrb + 1;
-            waddr <= waddrb;
+//            waddr <= waddrb;
+            waddr0 <= waddrb;
+            waddr1 <= waddrb;
 //            dina_v <= 1;
 //            dinb_v <= 0;
             load_v <= 0;
@@ -114,7 +119,8 @@ always @(posedge clk) begin
         end
         else if (wed) begin // write enable for write back 
             waddrd <= wb_addr_d5; // wb_addr_d4
-            waddr <= waddrd;
+//            waddr <= waddrd;
+            waddr0 <= waddrd;
 //            dina_v <= 0;
 //            dinb_v <= 1;
             load_v <= 0;
@@ -137,7 +143,8 @@ always @(posedge clk) begin
         
         if (wec) begin // write enable for TX
             waddrc <= waddrc + 1;
-            waddr <= waddrc;
+//            waddr <= waddrc;
+            waddr1 <= waddrc;
 //            dina_v <= 1;
 //            dinb_v <= 0;
             tx_v <= 1;
@@ -159,7 +166,7 @@ always @(posedge clk) begin
         
         if (rec_r) // shift_v_r
             raddrc <= raddrc + 1;
-        else if (rea)
+        else if (inst[31:29] == 3'b111) // MAX instruction
             raddrc <= inst[23:16]; // source 2
         else 
             raddrc <= 8'h20;;
@@ -188,7 +195,7 @@ assign ren1 = rec_r | (~rec_r & rea);
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_bram_0 (
-    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
+    .addra(waddr0),   // Write address bus, width determined from RAM_DEPTH
     .addrb(raddra),   // Read address bus, width determined from RAM_DEPTH
     .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
     .clka(clk),       // Clock
@@ -206,7 +213,7 @@ assign ren1 = rec_r | (~rec_r & rea);
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_bram_1 (
-    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
+    .addra(waddr0),   // Write address bus, width determined from RAM_DEPTH
     .addrb(raddrb),   // Read address bus, width determined from RAM_DEPTH
     .dina(din_bram),  // RAM input data, width determined from RAM_WIDTH
     .clka(clk),       // Clock
@@ -224,7 +231,7 @@ assign ren1 = rec_r | (~rec_r & rea);
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_bram_2 (
-    .addra(waddr),    // Write address bus, width determined from RAM_DEPTH
+    .addra(waddr1),   // Write address bus, width determined from RAM_DEPTH
     .addrb(raddrc),   // Read address bus, width determined from RAM_DEPTH
     .dina(din_bram1), // RAM input data, width determined from RAM_WIDTH
     .clka(clk),       // Clock
