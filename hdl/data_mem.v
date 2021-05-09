@@ -184,7 +184,7 @@ assign din_bram = (load_v | shift_v) ? dina : (wb_v ? dinb : 0);
 assign din_bram1 = wren1 ? dina : 0;
 
 wire ren1;
-assign ren1 = rec_r | (~rec_r & rea);
+assign ren1 = rec_r | (~rec_r & rea_r);
 
 //  A 3-port RAM which supports 2 reads and 1 write in a single cycle? (One more RAMB18E2 is added to support 3 reads and 1 write concurrently.)
 //  solution -> https://forums.xilinx.com/t5/Virtex-Family-FPGAs-Archived/3-port-BRAM/td-p/133954

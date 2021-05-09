@@ -99,11 +99,12 @@ inst_rom IMEM(
     .data_out(inst_pc)
     );
 
-reg [2:0] opcode, opcode_d1, opcode_d2;
+reg [2:0] opcode, opcode_d1, opcode_d2, opcode_d3;
 always @ (posedge clk) begin
     opcode    <= inst_pc[31:29];
     opcode_d1 <= opcode;
     opcode_d2 <= opcode_d1;
+    opcode_d3 <= opcode_d2;
 end
 
 // Control Logics & Decoder
