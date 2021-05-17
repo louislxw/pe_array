@@ -19,7 +19,9 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
+//  Xilinx Simple Dual Port Single Clock RAM
+//  This code implements a parameterizable SDP single clock memory.
+//  If a reset or enable is not necessary, it may be tied off or removed from the code.
 module sdp_bram #(
   parameter RAM_WIDTH = 32,                       // Specify RAM data width
   parameter RAM_DEPTH = 256,                      // Specify RAM depth (number of entries)

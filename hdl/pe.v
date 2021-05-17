@@ -59,7 +59,7 @@ wire [3:0] ceb2;    // 1-bit * 4
 wire [3:0] usemult; // 1-bit * 4
 
 wire [`DATA_WIDTH*2-1:0] dout_ctrl;
-wire [`DATA_WIDTH*2-1:0] rdata0, rdata1, rdata2;
+wire [`DATA_WIDTH*2-1:0] rdata0, rdata1, rdata2, rdata3;
 wire din_ld_v;
 wire [`DATA_WIDTH*2-1:0] din_ld;
 wire dout_alu_v;
@@ -150,7 +150,7 @@ end
 // It takes 2 cycles to read the data from DMEM.
 //assign dout_shift = shift_v_d3 ? rdata0 : 0;
 //assign dout_shift_v = shift_v_d3 ? 1 : 0;
-assign dout_shift   = s_shift_d3 ? rdata2 : 0;
+assign dout_shift   = s_shift_d3 ? rdata3 : 0;
 assign dout_shift_v = s_shift_d3 ? 1 : 0;
 
 // Data Memory
@@ -176,7 +176,8 @@ data_mem DMEM(
     
     .douta(rdata0),
     .doutb(rdata1),
-    .doutc(rdata2) // add one read port for slave_shift
+    .doutc(rdata2),
+    .doutd(rdata3) // add one read port for slave_shift 
     );
 
 // Synchronize dout_rom with rdata0 and rdata1. 
@@ -204,7 +205,7 @@ const_rom ROM(
 /*** Data Memory Feedback Input Map ***/
 wire [`DATA_WIDTH*2-1:0] alu_in_1, alu_in_2, alu_in_3; 
 assign alu_in_1 = rom_en_d2 ? dout_rom : rdata0;
-assign alu_in_2 = (opcode_d2 == 3'b111) ? rdata2 : rdata1; // rdata1
+assign alu_in_2 = (opcode_d2 == 3'b111) ? rdata2 : rdata1; 
 assign alu_in_3 = rom_en_d2 ? rdata0 : 0;
 
 // ALU for Complex Data
