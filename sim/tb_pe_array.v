@@ -89,8 +89,8 @@ module tb_pe_array;
         // Add stimulus here
         #20; rst = 0; 
         // Load the data  
-        data_file = $fopen("array_input_hex.txt", "rb"); //read mode, binary
-//        data_file = $fopen("array16_input_hex.txt", "rb"); //read mode, binary
+//        data_file = $fopen("array_input_hex.txt", "rb"); //read mode, binary (128-PE array -> 256*32*2)
+        data_file = $fopen("array16_input_hex.txt", "rb"); //read mode, binary (8-PE array -> 16*32*2)
         if (data_file == `NULL) begin
             $display("data_file handle was NULL");
             $finish;
