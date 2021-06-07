@@ -11,8 +11,8 @@
 // Tool Versions: 
 // Description: A linear array of RISC-V PEs
 // 
-// Dependencies: 8-PE: 4,704 LUTs, 4,530 FFs, 16 BRAMs, 32 DSPs (meet 600MHz)
-//              32-PE: 20,216 LUTs, 18,610 FFs, 64 BRAMs, 128 DSPs (meet 550MHz)
+// Dependencies: 8-PE: 5,278 LUTs, 4,844 FFs, 16 BRAMs, 32 DSPs (meet 600MHz)
+//              32-PE: 21,584 LUTs, 18,775 FFs, 64 BRAMs, 128 DSPs (meet 600MHz)
 //             128-PE: 80,725 LUTs, 71,898 FFs, 256 BRAMs, 512 DSPs (meet 500MHz)
 // Revision:
 // Revision 0.01 - File Created
