@@ -12,7 +12,7 @@
 // Description: Single PE with data forwarding support (-> Add the state machine)
 //  IMEM: BRAM -> ROM
 // Dependencies: 226 -> 265 LUTs, 295 -> 301 FFs, 1.5 BRAMs, 4 DSPs (meet 600MHz)
-//               684 LTUs, 539 FFs, 1.5 BRAM, 4 DSPs (meet 600MHz)
+//               720 LTUs, 624 FFs, 2 BRAM, 4 DSPs (meet 600MHz)
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:

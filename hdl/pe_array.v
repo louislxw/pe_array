@@ -11,8 +11,9 @@
 // Tool Versions: 
 // Description: A linear array of RISC-V PEs
 // 
-// Dependencies: 8-PE: 4,704 LUTs, 4,530 FFs, 11.5 BRAMs, 32 DSPs (meet 600MHz)
-// 
+// Dependencies: 8-PE: 4,704 LUTs, 4,530 FFs, 16 BRAMs, 32 DSPs (meet 600MHz)
+//              32-PE: 20,216 LUTs, 18,610 FFs, 64 BRAMs, 128 DSPs (meet 550MHz)
+//             128-PE: 80,725 LUTs, 71,898 FFs, 256 BRAMs, 512 DSPs (meet 500MHz)
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
@@ -21,7 +22,7 @@
 `include "parameters.vh"
 
 module pe_array(
-    clk, rst, load, din_overlay_v, din_overlay, dout_overlay
+    clk, rst, load, din_overlay_v, din_overlay, dout_overlay_v, dout_overlay
 //    array_out
     );
     
@@ -31,8 +32,9 @@ input  load;
 input  din_overlay_v; 
 input  [`DATA_WIDTH*2-1:0] din_overlay; 
 
-//output reg dout_overlay_v; 
+output reg dout_overlay_v; 
 output reg [`DATA_WIDTH*2-1:0] dout_overlay; 
+//output [`PE_NUM*`DATA_WIDTH*2-1:0] array_out;
 
 reg  [`PE_NUM-1:0] pe_in_v;
 reg  [`DATA_WIDTH*2-1:0] pe_in [`PE_NUM-1:0];
@@ -88,7 +90,7 @@ generate
         if (i == 0) begin
             pe #
             (
-            .ITER_NUM(`ITER_NUM-2*(i+1))
+            .ITER_NUM(`ITER_NUM-2) //
             )
             PE_i( 
             .clk(clk), 
@@ -114,33 +116,33 @@ generate
         else if (i == `PE_NUM-1) begin
             pe #
             (
-            .ITER_NUM(`ITER_NUM-2*(i+1))
+            .ITER_NUM(0) //
             )
             PE_i( 
             .clk(clk), 
             .rst(rst), 
-            .din_pe_v(pe_in_v[i]), 
-            .din_pe(pe_in[i]), 
-            .din_tx_v(pe_tx_v[i-1]), 
-            .din_tx(pe_tx[i-1]),  
-            .din_shift_v(0), //
-            .din_shift(0), //
-            .s_shift(shift[i-1]), 
+            .din_pe_v(pe_in_v[`PE_NUM-1]), 
+            .din_pe(pe_in[`PE_NUM-1]), 
+            .din_tx_v(pe_tx_v[`PE_NUM-2]), 
+            .din_tx(pe_tx[`PE_NUM-2]),  
+            .din_shift_v(0), // 
+            .din_shift(0), // 
+            .s_shift(shift[`PE_NUM-2]), 
             
-            .dout_pe_v(pe_out_v[i]), 
-            .dout_pe(pe_out[i]), 
-            .dout_tx_v(pe_tx_v[i]), 
-            .dout_tx(pe_tx[i]),
-            .dout_shift_v(pe_shift_v[i-1]), 
-            .dout_shift(pe_shift[i-1]),
-            .m_shift()
+            .dout_pe_v(pe_out_v[`PE_NUM-1]), 
+            .dout_pe(pe_out[`PE_NUM-1]), 
+            .dout_tx_v(pe_tx_v[`PE_NUM-1]), 
+            .dout_tx(pe_tx[`PE_NUM-1]),
+            .dout_shift_v(pe_shift_v[`PE_NUM-2]), 
+            .dout_shift(pe_shift[`PE_NUM-2]),
+            .m_shift() //
             );
         end        
         // PE_1 to PE_N-2
         else begin
              pe #
             (
-            .ITER_NUM(`ITER_NUM-2*(i+1))
+            .ITER_NUM(`ITER_NUM-2*(i+1)) 
             )
             PE_i( 
             .clk(clk), 
@@ -167,7 +169,7 @@ generate
 //        assign array_out_v = pe_out_v[i] ? 1 : 0;
 //        assign array_out = array_out_v ? pe_out[i] : 0;
         
-        assign array_out[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
+//        assign array_out[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
         
     end
 endgenerate
@@ -188,14 +190,28 @@ endgenerate
 //    .s_out(dout_overlay)
 //    );
 
+//always @ (posedge clk) begin
+//    if(load) begin
+////        dout_overlay_v <= 1;
+//        dout_overlay <= array_out;
+//    end
+//    else begin
+////        dout_overlay_v <= 0;
+//        dout_overlay <= 0;
+//    end
+//end
+
+integer k;
 always @ (posedge clk) begin
-    if(load) begin
-//        dout_overlay_v <= 1;
-        dout_overlay <= array_out;
-    end
-    else begin
-//        dout_overlay_v <= 0;
-        dout_overlay <= 0;
+    for (k = 0; k < `PE_NUM; k = k + 1) begin 
+        if(load) begin
+            dout_overlay_v <= 1;
+            dout_overlay <= pe_out[k];
+        end
+        else begin
+            dout_overlay_v <= 0;
+            dout_overlay <= 0;
+        end
     end
 end
     

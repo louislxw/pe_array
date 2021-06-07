@@ -30,7 +30,7 @@ module tb_pe_array;
     reg din_overlay_v; 
     reg [`DATA_WIDTH*2-1:0] din_overlay; 
 
-//    wire dout_overlay_v; 
+    wire dout_overlay_v; 
     wire [`DATA_WIDTH*2-1:0] dout_overlay; 
 
     // Instantiate the Unit Under Test (UUT)
@@ -40,7 +40,7 @@ module tb_pe_array;
     .load(load), 
     .din_overlay_v(din_overlay_v), 
     .din_overlay(din_overlay), 
-//    .dout_overlay_v(dout_overlay_v), 
+    .dout_overlay_v(dout_overlay_v), 
     .dout_overlay(dout_overlay)
     );
 
