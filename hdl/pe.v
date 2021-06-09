@@ -22,12 +22,13 @@
 
 module pe #
 (
-    parameter ITER_NUM = 4
+    parameter ITER_NUM_1 = 14,
+    parameter ITER_NUM_2 = 0
 )
 ( 
-    clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, din_shift_v, din_shift, s_shift,
+    clk, rst, din_pe_v, din_pe, din_tx_v, din_tx, din_shift_v, din_shift, s_shift, iter_set,
 //    inst_in_v, inst_in,  
-    dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift, m_shift 
+    dout_pe_v, dout_pe, dout_tx_v, dout_tx, dout_shift_v, dout_shift, m_shift, backward
     );
     
 input  clk;
@@ -39,6 +40,7 @@ input  [`DATA_WIDTH*2-1:0] din_tx;
 input  din_shift_v; 
 input  [`DATA_WIDTH*2-1:0] din_shift;
 input  s_shift; // slave 
+input  iter_set;
 //input  inst_in_v;
 //input  [`INST_WIDTH-1:0] inst_in;
 
@@ -49,6 +51,7 @@ output [`DATA_WIDTH*2-1:0] dout_tx;
 output dout_shift_v; 
 output [`DATA_WIDTH*2-1:0] dout_shift;
 output m_shift; // master
+output backward;
 
 /*** wires for module connection ***/
 wire [`ALUMODE_WIDTH*4-1:0] alumode; // 4-bit * 4
@@ -286,14 +289,16 @@ localparam [2:0]
    reg [4:0] shift_cnt = 0; // shift
    reg [3:0] alpha_cnt = 0; // alpha
    reg [1:0] output_cnt = 0; // output blocks
+   reg done;
    
    reg [2:0] state = IDLE; // initial state
 
    always @(posedge clk)
       if (rst) begin
          state <= IDLE;
+         done <= 0;
       end
-      else
+      else if (~iter_set)
          case (state)
             IDLE : begin
                if (din_pe_v)
@@ -314,7 +319,7 @@ localparam [2:0]
                fsm_output <= 6'b010000;  // load_v = 1
             end
             COMPUTE_START : begin
-               if (cmpt_cnt == `INST_NUM-1 && ITER_NUM == 0) begin
+               if (cmpt_cnt == `INST_NUM-1 && ITER_NUM_1 == 0) begin
                   state <= OUTPUT;
                   cmpt_cnt <= 0;
                end
@@ -351,7 +356,7 @@ localparam [2:0]
                fsm_output <= 6'b000010; // shift_V = 1
             end
             COMPUTE : begin
-               if (cmpt_cnt == `INST_NUM-1 && iter_cnt == ITER_NUM-1) begin
+               if (cmpt_cnt == `INST_NUM-1 && iter_cnt == ITER_NUM_1-1) begin
                   state <= OUTPUT;
                   cmpt_cnt <= 0;
                end
@@ -370,6 +375,114 @@ localparam [2:0]
                   state <= IDLE;
                   alpha_cnt <= 0;
                   output_cnt <= 0; 
+                  done <= ~done;
+               end
+               else if (alpha_cnt == `ALPHA_NUM-1) begin
+                  state <= COMPUTE_END;
+                  alpha_cnt <= 0;
+                  output_cnt <= output_cnt + 1'b1;
+               end
+               else begin
+                  state <= OUTPUT;
+                  alpha_cnt <= alpha_cnt + 1'b1;
+               end 
+               fsm_output <= 6'b000001; // output_v = 1
+            end
+            COMPUTE_END : begin
+               if (cmpt_cnt == `INST_NUM-1) begin
+                  state <= OUTPUT;
+                  cmpt_cnt <= 0;
+               end
+               else begin
+                  state <= COMPUTE_END;
+                  cmpt_cnt <= cmpt_cnt + 1'b1;
+               end
+                fsm_output <= 6'b001000; // cmpt_v = 1
+            end
+            default : begin  // Fault Recovery
+               state <= IDLE;
+               fsm_output <= 6'b100000;
+            end
+         endcase
+         
+         else 
+         case (state)
+            IDLE : begin
+               if (din_pe_v)
+                  state <= LOAD;
+               else
+                  state <= IDLE;
+               fsm_output <= 6'b100000;  // start = 1
+            end
+            LOAD : begin
+               if (load_cnt == `LOAD_NUM-1) begin
+                  state <= COMPUTE_START;  // COMPUTE
+                  load_cnt <= 0;
+               end
+               else begin
+                  state <= LOAD;
+                  load_cnt <= load_cnt + 1'b1;
+               end
+               fsm_output <= 6'b010000;  // load_v = 1
+            end
+            COMPUTE_START : begin
+               if (cmpt_cnt == `INST_NUM-1 && ITER_NUM_2 == 0) begin
+                  state <= OUTPUT;
+                  cmpt_cnt <= 0;
+               end
+               else if (cmpt_cnt == `INST_NUM-1) begin
+                  state <= TRANSMIT;
+                  cmpt_cnt <= 0;
+               end
+               else begin
+                  state <= COMPUTE_START;
+                  cmpt_cnt <= cmpt_cnt + 1'b1;
+               end
+                fsm_output <= 6'b001000; // cmpt_v = 1
+            end
+            TRANSMIT : begin
+               if (tx_cnt == `TX_NUM-1) begin
+                  state <= SHIFT;
+                  tx_cnt <= 0;
+               end
+               else begin
+                  state <= TRANSMIT;
+                  tx_cnt <= tx_cnt + 1'b1;
+               end
+               fsm_output <= 6'b000100; // tx_v = 1
+            end
+            SHIFT : begin
+               if (shift_cnt == `REG_NUM-1) begin
+                  state <= COMPUTE;
+                  shift_cnt <= 0;
+               end
+               else begin
+                  state <= SHIFT;
+                  shift_cnt <= shift_cnt + 1'b1;
+               end 
+               fsm_output <= 6'b000010; // shift_V = 1
+            end
+            COMPUTE : begin
+               if (cmpt_cnt == `INST_NUM-1 && iter_cnt == ITER_NUM_2-1) begin
+                  state <= OUTPUT;
+                  cmpt_cnt <= 0;
+               end
+               else if (cmpt_cnt == `INST_NUM-1) begin
+                  state <= TRANSMIT;
+                  cmpt_cnt <= 0;
+               end
+               else begin
+                  state <= COMPUTE;
+                  cmpt_cnt <= cmpt_cnt + 1'b1;
+               end
+               fsm_output <= 6'b001000; // cmpt_v = 1
+            end
+            OUTPUT : begin
+               if (alpha_cnt == `ALPHA_NUM-1 && output_cnt == `OUT_NUM-1) begin
+                  state <= IDLE;
+                  alpha_cnt <= 0;
+                  output_cnt <= 0; 
+                  done <= ~done;
                end
                else if (alpha_cnt == `ALPHA_NUM-1) begin
                   state <= COMPUTE_END;
@@ -429,5 +542,13 @@ assign dout_tx_v = tx_v ? 1 : 0;
 assign dout_tx = tx_v ? dout_alu_r8 : 0;
 assign dout_pe_v = output_v ? 1 : 0;
 assign dout_pe = output_v ? dout_alu_r8 : 0;
+
+reg done_r;
+
+always @ (posedge clk)
+    done_r <= done; 
+
+//assign backward = done & ~done_r;
+assign backward = done;
     
 endmodule
