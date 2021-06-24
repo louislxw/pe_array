@@ -32,6 +32,7 @@ input [7:0] addr; // 2^8 = 256 instructions
 output [`INST_WIDTH*2-1:0] data_out;
 
 //reg [`INST_WIDTH*2-1:0] data_out;
+(* RAM_STYLE="DISTRIBUTED" *)
 reg [`INST_WIDTH*2-1:0] rom_out;
 //always @(posedge clk) begin
 //    data_out <= rom_out; // Add one more pipeline for ROM output
