@@ -178,6 +178,8 @@ always @ (posedge clk) begin
     end    
 end
 
+wire out_v;
+
 genvar i;
 generate
     for (i = 0; i < `PE_NUM; i = i+1) begin : array
@@ -209,21 +211,25 @@ generate
         .m_shift(m_shift_c[i]),
         .backward(pe_back[i])
         ); 
+        
+//        assign out_v = pe_out_v[i] ? 1 : 0;
     end
 endgenerate
 
 integer k;
 always @ (posedge clk) begin
-    for (k = 0; k < `PE_NUM; k = k+1) begin 
-        if(load) begin
-            dout_v <= 1;
-            dout <= pe_out[k];
-        end
-        else begin
-            dout_v <= 0;
-            dout <= 0;
-        end
-    end
+    dout_v <= pe_out_v[`PE_NUM-1];
+    dout <= pe_out[`PE_NUM-1];
+//    for (k = 0; k < `PE_NUM; k = k+1) begin 
+//        if(pe_out_v[7]) begin // load
+//            dout_v <= 1;
+//            dout <= pe_out[7];
+//        end
+//        else begin
+//            dout_v <= 0;
+//            dout <= 0;
+//        end
+//    end
 end
     
 endmodule
