@@ -30,11 +30,11 @@ input  load;
 input  din_v; 
 input  [`DATA_WIDTH*2-1:0] din; 
 
-output reg dout_v; 
-output reg [`DATA_WIDTH*2-1:0] dout; 
+output dout_v; // reg
+output [`DATA_WIDTH*2-1:0] dout; // reg 
 
-reg  [`PE_NUM-1:0] array_in_v = 0;
-reg  [`DATA_WIDTH*2-1:0] array_in [`PE_NUM-1:0];
+reg [`PE_NUM-1:0] array_in_v = 0;
+reg [`DATA_WIDTH*2-1:0] array_in [`PE_NUM-1:0];
 
 //reg [13:0] stream_cnt = 0; // 2^14 = 16384 = 256*32*2 (X, Y matrices)
 //reg [14:0] stream_cnt = 0; // 2^15 = 32768 = 256*32*2*2 (X, Y matrices)
@@ -178,7 +178,8 @@ always @ (posedge clk) begin
     end    
 end
 
-wire out_v;
+wire out_v, p_in_v;
+wire [`PE_NUM*`DATA_WIDTH*2-1:0] p_in;
 
 genvar i;
 generate
@@ -187,8 +188,8 @@ generate
         pe #
         (
 //        .ITER_NUM(`ITER_NUM-2*(i+1)) 
-        .ITER_NUM_1(`ITER_NUM-2*(i+1)), 
-        .ITER_NUM_2(2*i) 
+        .ITER_NUM_1(`ITER_NUM-2*(i+1)), //
+        .ITER_NUM_2(2*i) // 
         )
         PE_i( 
         .clk(clk), 
@@ -212,24 +213,89 @@ generate
         .backward(pe_back[i])
         ); 
         
-//        assign out_v = pe_out_v[i] ? 1 : 0;
+//        assign p_in_v = pe_out_v[i] ? 1 : 0;
+//        assign p_in[(i+1)*`DATA_WIDTH*2-1:i*`DATA_WIDTH*2] = pe_out[i];
+        
     end
 endgenerate
 
+//piso_new out_buffer(
+//    .clk(clk), 
+//    .load(load), 
+//    .p_in_v(), // 
+//    .p_in(p_in), 
+//    .s_out_v(dout_v), 
+//    .s_out(dout)
+//    );
+
+reg [`PE_NUM-1:0] out_buf_v;
+reg [`DATA_WIDTH*2-1:0] out_buf [`PE_NUM-1:0];
+
 integer k;
 always @ (posedge clk) begin
-    dout_v <= pe_out_v[`PE_NUM-1];
-    dout <= pe_out[`PE_NUM-1];
-//    for (k = 0; k < `PE_NUM; k = k+1) begin 
-//        if(pe_out_v[7]) begin // load
+//    dout_v <= out_buf_v[0];
+//    dout <= out_buf[0];
+    
+    for (k = `PE_NUM-1; k >= 0 ; k = k-1) begin 
+        if (k == `PE_NUM-1) begin 
+            if (pe_out_v[k]) begin 
+                out_buf_v[k] <= 1;
+                out_buf[k] <= pe_out[k];
+            end
+            else begin
+                out_buf_v[k] <= 0;
+                out_buf[k] <= 0;
+            end
+        end
+//        else if (k == 0) begin
+//            dout_v <= out_buf_v[k+1];
+//            dout <= out_buf[k+1];
+//        end
+        else begin // 0 < k < `PE_NUM-1
+            if (pe_out_v[k]) 
+                out_buf[k] <= pe_out[k];
+            else 
+                out_buf[k] <= out_buf[k+1];
+                
+            if (pe_out_v[k] | out_buf_v[k+1]) 
+                out_buf_v[k] <= 1;
+            else 
+                out_buf_v[k] <= 0;
+        end
+        
+//        if(pe_out_v[k]) begin // load
 //            dout_v <= 1;
-//            dout <= pe_out[7];
+//            dout <= pe_out[k];
 //        end
 //        else begin
 //            dout_v <= 0;
 //            dout <= 0;
 //        end
-//    end
+    end
 end
+
+wire out_empty;
+wire out_rd_en;
+
+assign out_rd_en = out_empty ? 0 : 1;
+
+fifo_generator_0 output_fifo (
+  .clk(clk),                  // input wire clk
+  .srst(rst),                 // input wire srst
+  .din(out_buf[0]),                  // input wire [31 : 0] din
+  .wr_en(out_buf_v[0]),              // input wire wr_en
+  .rd_en(out_rd_en),              // input wire rd_en
+  .dout(dout),           // output wire [31 : 0] dout
+  .full(),                // output wire full
+  .empty(out_empty),              // output wire empty
+  .wr_rst_busy(),  // output wire wr_rst_busy
+  .rd_rst_busy()   // output wire rd_rst_busy
+);
+
+reg out_rd_en_r = 0;
+always @(posedge clk) 
+    out_rd_en_r <= out_rd_en;
+
+assign dout_v = out_rd_en_r;
     
 endmodule

@@ -70,7 +70,7 @@ module tb_pe_array_bd;
         dout_r <= dout;
         dout_v_r <= dout_v;
         
-//        if (dout != 32'd0) 
+//        if (dout_v_r) 
             $fwrite(fd, "%x\n", dout);
          
         scan_file = $fscanf(data_file, "%x\n", captured_data); 
