@@ -42,10 +42,10 @@ The 32-bit shift register logic (SRL) can be implemented by FFs or LUTs:
 DSP48E2 configuration:
 | Operation | INMODE |   OPMODE  | ALUMODE |
 |-----------|--------|-----------|---------|
-|    ADD    |  00000 | XX0110011 |   0000  |
-|    SUB    |  00000 | XX0110011 |   0011  |
-|    MUL    |  10001 | XX0000101 |   0000  |
-|  MULADD   |  10001 | XX0110101 |   0000  |
-|  MULSUB   |  10001 | XX0110101 |   0011  |
-|  COMPARE  |  00000 | XX0110011 |   1100  |
+|    ADD    |  00000 | 000110011 |   0000  |
+|    SUB    |  00000 | 000110011 |   0001  |
+|    MUL    |  00000 | 000000101 |   0000  |
+|  MULADD   |  00000 | 000110101 |   0000  |
+|  MULSUB   |  00000 | 000110101 |   0001  |
+|  COMPARE  |  00000 | 000110011 |   1100  |
 
